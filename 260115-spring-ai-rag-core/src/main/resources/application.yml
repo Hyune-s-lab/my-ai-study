@@ -12,7 +12,7 @@ spring:
           model: text-embedding-3-small   # 임베딩 모델 (dimensions와 일치해야 함)
     vectorstore:
       pgvector:
-        initialize-schema: true            # 앱 시작 시 vector_store 테이블 자동 생성
+        initialize-schema: false           # init.sql에서 직접 생성 (tsvector 포함)
         index-type: HNSW                   # 벡터 인덱스 알고리즘 (HNSW가 가장 빠름)
         distance-type: COSINE_DISTANCE     # 유사도 계산 방식 (코사인 유사도)
         dimensions: 1536                   # 임베딩 벡터 차원 (OpenAI text-embedding-3-small 기본값)
