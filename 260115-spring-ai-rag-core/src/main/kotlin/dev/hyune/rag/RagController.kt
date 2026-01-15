@@ -28,7 +28,13 @@ class RagController(
         val documents = ragService.search(query, topK, threshold)
         return SearchResponse(
             query = query,
-            results = documents.map { SearchResult(it.text ?: "", it.metadata) }
+            results = documents.map {
+                SearchResult(
+                    content = it.text ?: "",
+                    score = it.score,
+                    metadata = it.metadata,
+                )
+            }
         )
     }
 
@@ -39,5 +45,9 @@ class RagController(
     data class AskResponse(val question: String, val answer: String)
 
     data class SearchResponse(val query: String, val results: List<SearchResult>)
-    data class SearchResult(val content: String, val metadata: Map<String, Any>)
+    data class SearchResult(
+        val content: String,
+        val score: Double?,       // 유사도 점수 (0.0 ~ 1.0, 높을수록 유사)
+        val metadata: Map<String, Any>,
+    )
 }
