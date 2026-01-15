@@ -32,6 +32,9 @@ dependencies {
     // Netty MacOS DNS resolver
     runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.2.9.Final:osx-aarch_64")
 
+    // Exposed ORM
+    implementation("org.jetbrains.exposed:exposed-spring-boot-starter:0.61.0")
+
     // Kotlin
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
