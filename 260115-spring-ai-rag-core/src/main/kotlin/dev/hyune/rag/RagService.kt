@@ -30,11 +30,19 @@ class RagService(
             .content() ?: "응답을 생성할 수 없습니다."
     }
 
-    fun search(query: String, topK: Int = 5): List<Document> {
+    /**
+     * 벡터 유사도 검색
+     *
+     * @param query 검색 쿼리
+     * @param topK 최대 반환 개수
+     * @param threshold 유사도 임계값 (0.0 ~ 1.0). 이 값 이상인 문서만 반환
+     */
+    fun search(query: String, topK: Int = 5, threshold: Double = 0.0): List<Document> {
         return vectorStore.similaritySearch(
             SearchRequest.builder()
                 .query(query)
                 .topK(topK)
+                .similarityThreshold(threshold)
                 .build()
         )
     }

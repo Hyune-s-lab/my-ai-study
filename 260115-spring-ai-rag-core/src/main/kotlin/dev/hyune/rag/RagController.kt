@@ -23,8 +23,9 @@ class RagController(
     fun search(
         @RequestParam query: String,
         @RequestParam(defaultValue = "5") topK: Int,
+        @RequestParam(defaultValue = "0.0") threshold: Double,
     ): SearchResponse {
-        val documents = ragService.search(query, topK)
+        val documents = ragService.search(query, topK, threshold)
         return SearchResponse(
             query = query,
             results = documents.map { SearchResult(it.text ?: "", it.metadata) }

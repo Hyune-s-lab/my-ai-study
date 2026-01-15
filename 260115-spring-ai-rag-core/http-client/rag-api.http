@@ -18,5 +18,13 @@ Content-Type: application/json
   "question": "Spring AI가 뭐야?"
 }
 
-### 유사도 검색
+### 유사도 검색 (기본)
 GET http://localhost:8080/api/ai/search?query=벡터&topK=3
+
+### 유사도 검색 (threshold 적용)
+# threshold=0.7 → 유사도 70% 이상만 반환
+GET http://localhost:8080/api/ai/search?query=벡터&topK=5&threshold=0.7
+
+### 유사도 검색 (높은 threshold)
+# threshold=0.9 → 매우 유사한 문서만 반환 (결과가 없을 수 있음)
+GET http://localhost:8080/api/ai/search?query=벡터&topK=5&threshold=0.9
