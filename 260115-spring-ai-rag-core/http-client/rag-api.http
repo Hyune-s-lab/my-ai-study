@@ -10,7 +10,7 @@ Content-Type: application/json
   ]
 }
 
-### RAG 질의
+### RAG 질의 (기본값 사용)
 POST http://localhost:8080/api/ai/ask
 Content-Type: application/json
 
@@ -18,5 +18,35 @@ Content-Type: application/json
   "question": "Spring AI가 뭐야?"
 }
 
-### 유사도 검색
+### RAG 질의 (topK, threshold 지정)
+# threshold=0.5 → 유사도 50% 이상만 컨텍스트로 사용
+POST http://localhost:8080/api/ai/ask
+Content-Type: application/json
+
+{
+  "question": "RAG가 뭐야?",
+  "topK": 3,
+  "threshold": 0.5
+}
+
+### RAG 질의 (높은 threshold - 검색 결과 없을 수 있음)
+# threshold=0.95 → 검색 결과 없으면 LLM 호출 안 함 (llmCalled=false)
+POST http://localhost:8080/api/ai/ask
+Content-Type: application/json
+
+{
+  "question": "pgvector 설명해줘",
+  "topK": 5,
+  "threshold": 0.95
+}
+
+### 유사도 검색 (기본)
 GET http://localhost:8080/api/ai/search?query=벡터&topK=3
+
+### 유사도 검색 (threshold 적용)
+# threshold=0.7 → 유사도 70% 이상만 반환
+GET http://localhost:8080/api/ai/search?query=벡터&topK=5&threshold=0.7
+
+### 유사도 검색 (높은 threshold)
+# threshold=0.9 → 매우 유사한 문서만 반환 (결과가 없을 수 있음)
+GET http://localhost:8080/api/ai/search?query=벡터&topK=5&threshold=0.9
