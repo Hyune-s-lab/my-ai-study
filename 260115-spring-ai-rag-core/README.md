@@ -1,6 +1,6 @@
 # Spring AI RAG Core
 
-Spring AI + pgvector 기반 RAG 파이프라인
+Spring AI + pgvector 기반 RAG 파이프라인 (v0.3.0 - Hybrid Search)
 
 ## Step 1: 기본 RAG 파이프라인
 
