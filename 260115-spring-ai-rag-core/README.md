@@ -115,17 +115,19 @@ val hybridScore = alpha * normVector + (1 - alpha) * normBm25
 
 ### 전통 RDB vs Lexical vs Semantic
 
-| | 전통 RDB | Lexical Search | Semantic Search |
+| | 전통 RDB | Lexical (BM25) | Semantic (Vector) |
 |---|---|---|---|
 | 방식 | 정확히 일치 | 단어 빈도 + 점수 | 의미 유사도 |
-| 결과 | Yes/No | **순위** | **순위** |
-| 예시 | `WHERE name = 'dan'` | BM25, Elasticsearch | Vector, pgvector |
-| 용도 | 회원 조회, 주문 조회 | 문서 검색, 로그 검색 | Q&A, 추천 |
+| 결과 | Yes/No | 순위 | 순위 |
+| 예시 | `WHERE name = 'dan'` | Elasticsearch, FTS | pgvector |
+| 속도 | ⚡⚡⚡ | ⚡⚡ | ⚡ (임베딩 병목) |
+| 정확도 | 낮음 | 중간 | 높음 |
 
 ```
 전통 RDB     →  "이 값이 있나요?" (일치 여부)
 Lexical      →  "이 단어가 얼마나 나오나요?" (빈도 기반 순위)
 Semantic     →  "이 의미와 얼마나 비슷한가요?" (임베딩 기반 순위)
+Hybrid       →  Lexical + Semantic (정확도 ↑, 속도 ↓)
 ```
 
 ### BM25란?
@@ -140,17 +142,6 @@ IDF = 희귀도 (드문 단어일수록 ↑)
 ```
 
 Elasticsearch, PostgreSQL FTS, Lucene 모두 BM25 기반
-
-### 성능 비교
-
-| 방식 | 속도 | 정확도 | 병목 |
-|------|------|--------|------|
-| 전통 RDB | ⚡⚡⚡ | 낮음 | - |
-| BM25 | ⚡⚡ | 중간 | - |
-| Vector | ⚡ | 높음 | 임베딩 생성 (API 호출) |
-| Hybrid | ⚡ | 가장 높음 | 임베딩 + 이중 검색 |
-
-**트레이드오프**: 정확도 ↑ = 속도 ↓
 
 ---
 
