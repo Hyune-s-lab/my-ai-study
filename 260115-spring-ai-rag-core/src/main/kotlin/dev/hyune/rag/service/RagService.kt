@@ -1,4 +1,4 @@
-package dev.hyune.rag
+package dev.hyune.rag.service
 
 import dev.hyune.rag.dto.AskResult
 import dev.hyune.rag.dto.SearchResult
