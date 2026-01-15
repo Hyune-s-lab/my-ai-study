@@ -1,5 +1,6 @@
 package dev.hyune.rag
 
+import dev.hyune.rag.dto.SearchResult
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -67,14 +68,9 @@ class RagController(
     data class AskResponse(
         val question: String,
         val answer: String,
-        val searchResults: List<SearchResultDto>,  // 검색된 문서들 (관찰 가능성)
+        val searchResults: List<SearchResult>,  // 검색된 문서들 (관찰 가능성)
         val llmCalled: Boolean,                     // LLM 호출 여부
     )
 
     data class SearchResponse(val query: String, val results: List<SearchResult>)
-    data class SearchResult(
-        val content: String,
-        val score: Double,        // 유사도 점수 (0.0 ~ 1.0, 높을수록 유사)
-        val metadata: Map<String, Any>,
-    )
 }

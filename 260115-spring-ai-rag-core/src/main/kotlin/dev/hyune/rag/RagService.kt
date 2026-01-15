@@ -1,5 +1,7 @@
 package dev.hyune.rag
 
+import dev.hyune.rag.dto.AskResult
+import dev.hyune.rag.dto.SearchResult
 import org.slf4j.LoggerFactory
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.document.Document
@@ -75,7 +77,7 @@ class RagService(
             question = question,
             answer = answer,
             searchResults = documents.map {
-                SearchResultDto(
+                SearchResult(
                     content = it.text ?: "",
                     score = it.score ?: 0.0,
                 )
