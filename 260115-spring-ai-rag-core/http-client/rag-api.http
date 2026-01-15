@@ -50,3 +50,41 @@ GET http://localhost:8080/api/ai/search?query=벡터&topK=5&threshold=0.7
 ### 유사도 검색 (높은 threshold)
 # threshold=0.9 → 매우 유사한 문서만 반환 (결과가 없을 수 있음)
 GET http://localhost:8080/api/ai/search?query=벡터&topK=5&threshold=0.9
+
+###############################################
+# 하이브리드 검색 (Step 3)
+###############################################
+
+### 데이터 초기화
+DELETE http://localhost:8080/api/ai/clear
+
+### 하이브리드 검색용 문서 인덱싱
+POST http://localhost:8080/api/ai/index
+Content-Type: application/json
+
+{
+  "documents": [
+    "Spring AI는 AI 애플리케이션을 쉽게 만들 수 있게 해줍니다.",
+    "pgvector는 PostgreSQL의 벡터 검색 확장입니다.",
+    "RAG는 Retrieval Augmented Generation입니다.",
+    "하이브리드 검색은 BM25와 벡터 검색을 결합합니다."
+  ]
+}
+
+### 하이브리드 검색 (기본 alpha=0.5)
+# alpha=0.5 → 벡터와 BM25 동일 가중치
+GET http://localhost:8080/api/ai/hybrid?query=벡터&topK=3
+
+### 하이브리드 검색 (BM25 위주, alpha=0.2)
+# alpha=0.2 → BM25 80%, Vector 20%
+GET http://localhost:8080/api/ai/hybrid?query=벡터&alpha=0.2&topK=3
+
+### 하이브리드 검색 (벡터 위주, alpha=0.8)
+# alpha=0.8 → Vector 80%, BM25 20%
+GET http://localhost:8080/api/ai/hybrid?query=벡터&alpha=0.8&topK=3
+
+### 하이브리드 검색 (BM25 only, alpha=0.0)
+GET http://localhost:8080/api/ai/hybrid?query=검색&alpha=0.0&topK=3
+
+### 하이브리드 검색 (Vector only, alpha=1.0)
+GET http://localhost:8080/api/ai/hybrid?query=검색&alpha=1.0&topK=3
