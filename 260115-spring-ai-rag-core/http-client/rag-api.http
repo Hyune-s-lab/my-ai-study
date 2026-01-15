@@ -10,12 +10,34 @@ Content-Type: application/json
   ]
 }
 
-### RAG 질의
+### RAG 질의 (기본값 사용)
 POST http://localhost:8080/api/ai/ask
 Content-Type: application/json
 
 {
   "question": "Spring AI가 뭐야?"
+}
+
+### RAG 질의 (topK, threshold 지정)
+# threshold=0.5 → 유사도 50% 이상만 컨텍스트로 사용
+POST http://localhost:8080/api/ai/ask
+Content-Type: application/json
+
+{
+  "question": "RAG가 뭐야?",
+  "topK": 3,
+  "threshold": 0.5
+}
+
+### RAG 질의 (높은 threshold - 검색 결과 없을 수 있음)
+# threshold=0.95 → 검색 결과 없으면 LLM 호출 안 함 (llmCalled=false)
+POST http://localhost:8080/api/ai/ask
+Content-Type: application/json
+
+{
+  "question": "pgvector 설명해줘",
+  "topK": 5,
+  "threshold": 0.95
 }
 
 ### 유사도 검색 (기본)
