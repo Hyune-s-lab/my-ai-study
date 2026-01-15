@@ -1,5 +1,4 @@
 spring:
-
   datasource:
     url: jdbc:postgresql://localhost:35432/rag_db
     username: postgres
@@ -8,7 +7,9 @@ spring:
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
-
+      embedding:
+        options:
+          model: text-embedding-3-small   # 임베딩 모델 (dimensions와 일치해야 함)
     vectorstore:
       pgvector:
         initialize-schema: true            # 앱 시작 시 vector_store 테이블 자동 생성

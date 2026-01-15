@@ -24,14 +24,6 @@ Spring AI와 PostgreSQL + pgvector 기반의 RAG(Retrieval Augmented Generation)
                    └─────────────┘
 ```
 
-## API 엔드포인트
-
-| Method | Endpoint | 설명 |
-|--------|----------|------|
-| POST | `/api/ai/index` | 문서 임베딩 저장 |
-| POST | `/api/ai/ask` | RAG 기반 질의응답 |
-| GET | `/api/ai/search` | 유사도 검색 |
-
 ## 설정 옵션
 
 ### pgvector 설정
@@ -78,27 +70,22 @@ spring:
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
+      embedding:
+        options:
+          model: text-embedding-3-small   # dimensions와 일치해야 함
+```
+
+#### 선택적 설정 (Chat 모델 커스터마이징)
+
+```yaml
+spring:
+  ai:
+    openai:
       chat:
         options:
           model: gpt-4o              # 사용할 모델
           temperature: 0.7           # 창의성 (0.0 ~ 2.0)
           max-tokens: 1000           # 최대 토큰 수
-      embedding:
-        options:
-          model: text-embedding-3-small
-```
-
-## 실행 방법
-
-```bash
-# 1. Docker 실행 (pgvector)
-cd docker && docker compose up -d
-
-# 2. 환경변수 설정
-# .env.local 파일에 OPENAI_API_KEY 설정
-
-# 3. 애플리케이션 실행
-./gradlew :260115-spring-ai-rag-core:bootRun
 ```
 
 ## 참고 자료
