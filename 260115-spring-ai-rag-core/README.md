@@ -155,13 +155,68 @@ GET /api/ai/hybrid?query=벡터&alpha=0.5&topK=10
 ```
 src/main/kotlin/dev/hyune/rag/
 ├── controller/
-│   └── RagController.kt      # /hybrid, /clear 엔드포인트
+│   ├── RagController.kt      # /index, /ask (LLM 사용)
+│   └── SearchController.kt   # /search, /hybrid, /clear (검색만)
 ├── service/
-│   ├── RagService.kt         # 기존 RAG 서비스
+│   ├── RagService.kt         # RAG 파이프라인
 │   ├── Bm25SearchService.kt  # PostgreSQL FTS
 │   └── HybridSearchService.kt # 점수 융합
 └── dto/
     ├── SearchResult.kt
     ├── AskResult.kt
-    └── HybridSearchResult.kt # 하이브리드 검색 결과
+    └── HybridSearchResult.kt
+```
+
+---
+
+## 검색 기술 비교
+
+### 전통 RDB vs Lexical vs Semantic
+
+| | 전통 RDB | Lexical Search | Semantic Search |
+|---|---|---|---|
+| 방식 | 정확히 일치 | 단어 빈도 + 점수 | 의미 유사도 |
+| 결과 | Yes/No | **순위** | **순위** |
+| 예시 | `WHERE name = 'dan'` | BM25, Elasticsearch | Vector, pgvector |
+| 용도 | 회원 조회, 주문 조회 | 문서 검색, 로그 검색 | Q&A, 추천 |
+
+```
+전통 RDB     →  "이 값이 있나요?" (일치 여부)
+Lexical      →  "이 단어가 얼마나 나오나요?" (빈도 기반 순위)
+Semantic     →  "이 의미와 얼마나 비슷한가요?" (임베딩 기반 순위)
+```
+
+### BM25란?
+
+**Best Match 25** - 1994년 연구의 25번째 버전이 표준이 됨
+
+```
+BM25 ≈ TF × IDF × 문서길이 보정
+
+TF  = 단어 빈도 (많이 나올수록 ↑)
+IDF = 희귀도 (드문 단어일수록 ↑)
+```
+
+Elasticsearch, PostgreSQL FTS, Lucene 모두 BM25 기반
+
+---
+
+## 도메인별 검색 전략
+
+| 도메인 | 추천 | 이유 |
+|--------|------|------|
+| **법률/의료 문서** | BM25 위주 (alpha ↓) | 정확한 용어 중요 ("민법 제750조") |
+| **고객 Q&A** | Vector 위주 (alpha ↑) | 같은 질문 다르게 표현 ("환불" = "돈 돌려줘") |
+| **이커머스 검색** | 하이브리드 | "나이키 운동화" (브랜드=키워드, 운동화=의미) |
+| **코드 검색** | BM25 위주 | 함수명, 변수명 정확 매칭 |
+| **RAG 챗봇** | 하이브리드 | 질문 의도 + 정확한 용어 둘 다 |
+| **로그 검색** | BM25 | 에러코드, IP 등 정확한 값 |
+
+### 판단 기준
+
+```
+"사용자가 정확한 단어를 아는가?"
+   ├─ Yes → BM25 (alpha ↓)
+   ├─ No  → Vector (alpha ↑)
+   └─ 둘 다/모름 → Hybrid (alpha=0.5) + 튜닝
 ```
