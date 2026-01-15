@@ -9,11 +9,3 @@ data class AskResult(
     val searchResults: List<SearchResultDto>,
     val llmCalled: Boolean,  // LLM 호출 여부 (검색 결과 없으면 false)
 )
-
-/**
- * 검색 결과 DTO
- */
-data class SearchResultDto(
-    val content: String,
-    val score: Double,
-)
