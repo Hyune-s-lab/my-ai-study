@@ -84,8 +84,14 @@ jobs:
               \"max_tokens\": 2000
             }")
 
-          # 응답에서 리뷰 내용 추출
-          REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "리뷰 생성에 실패했습니다."')
+          # 응답에서 에러 확인
+          ERROR=$(echo "$RESPONSE" | jq -r '.error.message // empty')
+          if [ -n "$ERROR" ]; then
+            echo "::error::OpenAI API Error: $ERROR"
+            REVIEW="API 오류: $ERROR"
+          else
+            REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "리뷰 생성에 실패했습니다."')
+          fi
 
           # 멀티라인 출력
           echo "content<<EOF" >> $GITHUB_OUTPUT
