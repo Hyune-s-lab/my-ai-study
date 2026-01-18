@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: opengateway-mcp-server
+  main:
+    web-application-type: none  # MCP STDIO 서버는 웹 서버 불필요
+
+# Spring AI MCP 설정
+spring.ai.mcp.server:
+  name: opengateway-docs
+  version: 1.0.0
+
+logging:
+  level:
+    dev.hyune.mcp: DEBUG
