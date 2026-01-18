@@ -120,6 +120,7 @@ AI(GPT)를 사용해 **자동으로 코드 리뷰 및 학습 관점 피드백을
 - 단정하고 명확한 문장
 - 교수/멘토 톤
 - 불필요한 이모지/감탄사 금지
+- NEVER use backticks (`) for code or parameters. Use quotes ("") or bold (**) instead.
 
 ---
 
