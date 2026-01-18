@@ -84,29 +84,27 @@ jobs:
               \"max_completion_tokens\": 2000
             }")
 
+          # 리뷰 파일 생성
+          echo "## AI Review" > /tmp/review_comment.md
+          echo "" >> /tmp/review_comment.md
+
           # 응답에서 에러 확인
           ERROR=$(echo "$RESPONSE" | jq -r '.error.message // empty')
           if [ -n "$ERROR" ]; then
             echo "::error::OpenAI API Error: $ERROR"
-            REVIEW="API 오류: $ERROR"
+            echo "API 오류: $ERROR" >> /tmp/review_comment.md
           else
-            REVIEW=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "리뷰 생성에 실패했습니다."')
+            echo "$RESPONSE" | jq -r '.choices[0].message.content // "리뷰 생성에 실패했습니다."' >> /tmp/review_comment.md
           fi
 
-          # 멀티라인 출력
-          echo "content<<EOF" >> $GITHUB_OUTPUT
-          echo "$REVIEW" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "" >> /tmp/review_comment.md
+          echo "---" >> /tmp/review_comment.md
+          echo "*이 리뷰는 AI에 의해 자동 생성되었습니다.*" >> /tmp/review_comment.md
 
       - name: Post review comment
         run: |
           gh pr comment ${{ github.event.pull_request.number }} \
             --repo ${{ github.repository }} \
-            --body "## AI Review
-
-          ${{ steps.review.outputs.content }}
-
-          ---
-          *이 리뷰는 AI에 의해 자동 생성되었습니다.*"
+            --body-file /tmp/review_comment.md
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
