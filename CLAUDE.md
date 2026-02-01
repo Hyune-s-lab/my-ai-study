@@ -41,7 +41,7 @@
 
 ## 진행 중인 프로젝트
 
-### 260119-opengateway-mcp
-- **설명**: OpenGateway API 문서를 검색하는 MCP 서버. Claude Desktop, Cursor 등에서 정확한 연동 코드 생성 지원
+### opengateway-mcp
+- **설명**: OpenGateway API 문서를 검색하는 MCP 서버
 - **담당**: dan
 - **PR**: https://github.com/Hyune-s-lab/my-ai-study/pull/6

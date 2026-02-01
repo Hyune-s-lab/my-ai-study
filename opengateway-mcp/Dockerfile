@@ -1,19 +1,19 @@
 ### Step 1: Build
 FROM gradle:9.2.1-jdk25 AS build
 
-ARG MODULE_PATH=260119-opengateway-mcp
+ARG MODULE_PATH=opengateway-mcp
 
 WORKDIR /app
 
 COPY . .
 
 RUN --mount=type=cache,target=/root/.gradle \
-    ./gradlew :260119-opengateway-mcp:bootJar --no-daemon -x test
+    ./gradlew :opengateway-mcp:bootJar --no-daemon -x test
 
 ### Step 2: Runtime
 FROM eclipse-temurin:25-jre-jammy
 
-ARG MODULE_PATH=260119-opengateway-mcp
+ARG MODULE_PATH=opengateway-mcp
 
 WORKDIR /app
 
