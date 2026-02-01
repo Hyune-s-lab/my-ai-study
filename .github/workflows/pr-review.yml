@@ -8,13 +8,14 @@ on:
         description: 'PR 번호'
         required: true
         type: number
-  # 리뷰어 할당 시
+  # ai-review 라벨 붙이면 실행
   pull_request:
-    types: [review_requested]
+    types: [labeled]
 
 jobs:
   review:
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'ai-review'
     permissions:
       contents: read
       pull-requests: write
