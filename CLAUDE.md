@@ -38,3 +38,10 @@
 - 궁금한 것 자유롭게 탐구
 - 학습한 내용은 README에 기록하며 정리
 - 새 과제 제안 시, 기존 README들을 참고하여 맥락에 맞게 제안
+
+## 진행 중인 프로젝트
+
+### opengateway-mcp
+- **설명**: OpenGateway API 문서를 검색하는 MCP 서버
+- **담당**: dan
+- **PR**: https://github.com/Hyune-s-lab/my-ai-study/pull/6

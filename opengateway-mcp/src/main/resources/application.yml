@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: opengateway-mcp-server
+  main:
+    web-application-type: reactive  # WebFlux for SSE
+
+server:
+  port: 8080
+
+# Spring AI MCP 설정
+spring.ai.mcp.server:
+  name: opengateway-docs
+  version: 1.0.0
+  sse-message-endpoint: /mcp/message  # SSE 메시지 엔드포인트
+
+logging:
+  level:
+    dev.hyune.mcp: DEBUG
+    org.springframework.ai.mcp: DEBUG
