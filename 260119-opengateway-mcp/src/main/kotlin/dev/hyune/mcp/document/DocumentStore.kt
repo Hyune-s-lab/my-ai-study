@@ -15,6 +15,7 @@ class DocumentStore {
     private val documents = mutableListOf<Document>()
     private val documentById = mutableMapOf<String, Document>()
 
+    private val resolver = PathMatchingResourcePatternResolver()
     private val readerConfig = MarkdownDocumentReaderConfig.builder()
         .withHorizontalRuleCreateDocument(true)
         .withIncludeCodeBlock(true)
@@ -25,7 +26,7 @@ class DocumentStore {
     fun loadDocuments() {
         logger.info { "Loading documents from classpath:docs/" }
 
-        for (resource in PathMatchingResourcePatternResolver().getResources("classpath:docs/*.md")) {
+        for (resource in resolver.getResources("classpath:docs/*.md")) {
             val filename = resource.filename ?: continue
             try {
                 val docs = MarkdownDocumentReader(resource, readerConfig).get()
