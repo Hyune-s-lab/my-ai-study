@@ -15,7 +15,6 @@ class DocumentStore {
     private val documents = mutableListOf<Document>()
     private val documentById = mutableMapOf<String, Document>()
 
-    private val resolver = PathMatchingResourcePatternResolver()
     private val readerConfig = MarkdownDocumentReaderConfig.builder()
         .withHorizontalRuleCreateDocument(true)
         .withIncludeCodeBlock(true)
@@ -24,31 +23,28 @@ class DocumentStore {
 
     @PostConstruct
     fun loadDocuments() {
-        logger.info { "Loading documents from classpath:docs/" }
+        val resource = PathMatchingResourcePatternResolver().getResource("classpath:docs/opengateway-api.md")
+        val filename = resource.filename ?: return
+        logger.info { "Loading document: $filename" }
 
-        for (resource in resolver.getResources("classpath:docs/*.md")) {
-            val filename = resource.filename ?: continue
-            try {
-                val docs = MarkdownDocumentReader(resource, readerConfig).get()
-                    .mapIndexed { index, doc ->
-                        val title = doc.metadata["title"]?.toString() ?: "Section ${index + 1}"
-                        val id = generateId(title, index)
-                        Document.builder()
-                            .id(id)
-                            .text(doc.text ?: "")
-                            .metadata(doc.metadata + mapOf("id" to id, "sourceFile" to filename))
-                            .build()
-                    }
+        try {
+            val docs = MarkdownDocumentReader(resource, readerConfig).get()
+                .mapIndexed { index, doc ->
+                    val title = doc.metadata["title"]?.toString() ?: "Section ${index + 1}"
+                    val id = generateId(title, index)
+                    Document.builder()
+                        .id(id)
+                        .text(doc.text ?: "")
+                        .metadata(doc.metadata + mapOf("id" to id, "sourceFile" to filename))
+                        .build()
+                }
 
-                documents.addAll(docs)
-                docs.forEach { documentById[it.id] = it }
-                logger.info { "Loaded '$filename': ${docs.size} sections" }
-            } catch (e: Exception) {
-                logger.error(e) { "Failed to load: $filename" }
-            }
+            documents.addAll(docs)
+            docs.forEach { documentById[it.id] = it }
+            logger.info { "Loaded: ${docs.size} sections" }
+        } catch (e: Exception) {
+            logger.error(e) { "Failed to load: $filename" }
         }
-
-        logger.info { "Total: ${documents.size} documents" }
     }
 
     private fun generateId(title: String, index: Int): String {
