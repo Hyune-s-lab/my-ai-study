@@ -1,6 +1,6 @@
 # OpenGateway MCP Server
 
-OpenGateway API 문서를 검색하는 MCP(Model Context Protocol) 서버입니다.
+OpenGateway API 문서를 검색하는 MCP(Model Context Protocol) 서버입니다.  
 Claude Desktop, Cursor 등 AI 도구에서 정확한 OpenGateway 연동 코드를 생성할 수 있도록 지원합니다.
 
 ## 학습 목표
@@ -19,8 +19,9 @@ MCP는 **LLM 애플리케이션과 외부 데이터/도구를 연결하는 표�
 
 ```
 ┌─────────────────┐         ┌─────────────────┐
-│  Claude Desktop │  ←───→  │   MCP Server    │
-│  (MCP Host)     │  STDIO  │  (이 프로젝트)   │
+│  MCP Clients    │         │   MCP Server    │
+│  - Claude       │  ←───→  │  (Smithery 등)  │
+│  - Cursor       │   SSE   │                 │
 └─────────────────┘         └─────────────────┘
 ```
 
@@ -41,7 +42,7 @@ MCP는 **LLM 애플리케이션과 외부 데이터/도구를 연결하는 표�
 | SSE | 서버→클라 스트리밍 | 양방향 제한 | 웹 대시보드 |
 | Streamable-HTTP | 양방향 스트리밍 | 복잡 | 실시간 협업 |
 
-**이 프로젝트**: STDIO 방식 사용 (Claude Desktop 연동)
+**이 프로젝트**: SSE 방식 사용 (HTTP 기반, 원격 연동 가능)
 
 ### Spring AI MCP Server
 
@@ -94,30 +95,6 @@ POST /v1/chat...
 
 ## 3. BM25 검색 이론
 
-### RDB 개발자를 위한 비유
-
-검색 엔진의 개념을 RDB 용어로 이해하면 쉽습니다:
-
-| 검색 엔진 | RDB | 설명 |
-|----------|-----|------|
-| **IDF (희귀도)** | **카디널리티** | 고유한 값이 많을수록 구별에 유용 |
-| **낮은 IDF** | **낮은 선택도** | `gender = 'M'` → 50% 필터링 (별로) |
-| **높은 IDF** | **높은 선택도** | `user_id = 123` → 정확히 1건 (좋음) |
-| **역인덱스** | **B-Tree 인덱스** | 값 → 위치 매핑 |
-| **불용어 제거** | **인덱스 제외 컬럼** | 의미 없는 데이터 제외 |
-
-**핵심 통찰**: 둘 다 **"희귀할수록 구별하는 데 가치있다"**
-
-```
-RDB:  WHERE status = 'active'     -- 90%가 active면 인덱스 효율 낮음
-검색: "API"로 검색                 -- 거의 모든 문서 매칭 → 구별 안 됨
-
-RDB:  WHERE user_id = 12345       -- 정확히 1건 (선택도 높음)
-검색: "x-opengateway-user-id"     -- 1~2개 문서 (IDF 높음)
-```
-
----
-
 ### TF-IDF 이해하기
 
 **TF (Term Frequency)**: 문서 내 단어 출현 빈도
@@ -127,11 +104,13 @@ RDB:  WHERE user_id = 12345       -- 정확히 1건 (선택도 높음)
 ```
 
 **IDF (Inverse Document Frequency)**: 전체 문서에서의 희귀도
-```
-전체 100개 문서 중:
-- "API" → 95개 문서에 등장 → IDF 낮음 (선택도 낮음)
-- "Bearer" → 2개 문서에 등장 → IDF 높음 (선택도 높음)
-```
+
+| IDF | RDB 비유 | 예시 |
+|-----|----------|------|
+| **낮은 IDF** | 낮은 선택도 | `gender = 'M'` → 50% 필터링 (별로) |
+| **높은 IDF** | 높은 선택도 | `user_id = 123` → 정확히 1건 (좋음) |
+
+**핵심**: 희귀할수록 구별하는 데 가치있다
 
 **TF × IDF = 최종 점수**
 - 해당 문서에 많이 나오면서 (TF ↑)
@@ -190,11 +169,16 @@ RDB의 B-Tree 인덱스가 `컬럼값 → Row ID`를 매핑하듯,
 
 ### 구현 선택: 인메모리 vs 인메모리 DB
 
-| 옵션 | 장점 | 단점 |
-|-----|------|------|
-| **직접 구현 (선택)** | 알고리즘 이해, 의존성 없음 | 직접 유지보수 |
-| SQLite FTS5 | 검증됨, 가벼움 | 추가 의존성 |
-| Lucene 인메모리 | 최고 성능 | 무거움 |
+| 옵션 | 장점 | 단점 | 적합한 케이스 |
+|-----|------|------|--------------|
+| **직접 구현 (선택)** | 알고리즘 이해, 의존성 없음 | 직접 유지보수 | 학습, 소규모 |
+| SQLite FTS5 | 검증됨, 텍스트 검색 최적화 | 추가 의존성 | 문서 검색 |
+| DuckDB | 분석 쿼리에 강함 | FTS 미성숙 | 로그 분석, 통계 |
+| Lucene 인메모리 | 최고 성능 | 무거움 | 대규모 검색 |
+
+**SQLite FTS5 vs DuckDB**:
+- SQLite: OLTP(트랜잭션) 설계, FTS5 내장으로 텍스트 검색에 최적
+- DuckDB: OLAP(분석) 설계, 집계/스캔에 강하지만 FTS는 확장 기능
 
 **이 프로젝트**: 학습 목적 + 문서 수백 개 수준이라 직접 구현
 
@@ -202,14 +186,17 @@ RDB의 B-Tree 인덱스가 `컬럼값 → Row ID`를 매핑하듯,
 
 ## 실행 방법
 
-### 1. 빌드
+### Docker 실행
 
 ```bash
-cd 260119-opengateway-mcp
-./gradlew bootJar
+# 프로젝트 루트에서
+docker build -f 260119-opengateway-mcp/Dockerfile -t opengateway-mcp .
+docker run -p 8080:8080 opengateway-mcp
 ```
 
-### 2. Claude Desktop 설정
+서버가 http://localhost:8080 에서 시작됩니다.
+
+### MCP 클라이언트 설정
 
 `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
@@ -217,39 +204,17 @@ cd 260119-opengateway-mcp
 {
   "mcpServers": {
     "opengateway-docs": {
-      "command": "java",
-      "args": ["-jar", "/path/to/opengateway-mcp.jar"]
+      "url": "http://localhost:8080/sse"
     }
   }
 }
 ```
 
-### 3. 사용
+### 사용
 
 Claude에서 다음과 같이 질문:
 - "OpenGateway 인증 방법 알려줘"
 - "OpenGateway 연동 코드 만들어줘"
-
----
-
-## 프로젝트 구조
-
-```
-260119-opengateway-mcp/
-├── src/main/kotlin/dev/hyune/mcp/
-│   ├── McpApplication.kt          # 메인 애플리케이션
-│   ├── tool/                      # MCP Tool 정의
-│   │   └── OpenGatewayMcpTools.kt
-│   ├── document/                  # 문서 청킹/파싱
-│   │   ├── MarkdownChunker.kt
-│   │   └── DocumentStore.kt
-│   └── search/                    # BM25 검색
-│       └── Bm25SearchService.kt
-└── src/main/resources/
-    ├── application.yml
-    └── docs/                      # OpenGateway API 문서
-        └── opengateway-api.md
-```
 
 ---
 

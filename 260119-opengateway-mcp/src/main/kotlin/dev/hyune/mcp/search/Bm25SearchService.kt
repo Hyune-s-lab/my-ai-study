@@ -3,21 +3,12 @@ package dev.hyune.mcp.search
 import dev.hyune.mcp.document.DocumentChunk
 import dev.hyune.mcp.document.DocumentStore
 import io.github.oshai.kotlinlogging.KotlinLogging
-import jakarta.annotation.PostConstruct
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import kotlin.math.ln
 
 private val logger = KotlinLogging.logger {}
-
-/**
- * BM25 검색 결과
- */
-data class SearchResult(
-    val chunk: DocumentChunk,
-    val score: Double,
-    /** 검색어와 매칭된 토큰들 */
-    val matchedTerms: List<String>
-)
 
 /**
  * 인메모리 BM25 검색 서비스 (학습용 직접 구현)
@@ -40,6 +31,9 @@ data class SearchResult(
 class Bm25SearchService(
     private val documentStore: DocumentStore
 ) {
+    /** 테스트용: 직접 청크 주입 */
+    private var testChunks: List<DocumentChunk>? = null
+    
     // BM25 파라미터
     private val k1 = 1.5  // TF 포화 속도 (1.2 ~ 2.0 권장)
     private val b = 0.75  // 문서 길이 보정 (0.75 권장)
@@ -56,12 +50,19 @@ class Bm25SearchService(
     // 전체 문서 수
     private var totalDocs = 0
     
-    @PostConstruct
+    /** 청크 ID로 조회 (테스트/프로덕션 겸용) */
+    private val chunkIndex = mutableMapOf<String, DocumentChunk>()
+    
+    @EventListener(ApplicationReadyEvent::class)
     fun buildIndex() {
         logger.info { "Building BM25 inverted index..." }
         
-        val chunks = documentStore.getAllChunks()
+        val chunks = testChunks ?: documentStore.getAllChunks()
         totalDocs = chunks.size
+        
+        // 청크 인덱스 구축
+        chunkIndex.clear()
+        chunks.forEach { chunkIndex[it.id] = it }
         
         if (totalDocs == 0) {
             logger.warn { "No documents to index" }
@@ -71,7 +72,9 @@ class Bm25SearchService(
         var totalTokens = 0
         
         for (chunk in chunks) {
-            val tokens = tokenize(chunk.content)
+            // title + content 모두 검색 대상
+            val searchableText = "${chunk.title} ${chunk.content}"
+            val tokens = tokenize(searchableText)
             docLengths[chunk.id] = tokens.size
             totalTokens += tokens.size
             
@@ -128,7 +131,7 @@ class Bm25SearchService(
             .sortedByDescending { it.value }
             .take(limit)
             .mapNotNull { (docId, score) ->
-                documentStore.getChunkById(docId)?.let { chunk ->
+                chunkIndex[docId]?.let { chunk ->
                     SearchResult(
                         chunk = chunk,
                         score = score,
@@ -175,6 +178,17 @@ class Bm25SearchService(
     }
     
     companion object {
+        /** 테스트용 팩토리 메서드 - DocumentStore 없이 직접 청크로 인스턴스 생성 */
+        fun forTest(chunks: List<DocumentChunk>): Bm25SearchService {
+            // Dummy DocumentStore 생성 (실제로는 사용되지 않음)
+            val dummyChunker = dev.hyune.mcp.document.MarkdownChunker()
+            val dummyStore = DocumentStore(dummyChunker)
+            return Bm25SearchService(dummyStore).apply {
+                testChunks = chunks
+                buildIndex()
+            }
+        }
+        
         /** 검색에서 무시할 불용어 */
         private val STOP_WORDS = setOf(
             // 영어

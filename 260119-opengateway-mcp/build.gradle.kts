@@ -23,8 +23,8 @@ dependencies {
     // Spring AI 2.0.0-M1
     implementation(platform("org.springframework.ai:spring-ai-bom:2.0.0-M1"))
     
-    // Spring AI MCP Server (STDIO 기반)
-    implementation("org.springframework.ai:spring-ai-starter-mcp-server")
+    // Spring AI MCP Server (SSE/WebFlux 기반)
+    implementation("org.springframework.ai:spring-ai-starter-mcp-server-webflux")
     
     // Markdown 파싱 (Commonmark)
     implementation("org.commonmark:commonmark:0.24.0")
@@ -38,6 +38,7 @@ dependencies {
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("io.mockk:mockk:1.13.16")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
