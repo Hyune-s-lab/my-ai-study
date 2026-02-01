@@ -6,8 +6,8 @@ Claude Desktop, Cursor 등 AI 도구에서 정확한 OpenGateway 연동 코드�
 ## 학습 목표
 
 - MCP(Model Context Protocol) 이해 및 구현
-- 마크다운 헤더 기반 문서 청킹
-- BM25 키워드 검색 알고리즘
+- 문서 청킹 이론 (Spring AI MarkdownDocumentReader 사용)
+- BM25 키워드 검색 알고리즘 직접 구현
 
 ---
 
@@ -75,7 +75,7 @@ LLM에는 **Context Window** 제한이 있어 전체 문서를 한 번에 전달
 | 토큰/고정 길이 | 구현 간단 | 의미 단위 깨짐 | 소설, 일반 텍스트 |
 | 시맨틱 | 자동 감지 | 한국어 불안정 | 연구용 |
 
-**이 프로젝트**: 마크다운 헤더(`##`, `###`) 기반 청킹
+**이 프로젝트**: Spring AI `MarkdownDocumentReader` 사용
 
 ### 헤더 기반 청킹 예시
 
@@ -87,9 +87,11 @@ LLM에는 **Context Window** 제한이 있어 전체 문서를 한 번에 전달
 ## 요청 형식      ← 청크 2
 POST /v1/chat...
 
-### 파라미터      ← 청크 3 (2의 하위)
+### 파라미터      ← 청크 3
 - model: 모델명
 ```
+
+Spring AI가 헤더 레벨(level)을 메타데이터로 제공하므로, 필요시 계층 구조로 활용 가능.
 
 ---
 

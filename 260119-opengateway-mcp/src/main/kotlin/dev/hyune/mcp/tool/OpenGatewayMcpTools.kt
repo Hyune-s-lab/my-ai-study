@@ -1,6 +1,5 @@
 package dev.hyune.mcp.tool
 
-import dev.hyune.mcp.document.DocumentOutline
 import dev.hyune.mcp.document.DocumentStore
 import dev.hyune.mcp.search.Bm25SearchService
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -66,7 +65,13 @@ class OpenGatewayMcpTools(
             documents = outlines.map { outline ->
                 DocumentOutlineItem(
                     sourceFile = outline.sourceFile,
-                    sections = outline.items.flatMap { flattenOutlineItem(it, 0) }
+                    sections = outline.items.map { item ->
+                        OutlineSectionItem(
+                            id = item.id,
+                            title = item.title,
+                            level = item.level
+                        )
+                    }
                 )
             }
         )
@@ -101,18 +106,5 @@ class OpenGatewayMcpTools(
                 content = "섹션을 찾을 수 없습니다. getDocsOutline()으로 사용 가능한 섹션을 확인하세요."
             )
         }
-    }
-
-    private fun flattenOutlineItem(item: DocumentOutline.Item, depth: Int): List<OutlineSectionItem> {
-        val result = mutableListOf(
-            OutlineSectionItem(
-                id = item.id,
-                title = item.title,
-                level = item.level,
-                indent = "  ".repeat(depth)
-            )
-        )
-        item.children.forEach { result.addAll(flattenOutlineItem(it, depth + 1)) }
-        return result
     }
 }
