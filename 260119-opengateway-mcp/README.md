@@ -220,6 +220,16 @@ Claude에서 다음과 같이 질문:
 
 ---
 
+## 향후 개선
+
+- [ ] **파라미터 외부화**: k1, b, topK 등을 application.yml로 분리
+- [ ] **검색 결과 메타데이터**: sourceFile, headerPath 등 근거 정보 추가
+- [ ] **관측성**: 검색 쿼리/결과 로깅, Micrometer 지표
+- [ ] **하이브리드 검색**: BM25 + 벡터 검색 조합
+- [ ] **리랭킹**: Cross-encoder로 상위 결과 재정렬
+
+---
+
 ## 참고 자료
 
 - [MCP 공식 문서](https://modelcontextprotocol.io/)
