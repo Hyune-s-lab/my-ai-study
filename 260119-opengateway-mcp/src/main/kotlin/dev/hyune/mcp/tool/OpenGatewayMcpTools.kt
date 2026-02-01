@@ -17,19 +17,12 @@ class OpenGatewayMcpTools(
 ) {
     private val logger = KotlinLogging.logger {}
 
-    @Tool(
-        description = """
-        OpenGateway API 문서에서 관련 내용을 검색합니다.
-        인증, API 엔드포인트, 요청/응답 형식, 에러 코드 등을 찾을 때 사용하세요.
-    """
-    )
+    @Tool(description = "OpenGateway API 문서에서 관련 내용을 검색합니다.")
     fun searchDocs(
-        @ToolParam(description = "검색할 키워드 (예: '인증 헤더', 'chat completions', '에러 코드')")
-        query: String,
-        @ToolParam(description = "반환할 최대 결과 수 (기본값: 5)")
-        limit: Int = 5
+        @ToolParam(description = "검색 키워드") query: String,
+        @ToolParam(description = "최대 결과 수") limit: Int = 5
     ): SearchResponse {
-        logger.info { "MCP Tool 호출: searchDocs(query='$query', limit=$limit)" }
+        logger.info { "searchDocs(query='$query', limit=$limit)" }
 
         val results = searchService.search(query, limit)
 
@@ -50,26 +43,22 @@ class OpenGatewayMcpTools(
         )
     }
 
-    @Tool(
-        description = """
-        OpenGateway API 문서의 전체 목차(outline)를 반환합니다.
-        문서 구조를 파악하거나 어떤 API들이 있는지 확인할 때 사용하세요.
-    """
-    )
+    @Tool(description = "OpenGateway API 문서의 전체 목차를 반환합니다.")
     fun getDocsOutline(): OutlineResponse {
-        logger.info { "MCP Tool 호출: getDocsOutline()" }
+        logger.info { "getDocsOutline()" }
 
-        val outlines = documentStore.getOutlines()
+        val grouped = documentStore.getAllDocuments()
+            .groupBy { it.metadata["sourceFile"]?.toString() ?: "unknown" }
 
         return OutlineResponse(
-            documents = outlines.map { outline ->
+            documents = grouped.map { (sourceFile, docs) ->
                 DocumentOutlineItem(
-                    sourceFile = outline.sourceFile,
-                    sections = outline.items.map { item ->
+                    sourceFile = sourceFile,
+                    sections = docs.map { doc ->
                         OutlineSectionItem(
-                            id = item.id,
-                            title = item.title,
-                            level = item.level
+                            id = doc.id,
+                            title = doc.metadata["title"]?.toString() ?: "",
+                            level = (doc.metadata["level"] as? Int) ?: 2
                         )
                     }
                 )
@@ -77,17 +66,11 @@ class OpenGatewayMcpTools(
         )
     }
 
-    @Tool(
-        description = """
-        특정 문서 섹션의 전체 내용을 반환합니다.
-        searchDocs 결과의 sectionId를 사용하여 해당 섹션의 상세 내용을 확인할 때 사용하세요.
-    """
-    )
+    @Tool(description = "특정 문서 섹션의 전체 내용을 반환합니다.")
     fun getDocumentSection(
-        @ToolParam(description = "조회할 섹션 ID (searchDocs 결과의 sectionId)")
-        sectionId: String
+        @ToolParam(description = "섹션 ID") sectionId: String
     ): SectionResponse {
-        logger.info { "MCP Tool 호출: getDocumentSection(sectionId='$sectionId')" }
+        logger.info { "getDocumentSection(sectionId='$sectionId')" }
 
         val doc = documentStore.getDocumentById(sectionId)
 
@@ -103,7 +86,7 @@ class OpenGatewayMcpTools(
                 found = false,
                 sectionId = sectionId,
                 title = "",
-                content = "섹션을 찾을 수 없습니다. getDocsOutline()으로 사용 가능한 섹션을 확인하세요."
+                content = "섹션을 찾을 수 없습니다."
             )
         }
     }
