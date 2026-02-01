@@ -1,12 +1,21 @@
 name: AI PR Review
 
 on:
+  # 수동 트리거
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR 번호'
+        required: true
+        type: number
+  # ai-review 라벨 붙이면 실행
   pull_request:
-    types: [opened, synchronize]
+    types: [labeled]
 
 jobs:
   review:
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'ai-review'
     permissions:
       contents: read
       pull-requests: write
@@ -17,13 +26,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set PR number
+        id: pr
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "number=${{ inputs.pr_number }}" >> $GITHUB_OUTPUT
+          else
+            echo "number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Get PR diff
         id: diff
         run: |
-          # PR의 변경 내용 가져오기
-          DIFF=$(gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }})
-
-          # 멀티라인 출력을 위한 처리
+          DIFF=$(gh pr diff ${{ steps.pr.outputs.number }} --repo ${{ github.repository }} | head -500)
           echo "diff<<EOF" >> $GITHUB_OUTPUT
           echo "$DIFF" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -33,23 +48,17 @@ jobs:
       - name: Get PR info
         id: pr_info
         run: |
-          echo "title=${{ github.event.pull_request.title }}" >> $GITHUB_OUTPUT
+          PR_INFO=$(gh pr view ${{ steps.pr.outputs.number }} --repo ${{ github.repository }} --json title,body)
+          echo "title=$(echo "$PR_INFO" | jq -r '.title')" >> $GITHUB_OUTPUT
           echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "${{ github.event.pull_request.body }}" >> $GITHUB_OUTPUT
+          echo "$PR_INFO" | jq -r '.body' >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Read reviewer persona
-        id: persona
-        run: |
-          PERSONA=$(cat .github/prompts/reviewer-persona.md)
-          echo "content<<EOF" >> $GITHUB_OUTPUT
-          echo "$PERSONA" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Call OpenAI API
         id: review
         run: |
-          # 시스템 프롬프트와 사용자 메시지 준비
           SYSTEM_PROMPT=$(cat .github/prompts/reviewer-persona.md | jq -Rs .)
 
           USER_MESSAGE=$(cat <<'ENDOFMESSAGE' | jq -Rs .
@@ -70,7 +79,6 @@ jobs:
           ENDOFMESSAGE
           )
 
-          # OpenAI API 호출
           RESPONSE=$(curl -s https://api.openai.com/v1/chat/completions \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
@@ -84,11 +92,9 @@ jobs:
               \"max_completion_tokens\": 2000
             }")
 
-          # 리뷰 파일 생성
           echo "## AI Review" > /tmp/review_comment.md
           echo "" >> /tmp/review_comment.md
 
-          # 응답에서 에러 확인
           ERROR=$(echo "$RESPONSE" | jq -r '.error.message // empty')
           if [ -n "$ERROR" ]; then
             echo "::error::OpenAI API Error: $ERROR"
@@ -103,7 +109,7 @@ jobs:
 
       - name: Post review comment
         run: |
-          gh pr comment ${{ github.event.pull_request.number }} \
+          gh pr comment ${{ steps.pr.outputs.number }} \
             --repo ${{ github.repository }} \
             --body-file /tmp/review_comment.md
         env:
