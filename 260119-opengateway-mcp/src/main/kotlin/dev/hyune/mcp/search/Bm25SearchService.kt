@@ -8,8 +8,6 @@ import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import kotlin.math.ln
 
-private val logger = KotlinLogging.logger {}
-
 /**
  * 인메모리 BM25 검색 서비스 (학습용 직접 구현)
  * 
@@ -31,56 +29,55 @@ private val logger = KotlinLogging.logger {}
 class Bm25SearchService(
     private val documentStore: DocumentStore
 ) {
-    /** 테스트용: 직접 청크 주입 */
-    private var testChunks: List<DocumentChunk>? = null
-    
+    private val logger = KotlinLogging.logger {}
+
     // BM25 파라미터
     private val k1 = 1.5  // TF 포화 속도 (1.2 ~ 2.0 권장)
     private val b = 0.75  // 문서 길이 보정 (0.75 권장)
-    
+
     // 역인덱스: 토큰 → (청크ID → 출현 횟수)
     private val invertedIndex = mutableMapOf<String, MutableMap<String, Int>>()
-    
+
     // 문서별 토큰 수
     private val docLengths = mutableMapOf<String, Int>()
-    
+
     // 평균 문서 길이
     private var avgDocLength = 0.0
-    
+
     // 전체 문서 수
     private var totalDocs = 0
-    
+
     /** 청크 ID로 조회 (테스트/프로덕션 겸용) */
     private val chunkIndex = mutableMapOf<String, DocumentChunk>()
-    
+
     @EventListener(ApplicationReadyEvent::class)
     fun buildIndex() {
         logger.info { "Building BM25 inverted index..." }
-        
-        val chunks = testChunks ?: documentStore.getAllChunks()
+
+        val chunks = documentStore.getAllChunks()
         totalDocs = chunks.size
-        
+
         // 청크 인덱스 구축
         chunkIndex.clear()
         chunks.forEach { chunkIndex[it.id] = it }
-        
+
         if (totalDocs == 0) {
             logger.warn { "No documents to index" }
             return
         }
-        
+
         var totalTokens = 0
-        
+
         for (chunk in chunks) {
             // title + content 모두 검색 대상
             val searchableText = "${chunk.title} ${chunk.content}"
             val tokens = tokenize(searchableText)
             docLengths[chunk.id] = tokens.size
             totalTokens += tokens.size
-            
+
             // 토큰 빈도 계산
             val termFreq = tokens.groupingBy { it }.eachCount()
-            
+
             // 역인덱스에 추가
             for ((term, count) in termFreq) {
                 invertedIndex
@@ -88,14 +85,14 @@ class Bm25SearchService(
                     .put(chunk.id, count)
             }
         }
-        
+
         avgDocLength = totalTokens.toDouble() / totalDocs
-        
-        logger.info { 
-            "Index built: $totalDocs docs, ${invertedIndex.size} unique terms, avgDocLength=${"%.1f".format(avgDocLength)}" 
+
+        logger.info {
+            "Index built: $totalDocs docs, ${invertedIndex.size} unique terms, avgDocLength=${"%.1f".format(avgDocLength)}"
         }
     }
-    
+
     /**
      * BM25 검색 수행
      * 
@@ -105,27 +102,27 @@ class Bm25SearchService(
      */
     fun search(query: String, limit: Int = 5): List<SearchResult> {
         if (query.isBlank()) return emptyList()
-        
+
         val queryTokens = tokenize(query)
         if (queryTokens.isEmpty()) return emptyList()
-        
+
         // 각 문서의 점수 계산
         val scores = mutableMapOf<String, Double>()
         val matchedTermsMap = mutableMapOf<String, MutableSet<String>>()
-        
+
         for (term in queryTokens) {
             val postings = invertedIndex[term] ?: continue
             val idf = calculateIdf(postings.size)
-            
+
             for ((docId, tf) in postings) {
                 val docLength = docLengths[docId] ?: continue
                 val tfScore = calculateTfScore(tf, docLength)
-                
+
                 scores[docId] = (scores[docId] ?: 0.0) + idf * tfScore
                 matchedTermsMap.getOrPut(docId) { mutableSetOf() }.add(term)
             }
         }
-        
+
         // 점수순 정렬 및 결과 생성
         return scores.entries
             .sortedByDescending { it.value }
@@ -143,7 +140,7 @@ class Bm25SearchService(
                 logger.debug { "Search '$query' → ${results.size} results" }
             }
     }
-    
+
     /**
      * 텍스트를 토큰으로 분할
      * 
@@ -157,7 +154,7 @@ class Bm25SearchService(
             .filter { it.length >= 2 }          // 2글자 이상만
             .filter { !STOP_WORDS.contains(it) } // 불용어 제거
     }
-    
+
     /**
      * IDF (Inverse Document Frequency) 계산
      * IDF = ln((N - n + 0.5) / (n + 0.5) + 1)
@@ -167,7 +164,7 @@ class Bm25SearchService(
     private fun calculateIdf(docFreq: Int): Double {
         return ln((totalDocs - docFreq + 0.5) / (docFreq + 0.5) + 1)
     }
-    
+
     /**
      * TF 점수 계산 (문서 길이 보정 포함)
      * TF_score = (TF × (k1 + 1)) / (TF + k1 × (1 - b + b × |D|/avgdl))
@@ -176,19 +173,8 @@ class Bm25SearchService(
         val lengthNorm = 1 - b + b * (docLength / avgDocLength)
         return (tf * (k1 + 1)) / (tf + k1 * lengthNorm)
     }
-    
+
     companion object {
-        /** 테스트용 팩토리 메서드 - DocumentStore 없이 직접 청크로 인스턴스 생성 */
-        fun forTest(chunks: List<DocumentChunk>): Bm25SearchService {
-            // Dummy DocumentStore 생성 (실제로는 사용되지 않음)
-            val dummyChunker = dev.hyune.mcp.document.MarkdownChunker()
-            val dummyStore = DocumentStore(dummyChunker)
-            return Bm25SearchService(dummyStore).apply {
-                testChunks = chunks
-                buildIndex()
-            }
-        }
-        
         /** 검색에서 무시할 불용어 */
         private val STOP_WORDS = setOf(
             // 영어
