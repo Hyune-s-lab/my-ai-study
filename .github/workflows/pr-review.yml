@@ -38,7 +38,7 @@ jobs:
       - name: Get PR diff
         id: diff
         run: |
-          DIFF=$(gh pr diff ${{ steps.pr.outputs.number }} --repo ${{ github.repository }})
+          DIFF=$(gh pr diff ${{ steps.pr.outputs.number }} --repo ${{ github.repository }} | head -500)
           echo "diff<<EOF" >> $GITHUB_OUTPUT
           echo "$DIFF" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
