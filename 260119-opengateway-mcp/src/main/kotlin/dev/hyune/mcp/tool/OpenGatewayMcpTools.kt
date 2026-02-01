@@ -32,7 +32,7 @@ class OpenGatewayMcpTools(
             results = results.map { result ->
                 val doc = result.document
                 val content = doc.text ?: ""
-                SearchResultItem(
+                SearchResponse.Item(
                     sectionId = doc.id,
                     title = doc.metadata["title"]?.toString() ?: "",
                     score = result.score,
@@ -52,10 +52,10 @@ class OpenGatewayMcpTools(
 
         return OutlineResponse(
             documents = grouped.map { (sourceFile, docs) ->
-                DocumentOutlineItem(
+                OutlineResponse.Document(
                     sourceFile = sourceFile,
                     sections = docs.map { doc ->
-                        OutlineSectionItem(
+                        OutlineResponse.Section(
                             id = doc.id,
                             title = doc.metadata["title"]?.toString() ?: "",
                             level = (doc.metadata["level"] as? Int) ?: 2
@@ -90,4 +90,40 @@ class OpenGatewayMcpTools(
             )
         }
     }
+
+    data class SearchResponse(
+        val query: String,
+        val totalResults: Int,
+        val results: List<Item>
+    ) {
+        data class Item(
+            val sectionId: String,
+            val title: String,
+            val score: Double,
+            val matchedTerms: List<String>,
+            val contentPreview: String
+        )
+    }
+
+    data class OutlineResponse(
+        val documents: List<Document>
+    ) {
+        data class Document(
+            val sourceFile: String,
+            val sections: List<Section>
+        )
+
+        data class Section(
+            val id: String,
+            val title: String,
+            val level: Int
+        )
+    }
+
+    data class SectionResponse(
+        val found: Boolean,
+        val sectionId: String,
+        val title: String,
+        val content: String
+    )
 }
