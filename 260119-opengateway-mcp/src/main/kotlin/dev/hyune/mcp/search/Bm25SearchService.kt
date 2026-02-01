@@ -136,4 +136,13 @@ class Bm25SearchService(
             "으로", "로", "와", "과", "도", "만", "등", "및"
         )
     }
+
+    /**
+     * BM25 검색 결과
+     */
+    data class SearchResult(
+        val document: Document,
+        val score: Double,
+        val matchedTerms: List<String>
+    )
 }
