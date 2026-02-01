@@ -1,5 +1,6 @@
 package dev.hyune.mcp.tool
 
+import dev.hyune.mcp.document.DocumentOutline
 import dev.hyune.mcp.document.DocumentStore
 import dev.hyune.mcp.search.Bm25SearchService
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -9,31 +10,18 @@ import org.springframework.stereotype.Service
 
 /**
  * OpenGateway API 문서 검색을 위한 MCP Tools
- * 
- * Claude Desktop, Cursor 등에서 이 도구들을 호출하여
- * OpenGateway 연동 코드를 정확하게 생성할 수 있습니다.
  */
 @Service
 class OpenGatewayMcpTools(
     private val searchService: Bm25SearchService,
     private val documentStore: DocumentStore
 ) {
-
     private val logger = KotlinLogging.logger {}
 
-    /**
-     * OpenGateway API 문서를 검색합니다.
-     * 
-     * 사용 예시:
-     * - "인증 헤더" → 인증 관련 섹션 반환
-     * - "chat completions" → Chat API 관련 섹션 반환
-     * - "에러 코드 401" → 에러 처리 섹션 반환
-     */
     @Tool(
         description = """
         OpenGateway API 문서에서 관련 내용을 검색합니다.
         인증, API 엔드포인트, 요청/응답 형식, 에러 코드 등을 찾을 때 사용하세요.
-        검색 결과로 관련 문서 섹션과 점수가 반환됩니다.
     """
     )
     fun searchDocs(
@@ -50,23 +38,19 @@ class OpenGatewayMcpTools(
             query = query,
             totalResults = results.size,
             results = results.map { result ->
+                val doc = result.document
+                val content = doc.text ?: ""
                 SearchResultItem(
-                    sectionId = result.chunk.id,
-                    title = result.chunk.title,
-                    breadcrumb = result.chunk.breadcrumb,
+                    sectionId = doc.id,
+                    title = doc.metadata["title"]?.toString() ?: "",
                     score = result.score,
                     matchedTerms = result.matchedTerms,
-                    contentPreview = result.chunk.content.take(300) +
-                            if (result.chunk.content.length > 300) "..." else ""
+                    contentPreview = content.take(300) + if (content.length > 300) "..." else ""
                 )
             }
         )
     }
 
-    /**
-     * 문서 전체 목차를 반환합니다.
-     * 문서 구조를 파악하거나 특정 섹션을 찾을 때 유용합니다.
-     */
     @Tool(
         description = """
         OpenGateway API 문서의 전체 목차(outline)를 반환합니다.
@@ -82,18 +66,12 @@ class OpenGatewayMcpTools(
             documents = outlines.map { outline ->
                 DocumentOutlineItem(
                     sourceFile = outline.sourceFile,
-                    sections = outline.items.map { item ->
-                        flattenOutlineItem(item, 0)
-                    }.flatten()
+                    sections = outline.items.flatMap { flattenOutlineItem(it, 0) }
                 )
             }
         )
     }
 
-    /**
-     * 특정 섹션의 전체 내용을 반환합니다.
-     * searchDocs 결과에서 sectionId를 사용하여 상세 내용을 조회합니다.
-     */
     @Tool(
         description = """
         특정 문서 섹션의 전체 내용을 반환합니다.
@@ -106,31 +84,27 @@ class OpenGatewayMcpTools(
     ): SectionResponse {
         logger.info { "MCP Tool 호출: getDocumentSection(sectionId='$sectionId')" }
 
-        val chunk = documentStore.getChunkById(sectionId)
+        val doc = documentStore.getDocumentById(sectionId)
 
-        return if (chunk != null) {
+        return if (doc != null) {
             SectionResponse(
                 found = true,
-                sectionId = chunk.id,
-                title = chunk.title,
-                breadcrumb = chunk.breadcrumb,
-                content = chunk.content
+                sectionId = doc.id,
+                title = doc.metadata["title"]?.toString() ?: "",
+                content = doc.text ?: ""
             )
         } else {
             SectionResponse(
                 found = false,
                 sectionId = sectionId,
                 title = "",
-                breadcrumb = emptyList(),
                 content = "섹션을 찾을 수 없습니다. getDocsOutline()으로 사용 가능한 섹션을 확인하세요."
             )
         }
     }
 
-    // OutlineItem을 평탄화 (계층 구조 → 리스트)
-    private fun flattenOutlineItem(item: dev.hyune.mcp.document.DocumentOutline.Item, depth: Int): List<OutlineSectionItem> {
-        val result = mutableListOf<OutlineSectionItem>()
-        result.add(
+    private fun flattenOutlineItem(item: DocumentOutline.Item, depth: Int): List<OutlineSectionItem> {
+        val result = mutableListOf(
             OutlineSectionItem(
                 id = item.id,
                 title = item.title,
@@ -138,9 +112,7 @@ class OpenGatewayMcpTools(
                 indent = "  ".repeat(depth)
             )
         )
-        for (child in item.children) {
-            result.addAll(flattenOutlineItem(child, depth + 1))
-        }
+        item.children.forEach { result.addAll(flattenOutlineItem(it, depth + 1)) }
         return result
     }
 }

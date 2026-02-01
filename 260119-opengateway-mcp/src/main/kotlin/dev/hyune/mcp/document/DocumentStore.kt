@@ -2,6 +2,7 @@ package dev.hyune.mcp.document
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.annotation.PostConstruct
+import org.springframework.ai.document.Document
 import org.springframework.ai.reader.markdown.MarkdownDocumentReader
 import org.springframework.ai.reader.markdown.config.MarkdownDocumentReaderConfig
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
@@ -11,13 +12,14 @@ import org.springframework.stereotype.Component
  * 문서 저장소
  * - 애플리케이션 시작 시 resources/docs/ 디렉토리의 마크다운 문서 로드
  * - Spring AI MarkdownDocumentReader로 청킹
+ * - Spring AI Document 타입 직접 사용
  */
 @Component
 class DocumentStore {
     private val logger = KotlinLogging.logger {}
 
-    private val chunks = mutableListOf<DocumentChunk>()
-    private val chunkById = mutableMapOf<String, DocumentChunk>()
+    private val documents = mutableListOf<Document>()
+    private val documentById = mutableMapOf<String, Document>()
     private val outlines = mutableListOf<DocumentOutline>()
 
     @PostConstruct
@@ -31,7 +33,6 @@ class DocumentStore {
             try {
                 val filename = resource.filename ?: continue
 
-                // Spring AI MarkdownDocumentReader 사용
                 val reader = MarkdownDocumentReader(
                     resource,
                     MarkdownDocumentReaderConfig.builder()
@@ -41,68 +42,68 @@ class DocumentStore {
                         .build()
                 )
 
-                val documents = reader.get()
+                val docs = reader.get()
 
-                // Spring AI Document → DocumentChunk 변환
-                val documentChunks = documents.mapIndexed { index, doc ->
+                // ID 생성 및 메타데이터 보강
+                val processedDocs = docs.mapIndexed { index, doc ->
                     val title = doc.metadata["title"]?.toString() ?: "Section ${index + 1}"
                     val id = generateId(title, index)
 
-                    DocumentChunk(
-                        id = id,
-                        title = title,
-                        level = (doc.metadata["level"] as? Int) ?: 2,
-                        content = doc.text ?: "",
-                        breadcrumb = emptyList(),
-                        sourceFile = filename
-                    )
+                    Document.builder()
+                        .id(id)
+                        .text(doc.text ?: "")
+                        .metadata(doc.metadata + mapOf(
+                            "id" to id,
+                            "sourceFile" to filename
+                        ))
+                        .build()
                 }
 
-                chunks.addAll(documentChunks)
+                documents.addAll(processedDocs)
 
                 // ID로 인덱싱
-                for (chunk in documentChunks) {
-                    val uniqueId = if (chunkById.containsKey(chunk.id)) {
-                        "${chunk.id}-${chunks.indexOf(chunk)}"
+                for (doc in processedDocs) {
+                    val docId = doc.id
+                    val uniqueId = if (documentById.containsKey(docId)) {
+                        "${docId}-${documents.indexOf(doc)}"
                     } else {
-                        chunk.id
+                        docId
                     }
-                    chunkById[uniqueId] = chunk.copy(id = uniqueId)
+                    documentById[uniqueId] = doc
                 }
 
-                // 간단한 목차 생성
-                val outlineItems = documentChunks.map { chunk ->
+                // 목차 생성
+                val outlineItems = processedDocs.map { doc ->
                     DocumentOutline.Item(
-                        id = chunk.id,
-                        title = chunk.title,
-                        level = chunk.level
+                        id = doc.id,
+                        title = doc.metadata["title"]?.toString() ?: "",
+                        level = (doc.metadata["level"] as? Int) ?: 2
                     )
                 }
                 outlines.add(DocumentOutline(filename, outlineItems))
 
-                logger.info { "Loaded '$filename': ${documentChunks.size} chunks" }
+                logger.info { "Loaded '$filename': ${processedDocs.size} documents" }
             } catch (e: Exception) {
                 logger.error(e) { "Failed to load document: ${resource.filename}" }
             }
         }
 
-        logger.info { "Total loaded: ${chunks.size} chunks from ${outlines.size} documents" }
+        logger.info { "Total loaded: ${documents.size} documents from ${outlines.size} files" }
     }
 
     private fun generateId(title: String, index: Int): String {
-        val baseId = title
+        return title
             .lowercase()
             .replace(Regex("[^a-z0-9가-힣\\s-]"), "")
             .replace(Regex("\\s+"), "-")
             .replace(Regex("-+"), "-")
             .trim('-')
             .ifEmpty { "section-$index" }
-        return baseId
     }
 
-    fun getAllChunks(): List<DocumentChunk> = chunks.toList()
+    fun getAllDocuments(): List<Document> = documents.toList()
 
-    fun getChunkById(id: String): DocumentChunk? = chunkById[id]
+    fun getDocumentById(id: String): Document? = documentById[id]
 
     fun getOutlines(): List<DocumentOutline> = outlines.toList()
 }
