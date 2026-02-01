@@ -5,7 +5,6 @@ import jakarta.annotation.PostConstruct
 import org.springframework.ai.document.Document
 import org.springframework.ai.reader.markdown.MarkdownDocumentReader
 import org.springframework.ai.reader.markdown.config.MarkdownDocumentReaderConfig
-import org.springframework.core.io.Resource
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import org.springframework.stereotype.Component
 
@@ -26,35 +25,29 @@ class DocumentStore {
     fun loadDocuments() {
         logger.info { "Loading documents from classpath:docs/" }
 
-        PathMatchingResourcePatternResolver()
-            .getResources("classpath:docs/*.md")
-            .mapNotNull { loadResource(it) }
-            .flatten()
-            .also { docs ->
+        for (resource in PathMatchingResourcePatternResolver().getResources("classpath:docs/*.md")) {
+            val filename = resource.filename ?: continue
+            try {
+                val docs = MarkdownDocumentReader(resource, readerConfig).get()
+                    .mapIndexed { index, doc ->
+                        val title = doc.metadata["title"]?.toString() ?: "Section ${index + 1}"
+                        val id = generateId(title, index)
+                        Document.builder()
+                            .id(id)
+                            .text(doc.text ?: "")
+                            .metadata(doc.metadata + mapOf("id" to id, "sourceFile" to filename))
+                            .build()
+                    }
+
                 documents.addAll(docs)
                 docs.forEach { documentById[it.id] = it }
-                logger.info { "Total: ${docs.size} documents" }
+                logger.info { "Loaded '$filename': ${docs.size} sections" }
+            } catch (e: Exception) {
+                logger.error(e) { "Failed to load: $filename" }
             }
-    }
-
-    private fun loadResource(resource: Resource): List<Document>? {
-        val filename = resource.filename ?: return null
-        return try {
-            MarkdownDocumentReader(resource, readerConfig).get()
-                .mapIndexed { index, doc ->
-                    val title = doc.metadata["title"]?.toString() ?: "Section ${index + 1}"
-                    val id = generateId(title, index)
-                    Document.builder()
-                        .id(id)
-                        .text(doc.text ?: "")
-                        .metadata(doc.metadata + mapOf("id" to id, "sourceFile" to filename))
-                        .build()
-                }
-                .also { logger.info { "Loaded '$filename': ${it.size} sections" } }
-        } catch (e: Exception) {
-            logger.error(e) { "Failed to load: $filename" }
-            null
         }
+
+        logger.info { "Total: ${documents.size} documents" }
     }
 
     private fun generateId(title: String, index: Int): String {
