@@ -186,40 +186,6 @@ RDB의 B-Tree 인덱스가 `컬럼값 → Row ID`를 매핑하듯,
 
 ---
 
-## 실행 방법
-
-### Docker 실행
-
-```bash
-# 프로젝트 루트에서
-docker build -f 260119-opengateway-mcp/Dockerfile -t opengateway-mcp .
-docker run -p 8080:8080 opengateway-mcp
-```
-
-서버가 http://localhost:8080 에서 시작됩니다.
-
-### MCP 클라이언트 설정
-
-`~/Library/Application Support/Claude/claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "opengateway-docs": {
-      "url": "http://localhost:8080/sse"
-    }
-  }
-}
-```
-
-### 사용
-
-Claude에서 다음과 같이 질문:
-- "OpenGateway 인증 방법 알려줘"
-- "OpenGateway 연동 코드 만들어줘"
-
----
-
 ## 향후 개선
 
 - [ ] **파라미터 외부화**: k1, b, topK 등을 application.yml로 분리
