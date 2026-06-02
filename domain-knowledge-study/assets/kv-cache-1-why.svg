@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="390" viewBox="0 0 780 390" font-family="-apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">
+  <rect width="780" height="390" fill="#f8fafc"/>
+  <text x="30" y="40" font-size="22" font-weight="700" fill="#0f172a">① KV 캐시는 왜 필요할까?</text>
+  <text x="30" y="66" font-size="14" fill="#64748b">LLM은 글자(토큰)를 하나씩 쓴다. 다음 글자를 정하려면 앞 글자를 모두 봐야 한다.</text>
+
+  <!-- 캐시 없음 -->
+  <rect x="30" y="92" width="345" height="272" rx="14" fill="#fef2f2" stroke="#fca5a5" stroke-width="2"/>
+  <text x="50" y="124" font-size="17" font-weight="700" fill="#b91c1c">❌ 캐시 없음</text>
+  <text x="50" y="146" font-size="12.5" fill="#7f1d1d">새 글자마다 앞 글자를 전부 다시 계산 → 길수록 느려짐</text>
+
+  <rect x="50" y="162" width="305" height="56" rx="9" fill="#ffffff" stroke="#fecaca"/>
+  <text x="66" y="186" font-size="14" fill="#1e293b">1) "파"  →  계산: (파)</text>
+  <text x="66" y="206" font-size="11.5" fill="#94a3b8">처음이라 (파)만 계산</text>
+
+  <rect x="50" y="226" width="305" height="56" rx="9" fill="#ffffff" stroke="#fecaca"/>
+  <text x="66" y="250" font-size="14" fill="#1e293b">2) "파리"  →  계산: (파)(리)</text>
+  <text x="66" y="270" font-size="11.5" fill="#dc2626">↻ '파'를 또 계산 (낭비)</text>
+
+  <rect x="50" y="290" width="305" height="56" rx="9" fill="#ffffff" stroke="#fecaca"/>
+  <text x="66" y="314" font-size="14" fill="#1e293b">3) "파리는"  →  (파)(리)(는)</text>
+  <text x="66" y="334" font-size="11.5" fill="#dc2626">↻ '파·리'를 또 계산 … 점점 느려짐</text>
+
+  <!-- 캐시 있음 -->
+  <rect x="405" y="92" width="345" height="272" rx="14" fill="#f0fdf4" stroke="#86efac" stroke-width="2"/>
+  <text x="425" y="124" font-size="17" font-weight="700" fill="#15803d">✅ 캐시 있음</text>
+  <text x="425" y="146" font-size="12.5" fill="#14532d">한 번 본 글자는 '메모'해두고, 새 글자만 계산 → 항상 빠름</text>
+
+  <rect x="425" y="162" width="305" height="56" rx="9" fill="#ffffff" stroke="#bbf7d0"/>
+  <text x="441" y="186" font-size="14" fill="#1e293b">1) "파"  →  메모에 [파] 저장</text>
+  <text x="441" y="206" font-size="11.5" fill="#94a3b8">메모: [파]</text>
+
+  <rect x="425" y="226" width="305" height="56" rx="9" fill="#ffffff" stroke="#bbf7d0"/>
+  <text x="441" y="250" font-size="14" fill="#1e293b">2) "리"만 계산 + 메모 재사용</text>
+  <text x="441" y="270" font-size="11.5" fill="#16a34a">메모: [파][리]   ('파'는 재계산 안 함)</text>
+
+  <rect x="425" y="290" width="305" height="56" rx="9" fill="#ffffff" stroke="#bbf7d0"/>
+  <text x="441" y="314" font-size="14" fill="#1e293b">3) "는"만 계산 + 메모 재사용</text>
+  <text x="441" y="334" font-size="11.5" fill="#16a34a">메모: [파][리][는]  🚀</text>
+</svg>
