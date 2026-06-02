@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="330" viewBox="0 0 780 330" font-family="-apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">
+  <defs>
+    <marker id="a1blue" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect width="780" height="330" fill="#f8fafc"/>
+  <text x="30" y="40" font-size="22" font-weight="700" fill="#0f172a">① 어텐션이란? — "어디를 얼마나 볼지" 점수 매기기</text>
+  <text x="30" y="66" font-size="14" fill="#64748b">"그것"을 처리할 때, 앞 단어들에 가중치를 매겨(합=1) 정보를 섞는다.</text>
+
+  <!-- weight tags above target boxes -->
+  <text x="118" y="152" font-size="15" font-weight="700" fill="#60a5fa" text-anchor="middle">0.2</text>
+  <text x="285" y="152" font-size="17" font-weight="700" fill="#2563eb" text-anchor="middle">0.7</text>
+  <text x="455" y="152" font-size="15" font-weight="700" fill="#93c5fd" text-anchor="middle">0.1</text>
+
+  <!-- attention arcs (thickness = weight) -->
+  <path d="M648,164 C500,78 250,78 118,160" stroke="#60a5fa" stroke-width="2.4" fill="none" marker-end="url(#a1blue)"/>
+  <path d="M650,166 C560,104 380,104 288,162" stroke="#2563eb" stroke-width="6" fill="none" marker-end="url(#a1blue)"/>
+  <path d="M660,170 C612,124 522,124 458,164" stroke="#93c5fd" stroke-width="1.4" fill="none" marker-end="url(#a1blue)"/>
+
+  <!-- token boxes -->
+  <rect x="60" y="166" width="116" height="52" rx="10" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="118" y="198" font-size="16" font-weight="600" fill="#334155" text-anchor="middle">개발자</text>
+
+  <rect x="230" y="166" width="110" height="52" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="285" y="198" font-size="16" font-weight="700" fill="#1d4ed8" text-anchor="middle">버그</text>
+
+  <rect x="400" y="166" width="110" height="52" rx="10" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="455" y="198" font-size="16" font-weight="600" fill="#334155" text-anchor="middle">고쳤다</text>
+
+  <rect x="618" y="166" width="116" height="52" rx="10" fill="#ffedd5" stroke="#fb923c" stroke-width="2"/>
+  <text x="676" y="190" font-size="11" fill="#9a3412" text-anchor="middle">지금 처리 중</text>
+  <text x="676" y="210" font-size="16" font-weight="700" fill="#c2410c" text-anchor="middle">"그것"</text>
+
+  <!-- takeaway -->
+  <text x="30" y="270" font-size="13.5" fill="#0f172a">→ "그것"은 <tspan font-weight="700" fill="#1d4ed8">버그(0.7)</tspan>에 가장 주목한다. 이 가중치만큼 각 단어의 의미를 섞어 "그것"의 문맥을 만든다.</text>
+  <text x="30" y="296" font-size="13.5" fill="#64748b">화살표 굵기 = 가중치. 거리에 상관없이 <tspan font-weight="700" fill="#0f172a">모든 단어를 한 번에</tspan> 본다 (RNN과의 결정적 차이).</text>
+</svg>
