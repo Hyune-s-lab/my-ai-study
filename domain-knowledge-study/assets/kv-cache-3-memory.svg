@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="370" viewBox="0 0 780 370" font-family="-apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">
+  <rect width="780" height="370" fill="#f8fafc"/>
+  <text x="30" y="40" font-size="22" font-weight="700" fill="#0f172a">③ 왜 서빙에서 중요할까? — 메모리(VRAM)</text>
+  <text x="30" y="66" font-size="14" fill="#64748b">글이 길수록 메모가 많이 쌓인다. 메모는 GPU 메모리(VRAM)를 차지한다.</text>
+
+  <!-- 왼쪽: 글 길이 -> 캐시 크기 -->
+  <text x="30" y="104" font-size="14" font-weight="700" fill="#334155">글이 길수록 메모 ↑</text>
+
+  <text x="30" y="140" font-size="12.5" fill="#475569">짧은 글 (10토큰)</text>
+  <rect x="150" y="128" width="60" height="20" rx="4" fill="#93c5fd"/>
+
+  <text x="30" y="178" font-size="12.5" fill="#475569">중간 글 (300토큰)</text>
+  <rect x="150" y="166" width="180" height="20" rx="4" fill="#60a5fa"/>
+
+  <text x="30" y="216" font-size="12.5" fill="#475569">긴 RAG 글 (2,000토큰)</text>
+  <rect x="150" y="204" width="330" height="20" rx="4" fill="#2563eb"/>
+  <text x="490" y="219" font-size="11.5" fill="#2563eb" font-weight="700">메모 ↑↑</text>
+
+  <text x="30" y="260" font-size="12" fill="#94a3b8">→ "프롬프트는 긴데 답은 짧은" RAG일수록 메모리를 많이 먹는다.</text>
+
+  <!-- 오른쪽: GPU 한 장 한계 -->
+  <rect x="520" y="92" width="235" height="250" rx="14" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="637" y="120" font-size="14" font-weight="700" fill="#334155" text-anchor="middle">GPU 1장 (VRAM 한정)</text>
+
+  <rect x="540" y="134" width="195" height="40" rx="7" fill="#dcfce7" stroke="#4ade80"/>
+  <text x="556" y="159" font-size="13" fill="#166534">요청 A 캐시 ✅</text>
+
+  <rect x="540" y="180" width="195" height="40" rx="7" fill="#dcfce7" stroke="#4ade80"/>
+  <text x="556" y="205" font-size="13" fill="#166534">요청 B 캐시 ✅</text>
+
+  <rect x="540" y="226" width="195" height="40" rx="7" fill="#fee2e2" stroke="#f87171" stroke-dasharray="5 3"/>
+  <text x="556" y="251" font-size="13" fill="#b91c1c">요청 C 캐시 ✗ 자리 없음</text>
+
+  <text x="637" y="298" font-size="12.5" fill="#b91c1c" text-anchor="middle" font-weight="700">가득 차면 → OOM</text>
+  <text x="637" y="320" font-size="11.5" fill="#64748b" text-anchor="middle">(또는 대기 큐로 미룸)</text>
+
+  <text x="30" y="352" font-size="13.5" fill="#0f172a">→ 그래서 동시 처리량의 진짜 병목은 보통 <tspan font-weight="700" fill="#b91c1c">연산이 아니라 KV 캐시 메모리</tspan>다.</text>
+</svg>

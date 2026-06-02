@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="360" viewBox="0 0 780 360" font-family="-apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrG" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#3b82f6"/>
+    </marker>
+  </defs>
+  <rect width="780" height="360" fill="#f8fafc"/>
+  <text x="30" y="40" font-size="22" font-weight="700" fill="#0f172a">② 글자 하나를 처리하면? — Q · K · V</text>
+  <text x="30" y="66" font-size="14" fill="#64748b">각 글자는 K·V '메모'가 되어 캐시에 쌓이고, Q는 그 순간 쓰고 버린다.</text>
+
+  <!-- 글자 박스 -->
+  <rect x="30" y="150" width="120" height="74" rx="12" fill="#e0e7ff" stroke="#818cf8" stroke-width="2"/>
+  <text x="90" y="183" font-size="14" fill="#3730a3" text-anchor="middle">글자</text>
+  <text x="90" y="205" font-size="18" font-weight="700" fill="#3730a3" text-anchor="middle">"리"</text>
+
+  <!-- K / V / Q 카드 -->
+  <rect x="290" y="104" width="230" height="50" rx="9" fill="#dbeafe" stroke="#60a5fa" stroke-width="1.5"/>
+  <text x="306" y="125" font-size="14" font-weight="700" fill="#1d4ed8">K = 꼬리표 (색인)</text>
+  <text x="306" y="143" font-size="11.5" fill="#1e40af">나중에 찾을 때 비교용</text>
+
+  <rect x="290" y="166" width="230" height="50" rx="9" fill="#dbeafe" stroke="#60a5fa" stroke-width="1.5"/>
+  <text x="306" y="187" font-size="14" font-weight="700" fill="#1d4ed8">V = 내용</text>
+  <text x="306" y="205" font-size="11.5" fill="#1e40af">이 글자가 전달할 정보</text>
+
+  <rect x="290" y="240" width="230" height="50" rx="9" fill="#ffedd5" stroke="#fb923c" stroke-width="1.5"/>
+  <text x="306" y="261" font-size="14" font-weight="700" fill="#c2410c">Q = 질문</text>
+  <text x="306" y="279" font-size="11.5" fill="#9a3412">'다음 글자 뭐지?' → 쓰고 버림</text>
+
+  <!-- 글자 -> 카드 화살표 -->
+  <path d="M150,178 C210,160 240,135 288,129" stroke="#64748b" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+  <path d="M150,187 C210,190 240,190 288,191" stroke="#64748b" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+  <path d="M150,196 C210,225 240,255 288,265" stroke="#64748b" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+
+  <!-- 캐시 박스 -->
+  <rect x="585" y="104" width="170" height="112" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="670" y="132" font-size="15" font-weight="700" fill="#1d4ed8" text-anchor="middle">KV 캐시</text>
+  <text x="670" y="156" font-size="12" fill="#1e40af" text-anchor="middle">K·V 메모를</text>
+  <text x="670" y="174" font-size="12" fill="#1e40af" text-anchor="middle">글자 수만큼</text>
+  <text x="670" y="192" font-size="12" fill="#1e40af" text-anchor="middle">차곡차곡 저장</text>
+
+  <!-- K,V -> 캐시 -->
+  <path d="M520,129 C550,131 558,140 583,148" stroke="#3b82f6" stroke-width="1.8" fill="none" marker-end="url(#arrG)"/>
+  <path d="M520,191 C550,185 558,178 583,172" stroke="#3b82f6" stroke-width="1.8" fill="none" marker-end="url(#arrG)"/>
+  <text x="540" y="150" font-size="11" fill="#3b82f6" font-weight="700">저장</text>
+
+  <!-- Q -> 휴지통 -->
+  <path d="M520,265 C555,265 565,265 583,265" stroke="#fb923c" stroke-width="1.8" fill="none" marker-end="url(#arr)"/>
+  <text x="588" y="262" font-size="14" fill="#9a3412">🗑 버림</text>
+  <text x="588" y="282" font-size="11.5" fill="#9a3412">(안 남김)</text>
+
+  <text x="30" y="332" font-size="13.5" fill="#0f172a">→ 재사용되는 <tspan font-weight="700" fill="#1d4ed8">K·V만</tspan> 저장하고 Q는 버린다. 그래서 이름이 'QKV'가 아니라 <tspan font-weight="700">'KV' 캐시</tspan>.</text>
+</svg>
