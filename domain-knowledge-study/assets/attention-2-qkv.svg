@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="430" viewBox="0 0 820 430" font-family="-apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">
+  <defs>
+    <marker id="a2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#64748b"/>
+    </marker>
+    <marker id="a2o" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0,0 L9,4.5 L0,9 Z" fill="#fb923c"/>
+    </marker>
+  </defs>
+  <rect width="820" height="430" fill="#f8fafc"/>
+  <text x="30" y="40" font-size="22" font-weight="700" fill="#0f172a">② 어떻게 섞나 — Q로 K를 조회하고(softmax) V를 가중합</text>
+  <text x="30" y="66" font-size="14" fill="#64748b">key-value 스토어 조회와 같다: Q로 모든 K와 점수를 내고, 그 비율로 V를 꺼내 섞는다.</text>
+
+  <!-- stage headers -->
+  <text x="250" y="100" font-size="13" font-weight="700" fill="#475569" text-anchor="middle">① 점수 = Q·K</text>
+  <text x="470" y="100" font-size="13" font-weight="700" fill="#475569" text-anchor="middle">② softmax → 가중치</text>
+  <text x="690" y="100" font-size="13" font-weight="700" fill="#475569" text-anchor="middle">③ 가중치 × V → 합</text>
+
+  <!-- Q box -->
+  <rect x="30" y="190" width="110" height="70" rx="11" fill="#ffedd5" stroke="#fb923c" stroke-width="2"/>
+  <text x="85" y="220" font-size="20" font-weight="700" fill="#c2410c" text-anchor="middle">Q</text>
+  <text x="85" y="242" font-size="12" fill="#9a3412" text-anchor="middle">"그것"의 질문</text>
+
+  <!-- K boxes -->
+  <rect x="175" y="123" width="92" height="40" rx="8" fill="#dbeafe" stroke="#60a5fa" stroke-width="1.5"/>
+  <text x="221" y="148" font-size="14" font-weight="600" fill="#1d4ed8" text-anchor="middle">K(그)</text>
+  <rect x="175" y="200" width="92" height="40" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+  <text x="221" y="225" font-size="14" font-weight="700" fill="#1d4ed8" text-anchor="middle">K(버그)</text>
+  <rect x="175" y="277" width="92" height="40" rx="8" fill="#dbeafe" stroke="#60a5fa" stroke-width="1.5"/>
+  <text x="221" y="302" font-size="14" font-weight="600" fill="#1d4ed8" text-anchor="middle">K(그것)</text>
+
+  <!-- Q -> K arrows -->
+  <path d="M140,215 C150,180 158,150 173,144" stroke="#fb923c" stroke-width="1.6" fill="none" marker-end="url(#a2o)"/>
+  <path d="M140,224 C152,222 160,221 173,220" stroke="#fb923c" stroke-width="1.6" fill="none" marker-end="url(#a2o)"/>
+  <path d="M140,235 C150,270 158,292 173,296" stroke="#fb923c" stroke-width="1.6" fill="none" marker-end="url(#a2o)"/>
+
+  <!-- score values -->
+  <text x="320" y="148" font-size="14" fill="#334155">= 1.2</text>
+  <text x="320" y="225" font-size="14" font-weight="700" fill="#0f172a">= 4.8</text>
+  <text x="320" y="302" font-size="14" fill="#334155">= 2.5</text>
+
+  <!-- softmax gate -->
+  <rect x="395" y="120" width="78" height="200" rx="12" fill="#eef2ff" stroke="#818cf8" stroke-width="1.8"/>
+  <text x="434" y="212" font-size="14" font-weight="700" fill="#4338ca" text-anchor="middle">soft</text>
+  <text x="434" y="230" font-size="14" font-weight="700" fill="#4338ca" text-anchor="middle">max</text>
+  <text x="434" y="252" font-size="10.5" fill="#6366f1" text-anchor="middle">÷√d 후</text>
+  <text x="434" y="266" font-size="10.5" fill="#6366f1" text-anchor="middle">정규화</text>
+  <!-- score -> softmax -->
+  <path d="M360,143 L393,150" stroke="#64748b" stroke-width="1.4" fill="none" marker-end="url(#a2)"/>
+  <path d="M360,220 L393,220" stroke="#64748b" stroke-width="1.4" fill="none" marker-end="url(#a2)"/>
+  <path d="M360,297 L393,290" stroke="#64748b" stroke-width="1.4" fill="none" marker-end="url(#a2)"/>
+
+  <!-- weights -->
+  <rect x="500" y="125" width="60" height="36" rx="7" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="530" y="149" font-size="14" fill="#334155" text-anchor="middle">0.10</text>
+  <rect x="500" y="202" width="60" height="36" rx="7" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/>
+  <text x="530" y="226" font-size="14" font-weight="700" fill="#15803d" text-anchor="middle">0.75</text>
+  <rect x="500" y="279" width="60" height="36" rx="7" fill="#fff" stroke="#cbd5e1" stroke-width="1.4"/>
+  <text x="530" y="303" font-size="14" fill="#334155" text-anchor="middle">0.15</text>
+  <!-- softmax -> weight -->
+  <path d="M475,143 L498,143" stroke="#64748b" stroke-width="1.4" fill="none" marker-end="url(#a2)"/>
+  <path d="M475,220 L498,220" stroke="#64748b" stroke-width="1.4" fill="none" marker-end="url(#a2)"/>
+  <path d="M475,297 L498,297" stroke="#64748b" stroke-width="1.4" fill="none" marker-end="url(#a2)"/>
+
+  <!-- V boxes -->
+  <text x="600" y="148" font-size="14" fill="#475569">× V(그)</text>
+  <text x="600" y="225" font-size="14" font-weight="700" fill="#0f172a">× V(버그)</text>
+  <text x="600" y="302" font-size="14" fill="#475569">× V(그것)</text>
+
+  <!-- sum -> output -->
+  <rect x="680" y="185" width="115" height="78" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="737" y="212" font-size="14" font-weight="700" fill="#1d4ed8" text-anchor="middle">출력 = Σ</text>
+  <text x="737" y="232" font-size="12" fill="#1e40af" text-anchor="middle">가중합 결과</text>
+  <text x="737" y="250" font-size="11.5" font-weight="700" fill="#15803d" text-anchor="middle">≈ V(버그)</text>
+  <path d="M668,148 C700,160 710,175 716,183" stroke="#64748b" stroke-width="1.4" fill="none" marker-end="url(#a2)"/>
+  <path d="M675,224 L678,224" stroke="#64748b" stroke-width="1.6" fill="none" marker-end="url(#a2)"/>
+  <path d="M668,297 C700,285 710,272 716,265" stroke="#64748b" stroke-width="1.4" fill="none" marker-end="url(#a2)"/>
+
+  <!-- formula + takeaway -->
+  <rect x="30" y="345" width="760" height="34" rx="8" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="410" y="367" font-size="15" font-weight="700" fill="#0f172a" text-anchor="middle">Attention(Q, K, V) = softmax( Q·Kᵀ / √d ) · V</text>
+  <text x="30" y="404" font-size="13.5" fill="#64748b">→ 0.75가 가장 크니 출력은 <tspan font-weight="700" fill="#15803d">V(버그)</tspan>를 주로 닮는다. "정확히 한 키"가 아니라 <tspan font-weight="700" fill="#0f172a">모든 키에 부드럽게(soft)</tspan> 가중치를 주는 조회.</text>
+</svg>
