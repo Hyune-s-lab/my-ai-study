@@ -1,13 +1,13 @@
 # My AI Study
 
-## 모듈
+## 사이드 프로젝트
 
-| 모듈 | 주제 |
+| 프로젝트 | 주제 |
 |------|------|
 | [spring-ai-rag-core](./spring-ai-rag-core) | Spring AI + pgvector RAG |
 | [opengateway-mcp](./opengateway-mcp) | MCP 서버, BM25 검색 |
 
-## [domain-knowledge-study](./domain-knowledge-study) — 도메인 지식 문서
+## [domain-knowledge-study](./domain-knowledge-study)
 
 | 문서 | 주제 |
 |---|---|
