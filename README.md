@@ -1,6 +1,6 @@
 # My AI Study
 
-## Side Projects
+## Practice
 
 | 프로젝트 | 주제 |
 |------|------|
