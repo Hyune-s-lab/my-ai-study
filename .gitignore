@@ -146,3 +146,6 @@ gradle-app.setting
 
 # Local environment
 .env.local
+
+# 로컬 전용 draft (미공개)
+domain-knowledge-study/_local-draft/
