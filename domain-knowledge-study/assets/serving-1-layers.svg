@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="470" viewBox="0 0 840 470" font-family="-apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">
+  <defs>
+    <marker id="s1arr" markerWidth="11" markerHeight="11" refX="5" refY="9" orient="auto">
+      <path d="M0,0 L10,0 L5,10 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect width="840" height="470" fill="#f8fafc"/>
+  <text x="30" y="40" font-size="22" font-weight="700" fill="#0f172a">LLM 서빙 최적화의 4개 층</text>
+  <text x="30" y="66" font-size="14" fill="#64748b">아래로 갈수록 규모·네트워크·SLO가 받쳐줄 때만 ROI가 난다. 공통 축은 "KV 캐시가 어디 있나".</text>
+
+  <!-- ① 엔진 내부 -->
+  <rect x="40" y="92" width="660" height="74" rx="12" fill="#e0e7ff" stroke="#818cf8" stroke-width="2"/>
+  <text x="62" y="124" font-size="17" font-weight="700" fill="#3730a3">① 엔진 내부 최적화</text>
+  <text x="62" y="148" font-size="11.5" fill="#4338ca">continuous batching · prefix caching(APC/RadixAttention) · chunked prefill · 양자화 · speculative decoding</text>
+  <text x="680" y="116" font-size="11" font-weight="700" fill="#3730a3" text-anchor="end">거의 모두 · 1순위</text>
+
+  <!-- ② 라우팅 -->
+  <rect x="40" y="178" width="660" height="74" rx="12" fill="#dbeafe" stroke="#60a5fa" stroke-width="2"/>
+  <text x="62" y="210" font-size="17" font-weight="700" fill="#1d4ed8">② 라우팅</text>
+  <text x="62" y="234" font-size="11.5" fill="#1e40af">round-robin의 한계 → KV/prefix cache-aware + load-aware (캐시 점수 + 부하 점수 합성)</text>
+  <text x="680" y="202" font-size="11" font-weight="700" fill="#1d4ed8" text-anchor="end">replica 2개+</text>
+
+  <!-- ③ disaggregation -->
+  <rect x="40" y="264" width="660" height="74" rx="12" fill="#ffedd5" stroke="#fb923c" stroke-width="2"/>
+  <text x="62" y="296" font-size="17" font-weight="700" fill="#c2410c">③ prefill / decode 분리 (disaggregation)</text>
+  <text x="62" y="320" font-size="11.5" fill="#9a3412">prefill 풀 / decode 풀 분리 → 간섭 제거 · 독립 스케일 / 대가 = KV 캐시 이동(NVLink·RDMA·NIXL)</text>
+  <text x="680" y="288" font-size="11" font-weight="700" fill="#c2410c" text-anchor="end">대규모 + tail latency</text>
+
+  <!-- ④ 토폴로지 -->
+  <rect x="40" y="350" width="660" height="74" rx="12" fill="#dcfce7" stroke="#22c55e" stroke-width="2"/>
+  <text x="62" y="382" font-size="17" font-weight="700" fill="#15803d">④ 하드웨어 토폴로지</text>
+  <text x="62" y="406" font-size="11.5" fill="#166534">NVLink 도메인 · cache locality · 병렬화 배치(TP는 NVLink 안, PP/EP는 랙 간)</text>
+  <text x="680" y="374" font-size="11" font-weight="700" fill="#15803d" text-anchor="end">멀티노드 (B300 NVL72)</text>
+
+  <!-- 우측 화살표: 규모/복잡도 증가 -->
+  <line x1="716" y1="100" x2="716" y2="412" stroke="#64748b" stroke-width="2.5" marker-end="url(#s1arr)"/>
+  <text x="784" y="245" font-size="12" font-weight="700" fill="#475569" text-anchor="middle">규모·복잡도 ↑</text>
+  <text x="784" y="265" font-size="12" font-weight="700" fill="#475569" text-anchor="middle">ROI 조건 ↑</text>
+
+  <!-- bottom takeaway -->
+  <text x="30" y="456" font-size="13.5" fill="#0f172a">→ 옛날엔 "①로 vLLM 띄우면 끝". 이제 병목이 <tspan font-weight="700" fill="#1d4ed8">엔진 밖</tspan>(②③④)으로 이동 — 전부 <tspan font-weight="700">KV 캐시 위치</tspan> 문제.</text>
+</svg>
