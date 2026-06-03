@@ -9,6 +9,7 @@
   - GPU 등급(RTX 4090 / L40S / A100 80G / H100 / H200 / B200 / B300)별로 "어떤 모델 크기·컨텍스트 길이·동시 요청"이 현실적으로 가능한가
   - VRAM 예산 = 모델 가중치 + KV 캐시. 양자화(FP16/FP8/AWQ4bit)에 따라 어디까지 올라가나
   - "이 카드면 이 모델"의 실무 매칭표 만들기 → 관련: [모델 종류 §7 VRAM](./260603-llm-모델-종류.md), [KV 캐시 §3](./260601-kv-cache-기초.md)
+  - GPU 3축(용량·대역폭·연산)을 **실서빙에서 관측**하는 법: nvidia-smi/nvtop, DCGM(`DRAM_ACTIVE`·`SM_ACTIVE`·`TENSOR_ACTIVE`·`FB_USED`)+Prometheus/Grafana, vLLM `/metrics`(TTFT·TPOT·`gpu_cache_usage_perc`·waiting). 어느 축이 병목인지 진단 (※ nvidia-smi GPU-Util은 부정확)
 
 - **token per second(TPS)를 늘리는 방법 총정리**
   - 처리량(throughput TPS) vs 지연(TPOT/TTFT) 구분해서 레버 정리: continuous batching, 양자화, speculative decoding, chunked prefill, TP/PP, prefix caching
