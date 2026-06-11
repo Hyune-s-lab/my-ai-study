@@ -18,3 +18,9 @@
 | [260603-attention-기초.md](./domain-knowledge-study/260603-attention-기초.md) | Attention (기초편) — Q/K/V·self-attention·KV 캐시의 뿌리 |
 | [260603-llm-모델-종류.md](./domain-knowledge-study/260603-llm-모델-종류.md) | LLM 모델 종류 — open-weight vs closed·base/instruct·dense/MoE·양자화 |
 | [BACKLOG.md](./domain-knowledge-study/BACKLOG.md) | 다음에 파볼 주제 목록 |
+
+## [cs-study](./cs-study) — 범용 CS 지식
+
+| 문서 | 주제 |
+|---|---|
+| [260610-모의면접-타임아웃.md](./cs-study/260610-모의면접-타임아웃.md) | 모의면접 — 타임아웃 (종류·자원고갈·재시도·분산·게이트웨이) |
