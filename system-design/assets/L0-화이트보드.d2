@@ -6,7 +6,7 @@ classes: {
 }
 c: "클라이언트" { class: svc; icon: https://icons.terrastruct.com/aws%2F_General%2FUsers_light-bg.svg }
 api: "API 서버 (동기)\n요청 스레드 점유" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
-nts: "국세청 (외부)\n응답 수십 초~분" { class: ext }
+nts: "국세청 (외부)\n응답 수십 초~분" { shape: rectangle; style: { fill: "#FDECEC"; stroke: "#D13212"; stroke-dash: 4; border-radius: 8; font-color: "#16191F" } }
 calc: "계산 엔진" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
 c -> api: "1. 요청"
 api -> nts: "2. 수집(느림)" { style: { stroke: "#D13212"; font-color: "#D13212" } }

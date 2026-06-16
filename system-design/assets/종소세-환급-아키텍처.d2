@@ -5,7 +5,7 @@ classes: {
   ext: { shape: rectangle; style: { fill: "#F4F4F5"; stroke: "#9AA0A6"; stroke-dash: 4; border-radius: 8; font-color: "#16191F" } }
 }
 client: "클라이언트\n(모바일 앱)" { class: svc; icon: https://icons.terrastruct.com/aws%2F_General%2FUsers_light-bg.svg }
-nts: "국세청 홈택스/손택스\n(외부 · 느림)" { class: ext }
+nts: "국세청 홈택스/손택스\n(외부 · 느림)" { shape: rectangle; style: { fill: "#FDECEC"; stroke: "#D13212"; stroke-dash: 4; border-radius: 8; font-color: "#16191F" } }
 aws: "VPC" {
   style: { stroke: "#232F3E"; fill: "#FFFFFF"; font-color: "#232F3E"; stroke-width: 2 }
   apigw:  "인증·라우팅"          { class: svc; icon: https://icons.terrastruct.com/aws%2FMobile%2FAmazon-API-Gateway.svg }
@@ -24,7 +24,7 @@ client -> aws.apigw: "1. 미리보기 요청"
 aws.apigw -> aws.api: "2. 잡 생성"
 aws.api -> aws.kafka: "3. 발행"
 aws.kafka -> aws.worker: "4. 구독"
-aws.worker -> nts: "5. 수집" { style: { stroke: "#D13212"; font-color: "#D13212" } }
+aws.worker -> nts: "5. 수집" { style: { stroke: "#147EBA"; font-color: "#147EBA" } }
 aws.worker -> aws.calc: "6. 계산"
 aws.worker -> aws.ddb: "7. 상태/결과 저장"
 aws.worker -> aws.cache: "캐시"
@@ -35,5 +35,5 @@ aws.api -> aws.ddb: "상태 폴링" { style: { stroke-dash: 4; stroke: "#147EBA"
 # 제출(쓰기) 흐름 ①→④ — 초록 : 미리보기 보고 '셀프 신고' 누르는 별도 액션
 client -> aws.apigw: "① 셀프 신고" { style.stroke: "#16A34A" }
 aws.apigw -> aws.orch: "② 제출 요청" { style.stroke: "#16A34A" }
-aws.orch -> nts: "③ 제출(멱등키)" { style: { stroke: "#D13212"; font-color: "#D13212" } }
+aws.orch -> nts: "③ 제출(멱등키)" { style: { stroke: "#16A34A"; font-color: "#16A34A" } }
 aws.orch -> aws.ddb: "④ 제출 상태" { style.stroke: "#16A34A" }
