@@ -41,3 +41,11 @@ obs.logstash -> obs.es
 obs.kibana -> obs.es: "질의"
 lic -> obs.prometheus: "지표"
 obs.grafana -> obs.prometheus: "질의"
+
+notes: |md
+  ### 범례 · 메모
+  - 실선 = 동기 · 점선 = 비동기/구성로드 · 빨강 = 캐시
+  - Resilience4j = CB · Retry · Bulkhead
+  - DB per service (서비스별 전용 DB)
+  - 관측 3종 = 추적 · 로그 · 메트릭
+| { near: bottom-left; style: { font-size: 24 } }
