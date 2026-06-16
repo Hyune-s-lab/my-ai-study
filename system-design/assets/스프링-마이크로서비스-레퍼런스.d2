@@ -24,28 +24,20 @@ obs: "도커 — 관측(Observability)" {
   prometheus: "Prometheus" { class: svc; icon: https://cdn.simpleicons.org/prometheus }
   grafana: "Grafana" { class: svc; icon: https://cdn.simpleicons.org/grafana }
 }
-client -> gw: "토큰"
-client -> keycloak: "인증·토큰"
+client -> keycloak: "1. 인증·토큰"
+client -> gw: "2. 토큰 요청"
 gw -> eureka: "등록/조회" { style.stroke: "#3F8E55" }
-gw -> org
+gw -> org: "3. 라우팅"
 gw -> lic
 org -> config: "구성 로드" { style: { stroke-dash: 4; stroke: "#3F8E55" } }
-org -> orgdb: "조회"
+org -> orgdb: "4. 조회"
 lic -> licdb
 lic -> redis: "캐시" { style.stroke: "#C0392B" }
-org -> kafka: "발행"
-kafka -> lic: "구독"
+org -> kafka: "5. 발행"
+kafka -> lic: "6. 구독"
 org -> obs.zipkin: "추적"
 org -> obs.logstash: "로그"
 obs.logstash -> obs.es
 obs.kibana -> obs.es: "질의"
 lic -> obs.prometheus: "지표"
 obs.grafana -> obs.prometheus: "질의"
-
-notes: |md
-  ### 범례 · 메모
-  - 실선 = 동기 · 점선 = 비동기/구성로드 · 빨강 = 캐시
-  - Resilience4j = CB · Retry · Bulkhead
-  - DB per service (서비스별 전용 DB)
-  - 관측 3종 = 추적 · 로그 · 메트릭
-| { near: bottom-left; style: { font-size: 24 } }

@@ -25,12 +25,12 @@ sm: "상태 머신 (jobId)" {
   s1 -> s2 -> s3 -> s4
   s3 -> s5 { style.stroke-dash: 4 }
 }
-c -> apigw: "요청·폴링"
-apigw -> api
-api -> kafka: "발행"
-kafka -> worker: "구독"
-worker -> nts: "수집" { style: { stroke: "#D13212"; font-color: "#D13212" } }
-worker -> calc: "계산"
-worker -> ddb: "상태/결과"
-api -> ddb: "상태 조회" { style: { stroke-dash: 4; stroke: "#147EBA"; font-color: "#147EBA" } }
+c -> apigw: "1. 요청·폴링"
+apigw -> api: "2. 잡 생성"
+api -> kafka: "3. 발행"
+kafka -> worker: "4. 구독"
+worker -> nts: "5. 수집" { style: { stroke: "#D13212"; font-color: "#D13212" } }
+worker -> calc: "6. 계산"
+worker -> ddb: "7. 상태/결과"
+api -> ddb: "상태 조회(폴링)" { style: { stroke-dash: 4; stroke: "#147EBA"; font-color: "#147EBA" } }
 ddb -> sm.s1: "상태 전이" { style: { stroke-dash: 4; stroke: "#22C55E"; font-color: "#15803D" } }

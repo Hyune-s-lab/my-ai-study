@@ -19,26 +19,18 @@ aws: "AWS Cloud" {
   notif:  "알림 서비스\nFCM/APNs 푸시" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
   sfn:    "셀프 신고 사가"         { class: svc; icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAWS-Step-Functions.svg }
 }
-client -> aws.apigw: "요청·폴링"
-aws.apigw -> aws.api
-aws.api -> aws.kafka: "발행"
-aws.kafka -> aws.worker: "구독"
-aws.worker -> aws.calc: "계산"
-aws.worker -> nts: "수집" { style: { stroke: "#D13212"; font-color: "#D13212" } }
-aws.worker -> aws.ddb: "상태/결과 저장"
+client -> aws.apigw: "1. 요청·폴링"
+aws.apigw -> aws.api: "2. 잡 생성"
+aws.api -> aws.kafka: "3. 발행"
+aws.kafka -> aws.worker: "4. 구독"
+aws.worker -> nts: "5. 수집" { style: { stroke: "#D13212"; font-color: "#D13212" } }
+aws.worker -> aws.calc: "6. 계산"
+aws.worker -> aws.ddb: "7. 상태/결과 저장"
 aws.worker -> aws.cache: "캐시"
-aws.worker -> aws.s3
-aws.worker -> aws.notif: "완료 이벤트"
-aws.notif -> client: "푸시" { style.stroke-dash: 4 }
-aws.api -> aws.ddb: "상태 조회" { style: { stroke-dash: 4; stroke: "#147EBA"; font-color: "#147EBA" } }
-aws.apigw -> aws.sfn: "제출 요청"
-aws.sfn -> nts: "제출(멱등키)" { style: { stroke: "#D13212"; font-color: "#D13212" } }
-aws.sfn -> aws.ddb: "제출상태"
-
-notes: |md
-  ### 범례 · 핵심
-  - 실선 = 동기 · 점선 = 비동기/폴링/푸시 · 빨강 = 국세청(외부)
-  - **읽기(수집) = 견디기**: Retry+jitter · CB · RateLimiter · 캐시 · DLT
-  - **쓰기(제출) = 정확히 한 번**: 사가 · 멱등키 · 타임아웃 시 상태 재확인(성공 오판 금지)
-  - **횡단**: KMS/Secrets(PII) · 룰셋 버저닝+스냅샷 · 관측(성공률·DLT 알림)
-| { near: bottom-left; style: { font-size: 26 } }
+aws.worker -> aws.s3: "원천 저장"
+aws.worker -> aws.notif: "8. 완료 이벤트"
+aws.notif -> client: "9. 푸시" { style.stroke-dash: 4 }
+aws.api -> aws.ddb: "상태 조회(폴링)" { style: { stroke-dash: 4; stroke: "#147EBA"; font-color: "#147EBA" } }
+aws.apigw -> aws.sfn: "제출 ①요청" { style.stroke: "#7B5EA7" }
+aws.sfn -> nts: "제출 ②멱등키" { style: { stroke: "#D13212"; font-color: "#D13212" } }
+aws.sfn -> aws.ddb: "제출 ③상태" { style.stroke: "#7B5EA7" }
