@@ -1,43 +1,35 @@
 direction: right
-vars: { d2-config: { theme-id: 0; pad: 30 } }
-
+vars: { d2-config: { pad: 30 } }
 classes: {
-  app:   { style: { fill: "#EAF2FF"; stroke: "#3B5BA5"; font-color: "#16213E"; border-radius: 10 } }
-  store: { shape: cylinder; style: { fill: "#EAF7EE"; stroke: "#3F8E55"; font-color: "#16213E" } }
-  cache: { shape: cylinder; style: { fill: "#FDECEC"; stroke: "#C0392B"; font-color: "#16213E" } }
-  queue: { shape: queue;    style: { fill: "#FFF1F6"; stroke: "#C2256B"; font-color: "#16213E" } }
-  ext:   { style: { fill: "#F4F4F5"; stroke: "#9AA0A6"; font-color: "#16213E"; stroke-dash: 4; border-radius: 10 } }
-  obs:   { style: { fill: "#FFF6E9"; stroke: "#C98A2B"; font-color: "#16213E"; border-radius: 8 } }
+  svc: { shape: image; width: 58; height: 58 }
+  ext: { shape: rectangle; style: { fill: "#F4F4F5"; stroke: "#9AA0A6"; stroke-dash: 4; border-radius: 8; font-color: "#16191F" } }
 }
-
-client: "클라이언트\n웹/모바일" { shape: person; style.fill: "#E9ECF2"; style.stroke: "#5A6B7B" }
-keycloak: "키클록\nKeycloak (인증·토큰)" { class: ext }
-gw: "서비스 게이트웨이\nSpring Cloud Gateway" { class: app }
-eureka: "서비스 디스커버리\nEureka" { class: app }
-config: "구성 저장소\nSpring Cloud Config" { class: app }
-org: "조직 서비스\n+Resilience4j" { class: app }
-lic: "라이선싱 서비스\n+Resilience4j" { class: app }
-kafka: "Kafka\n토픽(이벤트)" { class: queue }
-orgdb: "조직 DB" { class: store }
-licdb: "라이선싱 DB" { class: store }
-redis: "Redis\n조회 캐시" { class: cache }
-
+client: "클라이언트\n웹/모바일" { shape: person; style: { fill: "#E9ECF2"; stroke: "#5A6B7B" } }
+keycloak: "키클록\nKeycloak (인증·토큰)" { class: svc; icon: https://cdn.simpleicons.org/keycloak }
+gw: "서비스 게이트웨이\nSpring Cloud Gateway" { class: svc; icon: https://cdn.simpleicons.org/springboot }
+eureka: "서비스 디스커버리\nEureka" { class: svc; icon: https://cdn.simpleicons.org/springboot }
+config: "구성 저장소\nSpring Cloud Config" { class: svc; icon: https://cdn.simpleicons.org/springboot }
+org: "조직 서비스\n+Resilience4j" { class: svc; icon: https://cdn.simpleicons.org/springboot }
+lic: "라이선싱 서비스\n+Resilience4j" { class: svc; icon: https://cdn.simpleicons.org/springboot }
+kafka: "Kafka\n토픽(이벤트)" { class: svc; icon: https://cdn.simpleicons.org/apachekafka }
+orgdb: "조직 DB\n(PostgreSQL)" { class: svc; icon: https://cdn.simpleicons.org/postgresql }
+licdb: "라이선싱 DB\n(PostgreSQL)" { class: svc; icon: https://cdn.simpleicons.org/postgresql }
+redis: "Redis\n조회 캐시" { class: svc; icon: https://cdn.simpleicons.org/redis }
 obs: "도커 — 관측(Observability)" {
   style: { stroke: "#0EA5E9"; stroke-dash: 4; fill: "#FFFFFF"; font-color: "#0369A1" }
-  zipkin: "Zipkin\n분산 추적" { class: obs }
-  logstash: "Logstash" { class: obs }
-  es: "Elasticsearch" { class: obs }
-  kibana: "Kibana" { class: obs }
-  prometheus: "Prometheus" { class: obs }
-  grafana: "Grafana" { class: obs }
+  zipkin: "Zipkin\n분산 추적" { class: ext }
+  logstash: "Logstash" { class: svc; icon: https://cdn.simpleicons.org/logstash }
+  es: "Elasticsearch" { class: svc; icon: https://cdn.simpleicons.org/elasticsearch }
+  kibana: "Kibana" { class: svc; icon: https://cdn.simpleicons.org/kibana }
+  prometheus: "Prometheus" { class: svc; icon: https://cdn.simpleicons.org/prometheus }
+  grafana: "Grafana" { class: svc; icon: https://cdn.simpleicons.org/grafana }
 }
-
 client -> gw: "토큰"
 client -> keycloak: "인증·토큰"
 gw -> eureka: "등록/조회" { style.stroke: "#3F8E55" }
 gw -> org
 gw -> lic
-org -> config: "구성 로드" { style.stroke-dash: 4; style.stroke: "#3F8E55" }
+org -> config: "구성 로드" { style: { stroke-dash: 4; stroke: "#3F8E55" } }
 org -> orgdb: "조회"
 lic -> licdb
 lic -> redis: "캐시" { style.stroke: "#C0392B" }
