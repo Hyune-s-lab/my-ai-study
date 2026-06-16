@@ -1,0 +1,30 @@
+<mxfile host="Electron" version="29.6.1">
+  <diagram name="L0" id="L0">
+    <mxGraphModel dx="1200" dy="700" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1340" pageHeight="600" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="bg" value="" style="fillColor=#FFFFFF;strokeColor=none;" vertex="1" parent="1"><mxGeometry x="-20" y="-20" width="1380" height="640" as="geometry" /></mxCell>
+
+        <mxCell id="t" style="text;html=1;align=left;fontSize=24;fontStyle=1;fontFamily=Helvetica;fontColor=#16191F;" value="L0 — 화이트보드: 단순 동기 안 (의도적으로 깨지는 그림)" vertex="1" parent="1"><mxGeometry x="50" y="34" width="1200" height="32" as="geometry" /></mxCell>
+        <mxCell id="st" style="text;html=1;align=left;fontSize=14;fontFamily=Helvetica;fontColor=#5A6B7B;" value="&quot;숨은 환급액 찾기&quot;를 그냥 동기 요청-응답으로 만들면? — 왜 못 버티는지부터 짚는다." vertex="1" parent="1"><mxGeometry x="50" y="68" width="1200" height="20" as="geometry" /></mxCell>
+
+        <mxCell id="client" style="sketch=0;outlineConnect=0;fontColor=#16191F;fillColor=#232F3D;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=13;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.users;fontFamily=Helvetica;" value="클라이언트&lt;div&gt;&lt;i&gt;모바일 앱&lt;/i&gt;&lt;/div&gt;" vertex="1" parent="1"><mxGeometry x="90" y="220" width="78" height="78" as="geometry" /></mxCell>
+        <mxCell id="api" style="sketch=0;outlineConnect=0;fontColor=#16191F;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=13;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.fargate;fontFamily=Helvetica;" value="API 서버 (동기)&lt;div&gt;&lt;i&gt;요청 스레드 점유&lt;/i&gt;&lt;/div&gt;" vertex="1" parent="1"><mxGeometry x="380" y="220" width="78" height="78" as="geometry" /></mxCell>
+        <mxCell id="nts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#9AA0A6;dashed=1;fontColor=#7f1d1d;fontStyle=1;fontSize=13;align=center;verticalAlign=middle;fontFamily=Helvetica;" value="국세청 홈택스/손택스&lt;div style=&quot;font-weight:normal&quot;&gt;&lt;i&gt;외부 · 응답 수십 초~분&lt;/i&gt;&lt;/div&gt;" vertex="1" parent="1"><mxGeometry x="620" y="216" width="190" height="86" as="geometry" /></mxCell>
+        <mxCell id="calc" style="sketch=0;outlineConnect=0;fontColor=#16191F;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=13;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.fargate;fontFamily=Helvetica;" value="계산 엔진&lt;div&gt;&lt;i&gt;세법 룰 산출&lt;/i&gt;&lt;/div&gt;" vertex="1" parent="1"><mxGeometry x="960" y="220" width="78" height="78" as="geometry" /></mxCell>
+
+        <mxCell id="a1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#5A6B7B;strokeWidth=2;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontFamily=Helvetica;" edge="1" parent="1" source="client" target="api"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a1l" value="요청" style="edgeLabel;html=1;labelBackgroundColor=#FFFFFF;fontSize=11;fontColor=#16191F;fontFamily=Helvetica;" connectable="0" vertex="1" parent="a1"><mxGeometry relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+        <mxCell id="a2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#D13212;strokeWidth=2;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontFamily=Helvetica;" edge="1" parent="1" source="api" target="nts"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a2l" value="수집 (느림)" style="edgeLabel;html=1;labelBackgroundColor=#FFFFFF;fontSize=11;fontColor=#D13212;fontFamily=Helvetica;" connectable="0" vertex="1" parent="a2"><mxGeometry relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+        <mxCell id="a3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#5A6B7B;strokeWidth=2;endArrow=block;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontFamily=Helvetica;" edge="1" parent="1" source="nts" target="calc"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="aret" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#9AA0A6;strokeWidth=1.5;dashed=1;endArrow=block;exitX=0.5;exitY=0;entryX=0.5;entryY=0;fontFamily=Helvetica;" edge="1" parent="1" source="calc" target="client"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="999" y="170" /><mxPoint x="129" y="170" /></Array></mxGeometry></mxCell>
+        <mxCell id="aretl" value="동기 응답 (전부 끝날 때까지 한 번에)" style="edgeLabel;html=1;labelBackgroundColor=#FFFFFF;fontSize=11;fontColor=#9AA0A6;fontFamily=Helvetica;" connectable="0" vertex="1" parent="aret"><mxGeometry relative="1" as="geometry"><mxPoint as="offset" /></mxGeometry></mxCell>
+
+        <mxCell id="prob" value="⛔ 이대로는 못 버티는 이유" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF1F2;strokeColor=#FDA4AF;align=left;verticalAlign=top;fontSize=14;fontStyle=1;fontColor=#B91C1C;fontFamily=Helvetica;spacingLeft=12;spacingTop=8;" vertex="1" parent="1"><mxGeometry x="50" y="360" width="990" height="170" as="geometry" /></mxCell>
+        <mxCell id="probt" style="text;html=1;align=left;verticalAlign=top;fontSize=12;fontColor=#7F1D1D;fontFamily=Helvetica;" value="1. 국세청 호출이 수십 초~분 → HTTP 타임아웃 · 사용자를 3분 동기 대기시킬 수 없음&lt;div&gt;&lt;br&gt;2. 국세청 점검·폭주 시 전체 요청 실패 — 장애 격리(bulkhead/CB) 없음&lt;/div&gt;&lt;div&gt;&lt;br&gt;3. 동기 처리 → 5월 종소세 폭증에 스레드/커넥션 풀 고갈 → cascading failure&lt;/div&gt;&lt;div&gt;&lt;br&gt;4. 상태가 없음 → 중간 실패하면 처음부터 다시 (수집·계산 재낭비)&lt;/div&gt;" vertex="1" parent="1"><mxGeometry x="66" y="392" width="960" height="130" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
