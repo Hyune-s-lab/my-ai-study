@@ -13,11 +13,11 @@ aws: "VPC" {
   kafka:  "잡 토픽 + DLT"         { class: svc; icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Managed-Streaming-for-Kafka.svg }
   worker: "Worker\n수집·Retry·CB" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
   calc:   "계산 엔진\n세법 룰"     { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
-  ddb:    "상태·멱등키"           { class: svc; icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-DynamoDB.svg }
+  ddb:    "PostgreSQL (RDS)\n상태·멱등키" { class: svc; icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-RDS.svg }
   cache:  "수집 캐시"             { class: svc; icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-ElastiCache.svg }
   s3:     "원천·신고서"           { class: svc; icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg }
   notif:  "알림 서비스\nFCM/APNs 푸시" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
-  orch:   "제출 서비스\n(사가 구동·상태→DynamoDB)" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
+  orch:   "제출 서비스\n(사가 구동·상태→PostgreSQL)" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
 }
 # 미리보기(읽기) 흐름 1→9 — 파랑
 client -> aws.apigw: "1. 미리보기 요청"
