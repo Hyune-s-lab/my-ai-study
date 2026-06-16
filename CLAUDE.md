@@ -48,18 +48,21 @@
 - 커밋/PR 컨벤션의 접두사(`feat:`, `docs:` 등)는 유지하되, 뒤 설명은 한글로.
 
 ## 다이어그램 작성 규칙
-- draw.io·손그림 SVG 쓰지 말 것(아이콘 누락·다크배경·노가다로 폐기됨). 다이어그램 종류에 따라 도구 선택:
-- **(A) 단일 벤더(예: AWS만) → `diagrams`(mingrammer, Python).** 한 세트의 공식 아이콘이라 통일감이 있다.
-  - 도구: `brew install graphviz` + venv에 `pip install diagrams`. 실행: `<venv>/bin/python assets/NAME.py` (cwd=assets).
-  - 아이콘: `diagrams.aws.*`(APIGateway·Fargate·SQS·Sns·StepFunctions·Dynamodb·ElastiCache·S3 등). 라이브러리에 없는 외부(국세청 등)는 `Node(shape="box", style="rounded,filled", image="")` 라벨 박스.
-  - 한글 라벨: `graph_attr/node_attr/edge_attr`에 `fontname="AppleGothic"` 필수(안 하면 □□□). 흰 배경 `bgcolor="white"`.
-- **(B) 멀티 벤더(예: Spring+Kafka+Redis+ELK…) → `D2`.** 브랜드 로고를 섞으면 스타일이 제각각이라 어수선해진다 → 로고 대신 **역할별 색상으로 통일**한다.
-  - 도구: `brew install d2`. 렌더: `d2 --font-regular ~/Library/Fonts/NotoSansKR-VariableFont_wght.ttf --font-bold <같은폰트> NAME.d2 NAME.png` (한글 폰트 필수, 안 주면 □□□).
-  - 스타일: `classes`로 역할별 팔레트 통일(앱=파랑, DB=초록 cylinder, 캐시=빨강, 큐=핑크 queue, 관측=주황, 외부=회색 점선). `direction: right`. 경계는 `container`(예: 관측 docker)로 실제 경계만.
-  - 흐름: 동기=실선, 비동기/구성로드=`style.stroke-dash: 4`, 외부/캐시 강조=`style.stroke` 색 지정.
-- 공통 흐름 규칙: 메인 동기 경로 실선, 비동기/폴링 점선, 외부 호출 빨강(`#C0392B`/`#D13212`).
-- 산출물: **생성 소스(`.py` 또는 `.d2`)를 repo에 저장**(편집=소스 수정 후 재실행) + export된 `.png`를 문서에 `![](...)` 임베드. (`.drawio`/`.svg` 쓰지 않음 — svg는 다크 뷰어에서 배경 검게 뜸)
-- 참고 산출물: `system-design/assets/*.{py,d2}` + `.png`.
+- **도구는 `D2` 하나로 통일.** draw.io·손그림 SVG·`diagrams`(mingrammer)는 쓰지 말 것(아이콘 누락·다크배경·노가다로 폐기됨).
+  - 설치/렌더: `brew install d2`. `d2 --font-regular ~/Library/Fonts/NotoSansKR-VariableFont_wght.ttf --font-bold <같은폰트> NAME.d2 NAME.png` (한글 폰트 필수, 안 주면 □□□). 흰 배경은 D2 기본.
+  - `direction: right`. 경계는 `container`(예: AWS Cloud, 관측 docker)로 실제 경계만.
+- **아이콘 = terrastruct CDN** `https://icons.terrastruct.com/...`. 노드에 `{ shape: image; icon: <URL>; width: 64; height: 64 }`. 라벨은 아이콘 아래 표시.
+  - URL 인코딩 주의: 슬래시=`%2F`, **공백=`%20`**(예: 카테고리 `Application Integration` → `Application%20Integration`). AWS Users는 `aws/_General/Users_light-bg.svg`.
+  - 경로 확정: `curl -s https://icons.terrastruct.com/icons.json`에서 정확한 카테고리/파일명을 grep해 쓴다(추측 금지, 틀리면 403). 쓰기 전 `curl -o /dev/null -w '%{http_code}'`로 200 확인.
+  - 아이콘 없는 외부(국세청·Keycloak 등)는 `shape: rectangle` + 회색 점선 박스.
+- **단일 벤더(AWS만) → terrastruct AWS 아이콘을 그대로** 쓴다(한 세트라 통일감). 예: 종소세 설계.
+- **멀티 벤더(Spring+Kafka+Redis+ELK…) → 브랜드 로고 섞지 말고 역할별 색상으로 통일**(로고는 스타일이 제각각이라 어수선). `classes`로 팔레트: 앱=파랑, DB=초록 cylinder, 캐시=빨강, 큐=핑크 queue, 관측=주황, 외부=회색 점선. 예: 스프링 MSA 레퍼런스.
+- 흐름 규칙: 동기=실선, 비동기/폴링/구성로드=`style.stroke-dash: 4`, 외부 호출=빨강(`style.stroke: "#D13212"` + `font-color` 동일).
+- 산출물: **생성 소스 `.d2`를 repo에 저장**(편집=`.d2` 수정 후 재실행) + export된 `.png`를 문서에 `![](...)` 임베드. (`.drawio`/`.svg`/`.py` 쓰지 않음)
+- 참고 산출물: `system-design/assets/*.d2` + `.png`.
+
+## 설계 원칙 (아키텍처)
+- **메시징은 Kafka 또는 MQ(RabbitMQ/Amazon MQ)를 우선**한다. 매니지드 **SQS/SNS는 가능하면 지양**(락인·세밀 제어 한계). AWS 다이어그램에서도 큐/스트림은 Amazon MSK(Kafka)로 그린다. 데드레터는 DLT(dead-letter topic).
 
 ## 진행 중인 프로젝트
 
