@@ -47,16 +47,14 @@
 - 기술 용어는 한글 설명 + 괄호로 원어 병기 권장. 예: "추론 모드(Reasoning)".
 - 커밋/PR 컨벤션의 접두사(`feat:`, `docs:` 등)는 유지하되, 뒤 설명은 한글로.
 
-## 다이어그램(SVG) 작성 규칙
-- 아키텍처/시스템 다이어그램은 **색 박스만 나열하지 말 것**("클로드 스타일" 금지). 컴포넌트마다 **알아볼 수 있는 아이콘/마커**를 넣는다.
-- 아이콘은 외부 파일 없이 **인라인 SVG glyph**(색 타일 + 흰 글리프)로 그린다. **⚠️ `<defs>`+`<use href>` 방식은 일부 렌더러(마크다운 미리보기 등)에서 빈 네모로만 보이므로 금지** — 각 아이콘을 `<g transform="translate(x,y)">…</g>`로 **그 자리에 직접 인라인**한다. (`<marker>`의 `url()` 참조는 OK)
-- 스택별 관례를 따른다:
-  - **AWS 아키텍처**: 서비스별 색 타일 + 흰 글리프 (컴퓨팅🟧 ECS/Lambda, 네트워킹🟪 API Gateway, 메시징🟥핑크 SQS/SNS/Step Functions, DB🟦 DynamoDB, 스토리지🟩 S3, 보안🟥 KMS, 관측 CloudWatch).
-  - **Spring/MSA**: 서버 아이콘(3단 랙) + **스프링 잎 마커(녹색 #6DB33F)**, DB는 실린더, Redis🟥·Kafka(검정 노드)·Docker(고래) 등 각 도구의 시각 표식.
-- 색=종류, 실선=동기 경로, 점선=비동기/상태 접근. 범례(legend)를 넣어 색·아이콘 의미를 명시.
-- 작성 후 `xmllint --noout`으로 well-formed 검증.
-- 같은 주제의 표/그림은 **축을 통일**(예: 같은 컬럼 구조)해 비교 가능하게.
-- 참고 산출물: `system-design/assets/*.svg` (AWS L0~L2, 스프링 MSA 레퍼런스).
+## 다이어그램 작성 규칙
+- **아키텍처/시스템 다이어그램은 `/drawio` 스킬로 만든다** (jgraph 공식, `~/.claude/skills/drawio`). 손으로 인라인 SVG glyph 그리지 말 것 — 진짜 아이콘이 아니라 어색하다.
+- 스타일: **AWS 공식 레퍼런스처럼** — 서비스마다 `mxgraph.aws4.*` 아이콘(78x78) + 라벨(아이콘 아래). **각 아이콘을 색 박스(category container)로 감싸지 말 것. 우측 step legend 사이드바 만들지 말 것.** 경계 박스는 AWS Cloud 같은 실제 경계만. 화살표(orthogonal)로 흐름 + 짧은 라벨 (동기=실선, 비동기/폴링=점선, 외부 호출=빨강).
+- XML 주석(`<!-- -->`) 금지. 작성 후 `xmllint --noout` 검증.
+- **문서에 박으려면 SVG로 export 필수** (`.drawio`는 마크다운에 렌더 안 됨):
+  `/Applications/draw.io.app/Contents/MacOS/draw.io -x -f svg -e -b 10 -o NAME.svg NAME.drawio`
+  → 문서엔 export된 `.svg`를 `![](...)`로 임베드하고, 편집용 `.drawio`도 함께 커밋. (Draw.io Desktop: `brew install --cask drawio`)
+- 참고 산출물: `system-design/assets/종소세-환급-아키텍처.drawio` + `.svg`.
 
 ## 진행 중인 프로젝트
 
