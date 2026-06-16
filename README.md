@@ -19,16 +19,17 @@
 | [260603-llm-모델-종류.md](./domain-knowledge-study/260603-llm-모델-종류.md) | LLM 모델 종류 — open-weight vs closed·base/instruct·dense/MoE·양자화 |
 | [BACKLOG.md](./domain-knowledge-study/BACKLOG.md) | 다음에 파볼 주제 목록 |
 
-## [cs-study](./cs-study) — 범용 CS 지식
+## [cs-study](./cs-study)
 
 | 문서 | 주제 |
 |---|---|
 | [260610-모의면접-타임아웃.md](./cs-study/260610-모의면접-타임아웃.md) | 모의면접 — 타임아웃 (종류·자원고갈·재시도·분산·게이트웨이) |
 | [260610-모의면접-레디스.md](./cs-study/260610-모의면접-레디스.md) | 모의면접 — Redis (싱글스레드·캐시 3대 장애·영속성/HA·분산락·게이트웨이 활용) |
 
-## [system-design](./system-design) — 아키텍처 설계 연습
+## [system-design](./system-design)
 
 | 문서 | 주제 |
 |---|---|
 | [260611-종소세-환급-설계.md](./system-design/260611-종소세-환급-설계.md) | 종소세 환급/연말정산 — 화이트보드 점진 설계 (비동기·상태관리·제출 사가) |
+| [260617-종소세-도메인모델링.md](./system-design/260617-종소세-도메인모델링.md) | 종소세 도메인 모델링 & DB — PostgreSQL 중심, 애그리거트·ERD·정합성(스냅샷·룰셋 버전) |
 | [260616-스프링-마이크로서비스-레퍼런스.md](./system-design/260616-스프링-마이크로서비스-레퍼런스.md) | 스프링 클라우드 MSA 레퍼런스 아키텍처 (게이트웨이·Eureka·Resilience4j·Kafka·관측) |

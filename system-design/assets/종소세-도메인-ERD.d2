@@ -1,0 +1,67 @@
+direction: right
+vars: { d2-config: { pad: 30 } }
+
+users: "사용자" {
+  shape: sql_table
+  user_id: uuid { constraint: primary_key }
+  ci: "본인인증 CI"
+  created_at: timestamptz
+}
+consent: "동의 이력 (마이데이터)" {
+  shape: sql_table
+  consent_id: uuid { constraint: primary_key }
+  user_id: uuid { constraint: foreign_key }
+  scope: text
+  purpose: text
+  granted_at: timestamptz
+  revoked_at: "timestamptz (nullable)"
+}
+ruleset: "룰셋 (세법, 불변 버전)" {
+  shape: sql_table
+  version: text { constraint: primary_key }
+  effective_year: int
+  definition: jsonb
+  published_at: timestamptz
+}
+estimate: "세액계산 / 미리보기 (불변)" {
+  shape: sql_table
+  estimate_id: uuid { constraint: primary_key }
+  user_id: uuid { constraint: foreign_key }
+  tax_year: int
+  type: "종소세 | 연말정산"
+  status: "REQUESTED→…→READY/FAILED"
+  ruleset_version: text { constraint: foreign_key }
+  input_snapshot: "jsonb (수집 데이터 박제)"
+  result: "jsonb (예상 환급액)"
+  collected_at: timestamptz
+  calculated_at: timestamptz
+}
+filing: "신고 (제출)" {
+  shape: sql_table
+  filing_id: uuid { constraint: primary_key }
+  user_id: uuid { constraint: foreign_key }
+  estimate_id: uuid { constraint: foreign_key }
+  idempotency_key: text { constraint: unique }
+  status: "DRAFT→SUBMITTED→ACCEPTED/COMPENSATED"
+  nts_receipt_no: "text (국세청 접수번호)"
+  payload_snapshot: "jsonb (제출 그 데이터)"
+  submitted_at: timestamptz
+}
+claim: "추징 안심보상 청구" {
+  shape: sql_table
+  claim_id: uuid { constraint: primary_key }
+  user_id: uuid { constraint: foreign_key }
+  filing_id: uuid { constraint: foreign_key }
+  status: "CLAIMED→VERIFYING→APPROVED/REJECTED→PAID"
+  assessment_proof: "text (추징 고지 증빙)"
+  amount: numeric
+  paid_at: "timestamptz (nullable)"
+}
+
+consent.user_id -> users.user_id
+estimate.user_id -> users.user_id
+estimate.ruleset_version -> ruleset.version
+filing.user_id -> users.user_id
+filing.estimate_id -> estimate.estimate_id: "스냅샷 고정"
+claim.user_id -> users.user_id
+claim.filing_id -> filing.filing_id
