@@ -17,7 +17,7 @@ aws: "AWS Cloud" {
   cache:  "수집 캐시"             { class: svc; icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-ElastiCache.svg }
   s3:     "원천·신고서"           { class: svc; icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg }
   notif:  "알림 서비스\nFCM/APNs 푸시" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
-  sfn:    "셀프 신고 사가"         { class: svc; icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAWS-Step-Functions.svg }
+  orch:   "신고 오케스트레이터\n(사가 구동·상태→DynamoDB)" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
 }
 client -> aws.apigw: "1. 요청·폴링"
 aws.apigw -> aws.api: "2. 잡 생성"
@@ -31,6 +31,6 @@ aws.worker -> aws.s3: "원천 저장"
 aws.worker -> aws.notif: "8. 완료 이벤트"
 aws.notif -> client: "9. 푸시" { style.stroke-dash: 4 }
 aws.api -> aws.ddb: "상태 조회(폴링)" { style: { stroke-dash: 4; stroke: "#147EBA"; font-color: "#147EBA" } }
-aws.apigw -> aws.sfn: "제출 ①요청" { style.stroke: "#7B5EA7" }
-aws.sfn -> nts: "제출 ②멱등키" { style: { stroke: "#D13212"; font-color: "#D13212" } }
-aws.sfn -> aws.ddb: "제출 ③상태" { style.stroke: "#7B5EA7" }
+aws.apigw -> aws.orch: "제출 ①요청" { style.stroke: "#7B5EA7" }
+aws.orch -> nts: "제출 ②멱등키" { style: { stroke: "#D13212"; font-color: "#D13212" } }
+aws.orch -> aws.ddb: "제출 ③상태" { style.stroke: "#7B5EA7" }
