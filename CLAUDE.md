@@ -48,15 +48,13 @@
 - 커밋/PR 컨벤션의 접두사(`feat:`, `docs:` 등)는 유지하되, 뒤 설명은 한글로.
 
 ## 다이어그램 작성 규칙
-- **아키텍처/시스템 다이어그램은 `/drawio` 스킬로 만든다** (jgraph 공식, `~/.claude/skills/drawio`). 손으로 인라인 SVG glyph 그리지 말 것 — 진짜 아이콘이 아니라 어색하다.
-- 스타일: **AWS 공식 레퍼런스처럼** — 서비스마다 `mxgraph.aws4.*` 아이콘(78x78) + 라벨(아이콘 아래). **각 아이콘을 색 박스(category container)로 감싸지 말 것. 우측 step legend 사이드바 만들지 말 것.** 경계 박스는 AWS Cloud 같은 실제 경계만. 화살표(orthogonal)로 흐름 + 짧은 라벨 (동기=실선, 비동기/폴링=점선, 외부 호출=빨강).
-- AWS 아이콘이 없는 스택(Spring/Kafka/Redis/ELK/Grafana 등)은 **Simple Icons 로고를 draw.io에 image로 임베드**해 진짜 아이콘으로 쓴다. 받기: `curl -fsSL https://cdn.simpleicons.org/<slug>/<hexcolor> -o x.svg` → base64 → `shape=image;image=data:image/svg+xml;base64,...;verticalLabelPosition=bottom;` (라벨은 아이콘 아래). 로고 없는 것(예: Zipkin)만 박스. DB는 실린더(`shape=cylinder3`).
-- 흰 배경(`fillColor=#FFFFFF` 배경 rect), 고정 색(`light-dark()` 쓰지 말 것).
-- XML 주석(`<!-- -->`) 금지. 작성 후 `xmllint --noout` 검증.
-- **문서에 박으려면 PNG로 export** (`.drawio`는 마크다운에 렌더 안 됨. **SVG는 draw.io가 다크모드 적응 CSS를 넣어 다크 뷰어에서 배경이 검게 떠서 금지** → PNG 고정):
-  `/Applications/draw.io.app/Contents/MacOS/draw.io -x -f png -e -b 10 -s 2 -o NAME.png NAME.drawio`
-  → 문서엔 export된 `.png`를 `![](...)`로 임베드하고, 편집용 `.drawio`도 함께 커밋. (Draw.io Desktop: `brew install --cask drawio`)
-- 참고 산출물: `system-design/assets/*.drawio` + `.png`.
+- **아키텍처/시스템 다이어그램은 `diagrams`(mingrammer, Python) 코드로 만든다.** draw.io·손그림 SVG 쓰지 말 것(아이콘 누락·다크배경·노가다로 폐기됨).
+  - 도구: `brew install graphviz` + venv에 `pip install diagrams`. 실행: `<venv>/bin/python assets/NAME.py` (cwd=assets).
+  - 아이콘: AWS는 `diagrams.aws.*`(APIGateway·Fargate·SQS·Sns·StepFunctions·Dynamodb·ElastiCache·S3 등), 스프링스택은 `diagrams.programming.framework.Spring`·`diagrams.onprem.queue.Kafka`·`diagrams.onprem.inmemory.Redis`·`diagrams.elastic.elasticsearch.{Elasticsearch,Kibana,Logstash}`·`diagrams.onprem.monitoring.{Grafana,Prometheus}`·`diagrams.onprem.database.Postgresql`. 라이브러리에 없는 것(Keycloak·Zipkin·국세청 등 외부)은 `diagrams.generic.blank.Blank`(라벨 박스).
+  - 한글 라벨: `graph_attr/node_attr/edge_attr`에 `fontname="AppleGothic"` 필수(안 하면 □□□). 흰 배경 `bgcolor="white"`.
+  - 흐름: 메인 동기 경로는 실선, 비동기/폴링은 `style="dashed"`, 외부 호출은 `color="#D13212"`(빨강). `direction="LR"`. 경계는 `Cluster`로 실제 경계만(AWS Cloud, 관측 docker 등).
+- 산출물: **생성 `.py`를 repo에 저장**(편집=`.py` 수정 후 재실행) + export된 `.png`를 문서에 `![](...)` 임베드. (`.drawio`/`.svg` 쓰지 않음 — svg는 다크 뷰어에서 배경 검게 뜸)
+- 참고 산출물: `system-design/assets/*.py` + `.png`.
 
 ## 진행 중인 프로젝트
 
