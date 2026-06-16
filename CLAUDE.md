@@ -50,11 +50,12 @@
 ## 다이어그램 작성 규칙
 - **아키텍처/시스템 다이어그램은 `/drawio` 스킬로 만든다** (jgraph 공식, `~/.claude/skills/drawio`). 손으로 인라인 SVG glyph 그리지 말 것 — 진짜 아이콘이 아니라 어색하다.
 - 스타일: **AWS 공식 레퍼런스처럼** — 서비스마다 `mxgraph.aws4.*` 아이콘(78x78) + 라벨(아이콘 아래). **각 아이콘을 색 박스(category container)로 감싸지 말 것. 우측 step legend 사이드바 만들지 말 것.** 경계 박스는 AWS Cloud 같은 실제 경계만. 화살표(orthogonal)로 흐름 + 짧은 라벨 (동기=실선, 비동기/폴링=점선, 외부 호출=빨강).
+- AWS 아이콘이 없는 스택(Spring/Eureka/Kafka/Redis 등)은 **브랜드색 박스 + DB 실린더**(`shape=cylinder3`)로. 흰 배경(`fillColor=#FFFFFF` 배경 rect), 고정 색(`light-dark()` 쓰지 말 것).
 - XML 주석(`<!-- -->`) 금지. 작성 후 `xmllint --noout` 검증.
-- **문서에 박으려면 SVG로 export 필수** (`.drawio`는 마크다운에 렌더 안 됨):
-  `/Applications/draw.io.app/Contents/MacOS/draw.io -x -f svg -e -b 10 -o NAME.svg NAME.drawio`
-  → 문서엔 export된 `.svg`를 `![](...)`로 임베드하고, 편집용 `.drawio`도 함께 커밋. (Draw.io Desktop: `brew install --cask drawio`)
-- 참고 산출물: `system-design/assets/종소세-환급-아키텍처.drawio` + `.svg`.
+- **문서에 박으려면 PNG로 export** (`.drawio`는 마크다운에 렌더 안 됨. **SVG는 draw.io가 다크모드 적응 CSS를 넣어 다크 뷰어에서 배경이 검게 떠서 금지** → PNG 고정):
+  `/Applications/draw.io.app/Contents/MacOS/draw.io -x -f png -e -b 10 -s 2 -o NAME.png NAME.drawio`
+  → 문서엔 export된 `.png`를 `![](...)`로 임베드하고, 편집용 `.drawio`도 함께 커밋. (Draw.io Desktop: `brew install --cask drawio`)
+- 참고 산출물: `system-design/assets/*.drawio` + `.png`.
 
 ## 진행 중인 프로젝트
 
