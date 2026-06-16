@@ -8,16 +8,16 @@ client: "클라이언트\n(모바일 앱)" { class: svc; icon: https://icons.ter
 nts: "국세청 홈택스/손택스\n(외부 · 느림)" { class: ext }
 aws: "AWS Cloud" {
   style: { stroke: "#232F3E"; fill: "#FFFFFF"; font-color: "#232F3E"; stroke-width: 2 }
-  apigw:  "API Gateway\n인증·라우팅"        { class: svc; icon: https://icons.terrastruct.com/aws%2FMobile%2FAmazon-API-Gateway.svg }
-  api:    "API (ECS)\n잡 생성·jobId"        { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
-  kafka:  "Amazon MSK (Kafka)\n잡 토픽+DLT"  { class: svc; icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Managed-Streaming-for-Kafka.svg }
-  worker: "Worker (ECS)\n수집·Retry·CB"     { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
-  calc:   "계산 엔진\n세법 룰"               { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
-  ddb:    "DynamoDB\n상태·멱등키"            { class: svc; icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-DynamoDB.svg }
-  cache:  "ElastiCache\n수집 캐시"           { class: svc; icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-ElastiCache.svg }
-  s3:     "S3\n원천·신고서"                 { class: svc; icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg }
-  notif:  "알림 서비스\nFCM/APNs 푸시"       { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
-  sfn:    "Step Functions\n셀프 신고 사가"   { class: svc; icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAWS-Step-Functions.svg }
+  apigw:  "인증·라우팅"          { class: svc; icon: https://icons.terrastruct.com/aws%2FMobile%2FAmazon-API-Gateway.svg }
+  api:    "API\n잡 생성·jobId"    { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
+  kafka:  "잡 토픽 + DLT"         { class: svc; icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Managed-Streaming-for-Kafka.svg }
+  worker: "Worker\n수집·Retry·CB" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
+  calc:   "계산 엔진\n세법 룰"     { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
+  ddb:    "상태·멱등키"           { class: svc; icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-DynamoDB.svg }
+  cache:  "수집 캐시"             { class: svc; icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-ElastiCache.svg }
+  s3:     "원천·신고서"           { class: svc; icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg }
+  notif:  "알림 서비스\nFCM/APNs 푸시" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
+  sfn:    "셀프 신고 사가"         { class: svc; icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAWS-Step-Functions.svg }
 }
 client -> aws.apigw: "요청·폴링"
 aws.apigw -> aws.api

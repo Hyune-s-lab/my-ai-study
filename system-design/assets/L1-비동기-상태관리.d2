@@ -9,13 +9,13 @@ classes: {
 }
 c: "클라이언트\njobId 폴링" { class: svc; icon: https://icons.terrastruct.com/aws%2F_General%2FUsers_light-bg.svg }
 nts: "국세청 (외부)" { class: ext }
-apigw: "API Gateway" { class: svc; icon: https://icons.terrastruct.com/aws%2FMobile%2FAmazon-API-Gateway.svg }
-api: "API (ECS)\n잡 생성·jobId" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
-kafka: "Amazon MSK (Kafka)\n잡 토픽" { class: svc; icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Managed-Streaming-for-Kafka.svg }
-worker: "Worker (ECS)\n수집→계산" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
+apigw: "라우팅" { class: svc; icon: https://icons.terrastruct.com/aws%2FMobile%2FAmazon-API-Gateway.svg }
+api: "API\n잡 생성·jobId" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
+kafka: "잡 토픽" { class: svc; icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Managed-Streaming-for-Kafka.svg }
+worker: "Worker\n수집→계산" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
 calc: "계산 엔진" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
-ddb: "DynamoDB\n잡 상태·결과" { class: svc; icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-DynamoDB.svg }
-sm: "상태 머신 (jobId, DynamoDB)" {
+ddb: "잡 상태·결과" { class: svc; icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-DynamoDB.svg }
+sm: "상태 머신 (jobId)" {
   style: { stroke: "#22C55E"; fill: "#FFFFFF"; font-color: "#15803D" }
   s1: "REQUESTED" { class: st }
   s2: "COLLECTING" { class: st }
