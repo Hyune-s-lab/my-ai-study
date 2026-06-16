@@ -48,13 +48,18 @@
 - 커밋/PR 컨벤션의 접두사(`feat:`, `docs:` 등)는 유지하되, 뒤 설명은 한글로.
 
 ## 다이어그램 작성 규칙
-- **아키텍처/시스템 다이어그램은 `diagrams`(mingrammer, Python) 코드로 만든다.** draw.io·손그림 SVG 쓰지 말 것(아이콘 누락·다크배경·노가다로 폐기됨).
+- draw.io·손그림 SVG 쓰지 말 것(아이콘 누락·다크배경·노가다로 폐기됨). 다이어그램 종류에 따라 도구 선택:
+- **(A) 단일 벤더(예: AWS만) → `diagrams`(mingrammer, Python).** 한 세트의 공식 아이콘이라 통일감이 있다.
   - 도구: `brew install graphviz` + venv에 `pip install diagrams`. 실행: `<venv>/bin/python assets/NAME.py` (cwd=assets).
-  - 아이콘: AWS는 `diagrams.aws.*`(APIGateway·Fargate·SQS·Sns·StepFunctions·Dynamodb·ElastiCache·S3 등), 스프링스택은 `diagrams.programming.framework.Spring`·`diagrams.onprem.queue.Kafka`·`diagrams.onprem.inmemory.Redis`·`diagrams.elastic.elasticsearch.{Elasticsearch,Kibana,Logstash}`·`diagrams.onprem.monitoring.{Grafana,Prometheus}`·`diagrams.onprem.database.Postgresql`. 라이브러리에 없는 것(Keycloak·Zipkin·국세청 등 외부)은 `diagrams.generic.blank.Blank`(라벨 박스).
+  - 아이콘: `diagrams.aws.*`(APIGateway·Fargate·SQS·Sns·StepFunctions·Dynamodb·ElastiCache·S3 등). 라이브러리에 없는 외부(국세청 등)는 `Node(shape="box", style="rounded,filled", image="")` 라벨 박스.
   - 한글 라벨: `graph_attr/node_attr/edge_attr`에 `fontname="AppleGothic"` 필수(안 하면 □□□). 흰 배경 `bgcolor="white"`.
-  - 흐름: 메인 동기 경로는 실선, 비동기/폴링은 `style="dashed"`, 외부 호출은 `color="#D13212"`(빨강). `direction="LR"`. 경계는 `Cluster`로 실제 경계만(AWS Cloud, 관측 docker 등).
-- 산출물: **생성 `.py`를 repo에 저장**(편집=`.py` 수정 후 재실행) + export된 `.png`를 문서에 `![](...)` 임베드. (`.drawio`/`.svg` 쓰지 않음 — svg는 다크 뷰어에서 배경 검게 뜸)
-- 참고 산출물: `system-design/assets/*.py` + `.png`.
+- **(B) 멀티 벤더(예: Spring+Kafka+Redis+ELK…) → `D2`.** 브랜드 로고를 섞으면 스타일이 제각각이라 어수선해진다 → 로고 대신 **역할별 색상으로 통일**한다.
+  - 도구: `brew install d2`. 렌더: `d2 --font-regular ~/Library/Fonts/NotoSansKR-VariableFont_wght.ttf --font-bold <같은폰트> NAME.d2 NAME.png` (한글 폰트 필수, 안 주면 □□□).
+  - 스타일: `classes`로 역할별 팔레트 통일(앱=파랑, DB=초록 cylinder, 캐시=빨강, 큐=핑크 queue, 관측=주황, 외부=회색 점선). `direction: right`. 경계는 `container`(예: 관측 docker)로 실제 경계만.
+  - 흐름: 동기=실선, 비동기/구성로드=`style.stroke-dash: 4`, 외부/캐시 강조=`style.stroke` 색 지정.
+- 공통 흐름 규칙: 메인 동기 경로 실선, 비동기/폴링 점선, 외부 호출 빨강(`#C0392B`/`#D13212`).
+- 산출물: **생성 소스(`.py` 또는 `.d2`)를 repo에 저장**(편집=소스 수정 후 재실행) + export된 `.png`를 문서에 `![](...)` 임베드. (`.drawio`/`.svg` 쓰지 않음 — svg는 다크 뷰어에서 배경 검게 뜸)
+- 참고 산출물: `system-design/assets/*.{py,d2}` + `.png`.
 
 ## 진행 중인 프로젝트
 
