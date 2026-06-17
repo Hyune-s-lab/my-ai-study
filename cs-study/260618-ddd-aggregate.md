@@ -2,7 +2,7 @@
 
 DDD 전술 패턴의 핵심. **"함께 변경되어야 하고, 함께 일관성을 지켜야 하는 객체들의 묶음"** = 애그리거트. 그 묶음의 **일관성 경계(consistency boundary)** 이자 **트랜잭션 단위**다.
 
-![DDD 애그리거트 — 경계와 ID 참조](./assets/ddd-애그리거트.png)
+![DDD 애그리거트 — 경계와 ID 참조](./assets/ddd-aggregate.png)
 
 ## 구성 요소
 - **Entity**: **식별자(ID)** 로 구분, 수명주기 있고 가변. (예: `Filing`)
