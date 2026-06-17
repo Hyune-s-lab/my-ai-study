@@ -1,0 +1,28 @@
+direction: right
+vars: { d2-config: { pad: 30 } }
+classes: {
+  root: { style: { fill: "#EAF2FF"; stroke: "#3B5BA5"; font-color: "#16213E"; bold: true } }
+  vo:   { style: { fill: "#F4F4F5"; stroke: "#9AA0A6"; font-color: "#16191F" } }
+}
+
+est: "Estimate 애그리거트" {
+  style: { stroke: "#3F8E55"; stroke-dash: 3; fill: "#F7FCF9" }
+  r: "Estimate  «root»" { class: root }
+  s: "input_snapshot «VO»" { class: vo }
+  v: "result «VO»" { class: vo }
+  r -> s
+  r -> v
+}
+fil: "Filing 애그리거트" {
+  style: { stroke: "#3F8E55"; stroke-dash: 3; fill: "#F7FCF9" }
+  r: "Filing  «root»" { class: root }
+  p: "payload_snapshot «VO»" { class: vo }
+  r -> p
+}
+clm: "Claim 애그리거트" {
+  style: { stroke: "#3F8E55"; stroke-dash: 3; fill: "#F7FCF9" }
+  r: "Claim  «root»" { class: root }
+}
+
+fil.r -> est.r: "estimate_id (ID 참조, 객체 X)" { style: { stroke: "#C2256B"; stroke-dash: 4 } }
+clm.r -> fil.r: "filing_id (ID 참조)" { style: { stroke: "#C2256B"; stroke-dash: 4 } }
