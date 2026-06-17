@@ -1,0 +1,34 @@
+vars: { d2-config: { pad: 30 } }
+classes: {
+  broker: { style: { fill: "#EAF2FF"; stroke: "#3B5BA5"; font-color: "#16213E"; border-radius: 6 } }
+  zk:     { style: { fill: "#FFF6E9"; stroke: "#C98A2B"; font-color: "#7A4E0A"; border-radius: 6 } }
+  ctrl:   { style: { fill: "#F1FBF4"; stroke: "#3F8E55"; font-color: "#14532D"; border-radius: 6 } }
+}
+
+cmp: "" {
+  style: { fill: "#FFFFFF"; stroke: "#FFFFFF" }
+  grid-columns: 2
+  grid-gap: 120
+
+  zkmode: "① ZooKeeper 모드  (레거시 · ~Kafka 3.x)" {
+    style: { stroke: "#C98A2B"; stroke-dash: 3 }
+    z: "ZooKeeper 앙상블\n(별도 클러스터 · 메타데이터·선출 보관)" { class: zk }
+    b1: "Broker 1\n(+ Active Controller · 선출됨)" { class: broker }
+    b2: "Broker 2" { class: broker }
+    b3: "Broker 3" { class: broker }
+    b1 -> z: "메타데이터·하트비트·리더 선출"
+    b2 -> z
+    b3 -> z
+  }
+
+  kraftmode: "② KRaft 모드  (Kafka 3.3+ · 4.0 전용)" {
+    style: { stroke: "#3F8E55"; stroke-dash: 3 }
+    cq: "Controller Quorum\n(__cluster_metadata · 내부 Raft 합의)" { class: ctrl }
+    b1: "Broker 1" { class: broker }
+    b2: "Broker 2" { class: broker }
+    b3: "Broker 3" { class: broker }
+    b1 -> cq: "메타데이터 (ZK 없음)"
+    b2 -> cq
+    b3 -> cq
+  }
+}
