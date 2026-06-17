@@ -1,0 +1,31 @@
+vars: { d2-config: { pad: 30 } }
+classes: {
+  db:   { style: { fill: "#EAF7EE"; stroke: "#3F8E55"; font-color: "#14532D" } }
+  part: { shape: cylinder; style: { fill: "#EAF2FF"; stroke: "#3B5BA5"; font-color: "#16213E" } }
+  app:  { style: { fill: "#FFF6E9"; stroke: "#C98A2B"; font-color: "#7A4E0A"; border-radius: 8 } }
+}
+cmp: "" {
+  style: { fill: "#FFFFFF"; stroke: "#FFFFFF" }
+  grid-columns: 2
+  grid-gap: 120
+
+  partm: "① 파티셔닝 — 한 DB 안에서 분할" {
+    style: { stroke: "#3B5BA5"; stroke-dash: 3 }
+    db: "PostgreSQL (단일 인스턴스)" {
+      class: db
+      p1: "filing_2023 (파티션)" { class: part }
+      p2: "filing_2024 (파티션)" { class: part }
+      p3: "filing_2025 (파티션)" { class: part }
+    }
+  }
+  shard: "② 샤딩 — 여러 노드로 분산" {
+    style: { stroke: "#C2256B"; stroke-dash: 3 }
+    router: "샤드 라우터\n(shard key로 라우팅)" { class: app }
+    n1: "Node 1" { class: db; s1: "Shard 1" { class: part } }
+    n2: "Node 2" { class: db; s2: "Shard 2" { class: part } }
+    n3: "Node 3" { class: db; s3: "Shard 3" { class: part } }
+    router -> n1.s1
+    router -> n2.s2
+    router -> n3.s3
+  }
+}

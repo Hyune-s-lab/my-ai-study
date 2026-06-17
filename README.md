@@ -26,6 +26,7 @@
 | [260610-모의면접-timeout.md](./cs-study/260610-모의면접-timeout.md) | 모의면접 — 타임아웃 (종류·자원고갈·재시도·분산·게이트웨이) |
 | [260610-모의면접-redis.md](./cs-study/260610-모의면접-redis.md) | 모의면접 — Redis (싱글스레드·캐시 3대 장애·영속성/HA·분산락·게이트웨이 활용) |
 | [260617-kafka-구조.md](./cs-study/260617-kafka-구조.md) | Kafka 구조 (broker·topic·partition·offset·컨슈머 그룹·KRaft·토픽 설계 전략) |
+| [260618-샤딩-파티셔닝.md](./cs-study/260618-샤딩-파티셔닝.md) | 샤딩 vs 파티셔닝 (포함관계·복제 구분·샤드키/핫스팟·언제 무엇을) |
 
 ## [system-design](./system-design)
 
