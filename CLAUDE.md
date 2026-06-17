@@ -48,7 +48,8 @@
 - 커밋/PR 컨벤션의 접두사(`feat:`, `docs:` 등)는 유지하되, 뒤 설명은 한글로.
 
 ## 다이어그램 작성 규칙
-- **도구는 `D2` 하나로 통일.** draw.io·손그림 SVG·`diagrams`(mingrammer)는 쓰지 말 것(아이콘 누락·다크배경·노가다로 폐기됨).
+- **용도별 도구**: 구조/아키텍처/ERD = **D2(PNG 임베드)**. 시퀀스·플로우(흐름도) 등은 **Mermaid 허용**(GitHub가 inline 렌더 → PNG 불필요, `\`\`\`mermaid` 코드블록). draw.io·손그림 SVG·`diagrams`(mingrammer)는 쓰지 말 것(아이콘 누락·다크배경·노가다로 폐기됨).
+- **D2(구조/아키텍처/ERD)**
   - 설치/렌더: `brew install d2`. `d2 --font-regular ~/Library/Fonts/NotoSansKR-VariableFont_wght.ttf --font-bold <같은폰트> NAME.d2 NAME.png` (한글 폰트 필수, 안 주면 □□□). 흰 배경은 D2 기본.
   - `direction: right`. 경계는 `container`(예: AWS Cloud, 관측 docker)로 실제 경계만.
 - **아이콘**: 노드에 `{ shape: image; icon: <URL>; width: 56~64; height: 56~64 }`. 라벨은 아이콘 아래 표시. 아이콘 없는 외부(국세청·Zipkin 등)는 `shape: rectangle` + 회색 점선 박스, 사람은 `shape: person`.
