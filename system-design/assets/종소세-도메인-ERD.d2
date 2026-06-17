@@ -60,8 +60,8 @@ claim: "claim · 추징 안심보상 청구 (mutable + 증적)" {
 event: "domain_event · 도메인 이벤트 (append-only, 증적)" {
   shape: sql_table
   event_id: "uuid · 이벤트 식별자" { constraint: primary_key }
-  aggregate_type: "text · 대상 종류(filing/claim…)"
-  aggregate_id: "uuid · 대상 인스턴스(논리 참조)"
+  aggregate_type: "text · 대상 애그리거트 (filing | claim | estimate …)"
+  aggregate_id: "uuid · 대상 행 id (다형 참조 · 단일 FK 아님)"
   event_type: "text · 사건 종류(FilingSubmitted…)"
   payload: "jsonb · 사건 상세"
   occurred_at: "timestamptz · 발생 시각"
@@ -74,4 +74,3 @@ filing.user_id -> users.user_id
 filing.estimate_id -> estimate.estimate_id: "스냅샷 고정"
 claim.user_id -> users.user_id
 claim.filing_id -> filing.filing_id
-event.aggregate_id -> filing.filing_id: "예: filing 증적" { style.stroke-dash: 4 }
