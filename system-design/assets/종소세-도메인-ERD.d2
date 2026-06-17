@@ -1,29 +1,29 @@
 direction: right
 vars: { d2-config: { pad: 30 } }
 
-users: "사용자" {
+users: "users · 사용자 (mutable)" {
   shape: sql_table
   user_id: uuid { constraint: primary_key }
   ci: "본인인증 CI"
   created_at: timestamptz
 }
-consent: "동의 이력 (마이데이터)" {
+consent: "consent · 동의 이력 (append-only)" {
   shape: sql_table
   consent_id: uuid { constraint: primary_key }
   user_id: uuid { constraint: foreign_key }
   scope: text
   purpose: text
-  granted_at: timestamptz
-  revoked_at: "timestamptz (nullable)"
+  action: "GRANTED | REVOKED"
+  occurred_at: timestamptz
 }
-ruleset: "룰셋 (세법, 불변 버전)" {
+ruleset: "ruleset · 룰셋 (append-only, 불변)" {
   shape: sql_table
   version: text { constraint: primary_key }
   effective_year: int
   definition: jsonb
   published_at: timestamptz
 }
-estimate: "세액계산 / 미리보기 (불변)" {
+estimate: "estimate · 세액계산/미리보기 (결과 불변)" {
   shape: sql_table
   estimate_id: uuid { constraint: primary_key }
   user_id: uuid { constraint: foreign_key }
@@ -36,7 +36,7 @@ estimate: "세액계산 / 미리보기 (불변)" {
   collected_at: timestamptz
   calculated_at: timestamptz
 }
-filing: "신고 (제출)" {
+filing: "filing · 신고/제출 (mutable + 증적)" {
   shape: sql_table
   filing_id: uuid { constraint: primary_key }
   user_id: uuid { constraint: foreign_key }
@@ -47,7 +47,7 @@ filing: "신고 (제출)" {
   payload_snapshot: "jsonb (제출 그 데이터)"
   submitted_at: timestamptz
 }
-claim: "추징 안심보상 청구" {
+claim: "claim · 추징 안심보상 청구 (mutable + 증적)" {
   shape: sql_table
   claim_id: uuid { constraint: primary_key }
   user_id: uuid { constraint: foreign_key }
@@ -57,6 +57,15 @@ claim: "추징 안심보상 청구" {
   amount: numeric
   paid_at: "timestamptz (nullable)"
 }
+event: "domain_event · 도메인 이벤트 (append-only, 증적)" {
+  shape: sql_table
+  event_id: uuid { constraint: primary_key }
+  aggregate_type: "filing | claim | estimate …"
+  aggregate_id: "uuid (논리 참조)"
+  event_type: "FilingSubmitted | ClaimApproved …"
+  payload: jsonb
+  occurred_at: timestamptz
+}
 
 consent.user_id -> users.user_id
 estimate.user_id -> users.user_id
@@ -65,3 +74,4 @@ filing.user_id -> users.user_id
 filing.estimate_id -> estimate.estimate_id: "스냅샷 고정"
 claim.user_id -> users.user_id
 claim.filing_id -> filing.filing_id
+event.aggregate_id -> filing.filing_id: "예: filing 증적" { style.stroke-dash: 4 }
