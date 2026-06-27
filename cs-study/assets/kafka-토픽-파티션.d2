@@ -1,0 +1,48 @@
+direction: down
+vars: { d2-config: { pad: 30 } }
+classes: {
+  cell: { width: 78; height: 46; style: { fill: "#EAF2FF"; stroke: "#3B5BA5"; font-color: "#16213E" } }
+  tail: { width: 96; height: 46; style: { fill: "#F1FBF4"; stroke: "#3F8E55"; font-color: "#14532D"; stroke-dash: 3 } }
+  app:  { style: { fill: "#FFF6E9"; stroke: "#C98A2B"; font-color: "#7A4E0A"; border-radius: 8 } }
+}
+
+producer: "Producer\nkey=filing_id → hash(key) % 파티션수\n로 어느 파티션에 넣을지 결정" { class: app }
+
+topic: "Topic: tax.filing   (파티션들의 묶음 = 논리적 이름일 뿐)" {
+  style: { fill: "#FBFCFE"; stroke: "#3B5BA5" }
+
+  p0: "Partition 0   —   순서 보장되는 append-only 로그   (오래됨 → 최신)" {
+    grid-rows: 1
+    grid-gap: 8
+    a0: "offset 0" { class: cell }
+    a1: "1" { class: cell }
+    a2: "2" { class: cell }
+    a3: "3" { class: cell }
+    aT: "다음 append →" { class: tail }
+  }
+  p1: "Partition 1" {
+    grid-rows: 1
+    grid-gap: 8
+    b0: "offset 0" { class: cell }
+    b1: "1" { class: cell }
+    bT: "다음 append →" { class: tail }
+  }
+  p2: "Partition 2" {
+    grid-rows: 1
+    grid-gap: 8
+    c0: "offset 0" { class: cell }
+    c1: "1" { class: cell }
+    c2: "2" { class: cell }
+    cT: "다음 append →" { class: tail }
+  }
+}
+
+producer -> topic.p0: "key A는 항상 P0 (순서 유지)"
+producer -> topic.p1
+producer -> topic.p2
+
+note: |md
+  - **Topic** = 논리적 이름. 그 안의 **Partition** 들이 실제 데이터.
+  - **순서 보장 = 파티션 안에서만.** 토픽 전체 순서는 보장 안 됨 → 순서 필요하면 같은 **key**.
+  - 파티션 수 = **병렬 소비 상한**. 파티션들은 브로커에 **분산·복제** 저장(전체 구조 그림 참고).
+| { near: bottom-center }

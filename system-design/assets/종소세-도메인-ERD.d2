@@ -1,0 +1,76 @@
+direction: right
+vars: { d2-config: { pad: 30 } }
+
+users: "users · 사용자 (mutable)" {
+  shape: sql_table
+  user_id: "uuid · 사용자 식별자" { constraint: primary_key }
+  ci: "text · 본인인증 연계정보(CI)"
+  created_at: "timestamptz · 생성 시각"
+}
+consent: "consent · 동의 이력 (append-only)" {
+  shape: sql_table
+  consent_id: "uuid · 동의 사건 식별자" { constraint: primary_key }
+  user_id: "uuid · 사용자" { constraint: foreign_key }
+  scope: "text · 마이데이터 동의 범위"
+  purpose: "text · 수집·이용 목적"
+  action: "enum · GRANTED 동의 | REVOKED 철회"
+  occurred_at: "timestamptz · 동의/철회 시각"
+}
+ruleset: "ruleset · 룰셋 (append-only, 불변)" {
+  shape: sql_table
+  version: "text · 룰셋 버전(자연키)" { constraint: primary_key }
+  effective_year: "int · 적용 귀속연도"
+  definition: "jsonb · 룰 정의(공제·세율)"
+  published_at: "timestamptz · 발행 시각"
+}
+estimate: "estimate · 세액계산/미리보기 (결과 불변)" {
+  shape: sql_table
+  estimate_id: "uuid · 미리보기 계산 식별자" { constraint: primary_key }
+  user_id: "uuid · 대상 사용자" { constraint: foreign_key }
+  tax_year: "int · 귀속 연도"
+  type: "enum · 종소세 | 연말정산"
+  status: "enum · REQUESTED→…→READY/FAILED"
+  ruleset_version: "text · 사용한 룰 버전(재현성)" { constraint: foreign_key }
+  input_snapshot: "jsonb · 수집 데이터 박제본"
+  result: "jsonb · 산출 결과(예상 환급액)"
+  collected_at: "timestamptz · 수집 완료"
+  calculated_at: "timestamptz · 계산 완료"
+}
+filing: "filing · 신고/제출 (mutable + 증적)" {
+  shape: sql_table
+  filing_id: "uuid · 신고(제출) 1건 식별자" { constraint: primary_key }
+  user_id: "uuid · 신고한 사용자" { constraint: foreign_key }
+  estimate_id: "uuid · 근거 미리보기(스냅샷 고정)" { constraint: foreign_key }
+  idempotency_key: "text · 이중 신고 차단 멱등키" { constraint: unique }
+  status: "enum · DRAFT→SUBMITTED→ACCEPTED/COMPENSATED"
+  nts_receipt_no: "text · 국세청 접수번호"
+  payload_snapshot: "jsonb · 제출한 그 데이터 박제본"
+  submitted_at: "timestamptz · 제출 시각"
+}
+claim: "claim · 추징 안심보상 청구 (mutable + 증적)" {
+  shape: sql_table
+  claim_id: "uuid · 보상 청구 식별자" { constraint: primary_key }
+  user_id: "uuid · 청구자" { constraint: foreign_key }
+  filing_id: "uuid · 대상 신고 건" { constraint: foreign_key }
+  status: "enum · CLAIMED→VERIFYING→APPROVED/REJECTED→PAID"
+  assessment_proof: "text · 추징 고지 증빙(진위 검증)"
+  amount: "numeric · 보상 금액"
+  paid_at: "timestamptz · 지급 시각"
+}
+event: "domain_event · 도메인 이벤트 (append-only, 증적)" {
+  shape: sql_table
+  event_id: "uuid · 이벤트 식별자" { constraint: primary_key }
+  aggregate_type: "text · 대상 애그리거트 (filing | claim | estimate …)"
+  aggregate_id: "uuid · 대상 행 id (다형 참조 · 단일 FK 아님)"
+  event_type: "text · 사건 종류(FilingSubmitted…)"
+  payload: "jsonb · 사건 상세"
+  occurred_at: "timestamptz · 발생 시각"
+}
+
+consent.user_id -> users.user_id
+estimate.user_id -> users.user_id
+estimate.ruleset_version -> ruleset.version
+filing.user_id -> users.user_id
+filing.estimate_id -> estimate.estimate_id: "스냅샷 고정"
+claim.user_id -> users.user_id
+claim.filing_id -> filing.filing_id

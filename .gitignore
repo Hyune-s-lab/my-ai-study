@@ -148,4 +148,4 @@ gradle-app.setting
 .env.local
 
 # 로컬 전용 draft (미공개)
-domain-knowledge-study/_local-draft/
+_local-draft/

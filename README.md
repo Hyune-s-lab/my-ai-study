@@ -19,9 +19,20 @@
 | [260603-llm-모델-종류.md](./domain-knowledge-study/260603-llm-모델-종류.md) | LLM 모델 종류 — open-weight vs closed·base/instruct·dense/MoE·양자화 |
 | [BACKLOG.md](./domain-knowledge-study/BACKLOG.md) | 다음에 파볼 주제 목록 |
 
-## [cs-study](./cs-study) — 범용 CS 지식
+## [cs-study](./cs-study)
 
 | 문서 | 주제 |
 |---|---|
-| [260610-모의면접-타임아웃.md](./cs-study/260610-모의면접-타임아웃.md) | 모의면접 — 타임아웃 (종류·자원고갈·재시도·분산·게이트웨이) |
-| [260610-모의면접-레디스.md](./cs-study/260610-모의면접-레디스.md) | 모의면접 — Redis (싱글스레드·캐시 3대 장애·영속성/HA·분산락·게이트웨이 활용) |
+| [260610-모의면접-timeout.md](./cs-study/260610-모의면접-timeout.md) | 모의면접 — 타임아웃 (종류·자원고갈·재시도·분산·게이트웨이) |
+| [260610-모의면접-redis.md](./cs-study/260610-모의면접-redis.md) | 모의면접 — Redis (싱글스레드·캐시 3대 장애·영속성/HA·분산락·게이트웨이 활용) |
+| [260617-kafka-구조.md](./cs-study/260617-kafka-구조.md) | Kafka 구조 (broker·topic·partition·offset·컨슈머 그룹·KRaft·토픽 설계 전략) |
+| [260618-샤딩-파티셔닝.md](./cs-study/260618-샤딩-파티셔닝.md) | 샤딩 vs 파티셔닝 (포함관계·복제 구분·샤드키/핫스팟·언제 무엇을) |
+| [260618-ddd-aggregate.md](./cs-study/260618-ddd-aggregate.md) | DDD 애그리거트 (일관성 경계·루트·ID 참조·한 트랜잭션 한 애그리거트) |
+| [260618-index.md](./cs-study/260618-index.md) | 인덱스 (B-tree/GIN·복합 컬럼 순서·부분/커버링·트레이드오프·clustered vs heap) |
+
+## [system-design](./system-design)
+
+| 문서 | 주제 |
+|---|---|
+| [260611-종소세-환급-설계.md](./system-design/260611-종소세-환급-설계.md) | 종소세 환급/연말정산 — 아키텍처(L0→L2 점진 설계) + 도메인 모델·ERD·정합성·증적 |
+| [260616-스프링-마이크로서비스-레퍼런스.md](./system-design/260616-스프링-마이크로서비스-레퍼런스.md) | 스프링 클라우드 MSA 레퍼런스 아키텍처 (게이트웨이·Eureka·Resilience4j·Kafka·관측) |

@@ -1,0 +1,39 @@
+direction: right
+vars: { d2-config: { pad: 40 } }
+classes: {
+  svc: { shape: image; width: 64; height: 64 }
+  ext: { shape: rectangle; style: { fill: "#F4F4F5"; stroke: "#9AA0A6"; stroke-dash: 4; border-radius: 8; font-color: "#16191F" } }
+}
+client: "클라이언트\n(모바일 앱)" { class: svc; icon: https://icons.terrastruct.com/aws%2F_General%2FUsers_light-bg.svg }
+nts: "국세청 홈택스/손택스\n(외부 · 느림)" { shape: rectangle; style: { fill: "#FDECEC"; stroke: "#D13212"; stroke-dash: 4; border-radius: 8; font-color: "#16191F" } }
+aws: "VPC" {
+  style: { stroke: "#232F3E"; fill: "#FFFFFF"; font-color: "#232F3E"; stroke-width: 2 }
+  apigw:  "인증·라우팅"          { class: svc; icon: https://icons.terrastruct.com/aws%2FMobile%2FAmazon-API-Gateway.svg }
+  api:    "API\n잡 생성·jobId"    { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
+  kafka:  "잡 토픽 + DLT"         { class: svc; icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Managed-Streaming-for-Kafka.svg }
+  worker: "Worker\n수집·Retry·CB" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
+  calc:   "계산 엔진\n세법 룰"     { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
+  ddb:    "PostgreSQL (RDS)\n상태·멱등키" { class: svc; icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-RDS.svg }
+  cache:  "수집 캐시"             { class: svc; icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-ElastiCache.svg }
+  s3:     "원천·신고서"           { class: svc; icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg }
+  notif:  "알림 서비스\nFCM/APNs 푸시" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
+  orch:   "제출 서비스\n(사가 구동·상태→PostgreSQL)" { class: svc; icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Fargate.svg }
+}
+# 미리보기(읽기) 흐름 1→9 — 파랑
+client -> aws.apigw: "1. 미리보기 요청"
+aws.apigw -> aws.api: "2. 잡 생성"
+aws.api -> aws.kafka: "3. 발행"
+aws.kafka -> aws.worker: "4. 구독"
+aws.worker -> nts: "5. 수집" { style: { stroke: "#147EBA"; font-color: "#147EBA" } }
+aws.worker -> aws.calc: "6. 계산"
+aws.worker -> aws.ddb: "7. 상태/결과 저장"
+aws.worker -> aws.cache: "캐시"
+aws.worker -> aws.s3: "원천 저장"
+aws.worker -> aws.notif: "8. 완료 이벤트"
+aws.notif -> client: "9. 푸시" { style.stroke-dash: 4 }
+aws.api -> aws.ddb: "상태 폴링" { style: { stroke-dash: 4; stroke: "#147EBA"; font-color: "#147EBA" } }
+# 제출(쓰기) 흐름 ①→④ — 초록 : 미리보기 보고 '셀프 신고' 누르는 별도 액션
+client -> aws.apigw: "① 셀프 신고" { style.stroke: "#16A34A" }
+aws.apigw -> aws.orch: "② 제출 요청" { style.stroke: "#16A34A" }
+aws.orch -> nts: "③ 제출(멱등키)" { style: { stroke: "#16A34A"; font-color: "#16A34A" } }
+aws.orch -> aws.ddb: "④ 제출 상태" { style.stroke: "#16A34A" }

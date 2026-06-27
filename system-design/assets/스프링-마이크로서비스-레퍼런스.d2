@@ -1,0 +1,43 @@
+direction: right
+vars: { d2-config: { pad: 30 } }
+classes: {
+  svc: { shape: image; width: 58; height: 58 }
+  ext: { shape: rectangle; style: { fill: "#F4F4F5"; stroke: "#9AA0A6"; stroke-dash: 4; border-radius: 8; font-color: "#16191F" } }
+}
+client: "클라이언트\n웹/모바일" { class: svc; icon: https://icons.terrastruct.com/aws%2F_General%2FUsers_light-bg.svg }
+keycloak: "키클록\n인증·토큰" { class: svc; icon: https://cdn.simpleicons.org/keycloak }
+gw: "서비스 게이트웨이\nSpring Cloud Gateway" { class: svc; icon: https://cdn.simpleicons.org/springboot }
+eureka: "서비스 디스커버리\nEureka" { class: svc; icon: https://cdn.simpleicons.org/springboot }
+config: "구성 저장소\nSpring Cloud Config" { class: svc; icon: https://cdn.simpleicons.org/springboot }
+org: "조직 서비스\n+Resilience4j" { class: svc; icon: https://cdn.simpleicons.org/springboot }
+lic: "라이선싱 서비스\n+Resilience4j" { class: svc; icon: https://cdn.simpleicons.org/springboot }
+kafka: "토픽(이벤트)" { class: svc; icon: https://cdn.simpleicons.org/apachekafka }
+orgdb: "조직 DB" { class: svc; icon: https://cdn.simpleicons.org/postgresql }
+licdb: "라이선싱 DB" { class: svc; icon: https://cdn.simpleicons.org/postgresql }
+redis: "조회 캐시" { class: svc; icon: https://cdn.simpleicons.org/redis }
+obs: "도커 — 관측(Observability)" {
+  style: { stroke: "#0EA5E9"; stroke-dash: 4; fill: "#FFFFFF"; font-color: "#0369A1" }
+  zipkin: "Zipkin\n분산 추적" { class: ext }
+  logstash: "Logstash" { class: svc; icon: https://cdn.simpleicons.org/logstash }
+  es: "Elasticsearch" { class: svc; icon: https://cdn.simpleicons.org/elasticsearch }
+  kibana: "Kibana" { class: svc; icon: https://cdn.simpleicons.org/kibana }
+  prometheus: "Prometheus" { class: svc; icon: https://cdn.simpleicons.org/prometheus }
+  grafana: "Grafana" { class: svc; icon: https://cdn.simpleicons.org/grafana }
+}
+client -> keycloak: "1. 인증·토큰"
+client -> gw: "2. 토큰 요청"
+gw -> eureka: "등록/조회" { style.stroke: "#3F8E55" }
+gw -> org: "3. 라우팅"
+gw -> lic
+org -> config: "구성 로드" { style: { stroke-dash: 4; stroke: "#3F8E55" } }
+org -> orgdb: "4. 조회"
+lic -> licdb
+lic -> redis: "캐시" { style.stroke: "#C0392B" }
+org -> kafka: "5. 발행"
+kafka -> lic: "6. 구독"
+org -> obs.zipkin: "추적"
+org -> obs.logstash: "로그"
+obs.logstash -> obs.es
+obs.kibana -> obs.es: "질의"
+lic -> obs.prometheus: "지표"
+obs.grafana -> obs.prometheus: "질의"
