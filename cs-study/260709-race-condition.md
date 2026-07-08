@@ -69,6 +69,14 @@ Stock findByIdForUpdate(Long id);
 - 낙관 vs 비관 선택 기준 = **충돌 빈도**. 마이페이지 수정처럼 드물면 낙관, 선착순 재고처럼 잦으면 비관.
 - 사실 이 예제의 최적해는 락 없이 원자적 UPDATE 한 방: `UPDATE stock SET qty = qty - 1 WHERE id = ? AND qty >= 1` → 영향 행 수로 성패 판단. **락은 "읽은 값으로 애플리케이션 로직을 태워야 할 때" 필요**하다.
 
+### 네임드 락 더 파기 — "Redis 없는 분산 락"
+
+- **네임드 락은 그 자체로 분산 락이다.** 락이 공유 지점(DB)에 있으므로 인스턴스 N대에 유효. 락 하나 때문에 Redis를 새로 들이기 싫을 때의 실용해 — Flyway(PG advisory lock)·ShedLock(JDBC)이 내부적으로 같은 원리를 쓴다.
+- **유량이 돌면 부적합.** 락 대기가 **커넥션을 통째로 점유**하는데, RDB 커넥션은 스레드+메모리가 붙는 비싼 자원 — 경합이 잦으면 풀 고갈 → 전면 장애. 락 전용 DataSource 분리가 정석이지만, 그 수고를 할 시점이면 Redis가 낫다. **적정선은 저빈도 조정**(배치 중복 방지·마이그레이션·리더 흉내).
+- **서버가 죽으면 락도 풀린다.** 커넥션 종료 = 락 자동 해제라 고아 락이 없다(Redis처럼 TTL 튜닝이 필요 없는 장점). 단, **프로세스만 죽으면** OS가 소켓을 닫아 즉시 해제되지만 **머신 다운·네트워크 단절**이면 DB가 죽은 커넥션을 인지할 때까지(TCP keepalive·`wait_timeout`) 락이 한동안 남을 수 있다.
+- **락 상태를 SQL로 조회할 수 있다**: MySQL `IS_USED_LOCK('key')`·`performance_schema.metadata_locks`(USER LEVEL LOCK, 대기 세션까지 표시), PG `pg_locks WHERE locktype='advisory'`(키가 숫자 해시라 문자열→숫자 매핑 규칙 필요). 락 릭 의심 시 범인 세션을 찾아 `KILL`하면 회수.
+- PG엔 `pg_advisory_xact_lock`(트랜잭션 종료 시 자동 해제)이 있어 MySQL `GET_LOCK`의 "명시적 해제 깜빡" 함정을 피할 수 있다.
+
 ## 2단계 — 스케일 아웃: 무엇이 살아남나
 
 인스턴스 N대가 되는 순간:
