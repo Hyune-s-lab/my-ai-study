@@ -106,7 +106,7 @@ Stock findByIdForUpdate(Long id);
 
 **방법 1 — 스핀락(spin lock)**: `SET key val NX PX 3000`(SETNX + TTL)으로 획득 시도, 실패하면 sleep 후 재시도 루프. Lettuce로 직접 구현하는 방식.
 
-**방법 2 — pub/sub (Redisson)**: 락 해제 시 채널로 알림을 쏘고, 대기자는 **구독하고 잠들어 있다가** 알림에 깨어나 재시도. 스핀이 없어 Redis 부하가 낮다. Spring 진영 표준 선택지.
+**방법 2 — pub/sub (Redisson)**: 락 해제 시 채널로 알림을 쏘고, 대기자는 **구독하고 잠들어 있다가** 알림에 깨어나 재시도. 스핀이 없어 Redis 부하가 낮다. Spring 진영의 **사실상 표준(de facto)** — 기본 클라이언트 Lettuce엔 락 구현이 없어 직접 짜야 하는 반면, Redisson은 완성된 `RLock`(+분산 Semaphore·CountDownLatch 등)을 제공하기 때문.
 
 ```mermaid
 sequenceDiagram
