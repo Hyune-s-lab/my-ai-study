@@ -77,17 +77,15 @@ Stock findByIdForUpdate(Long id);
 - **락 상태를 SQL로 조회할 수 있다**: MySQL `IS_USED_LOCK('key')`·`performance_schema.metadata_locks`(USER LEVEL LOCK, 대기 세션까지 표시), PG `pg_locks WHERE locktype='advisory'`(키가 숫자 해시라 문자열→숫자 매핑 규칙 필요). 락 릭 의심 시 범인 세션을 찾아 `KILL`하면 회수.
 - PG엔 `pg_advisory_xact_lock`(트랜잭션 종료 시 자동 해제)이 있어 MySQL `GET_LOCK`의 "명시적 해제 깜빡" 함정을 피할 수 있다.
 
-## 2단계 — 스케일 아웃: 무엇이 살아남나
+## 2단계 — Redis 분산 락
 
-인스턴스 N대가 되는 순간:
+배경조건은 **스케일 아웃**. 인스턴스 N대가 되는 순간 락별로 운명이 갈린다:
 
-- `synchronized`/`ReentrantLock` → **무력화**. 락이 JVM별로 따로 존재.
+- `synchronized`/`ReentrantLock`/`Mutex` → **무력화**. 락이 JVM별로 따로 존재.
 - DB 락(낙관·비관·네임드) → **여전히 유효**. 락의 위치가 공유 지점(DB)이기 때문.
-- 새 문제: 모든 인스턴스의 락 경합이 **DB로 집중**된다. 대기 커넥션이 풀을 점유하고, 트래픽이 크면 락 처리 자체가 DB 부하가 됨. 특히 네임드 락은 락 전용 커넥션까지 잡아먹는다. → 락 스토리지를 DB에서 분리하고 싶어진다(→ 3단계).
+- 대신 모든 인스턴스의 락 경합이 **DB로 집중**된다 — 대기 커넥션이 풀을 점유하고, 트래픽이 크면 락 처리 자체가 DB 부하가 된다.
 
-## 3단계 — Redis 분산 락
-
-락 저장소를 Redis로 분리. 싱글 스레드 + 인메모리라 락 연산이 싸고 빠르며, DB 부하와 분리된다.
+그래서 락 저장소를 DB에서 Redis로 분리한다. 싱글 스레드 + 인메모리라 락 연산이 싸고 빠르며, DB 부하와 분리된다.
 
 **방법 1 — 스핀락(spin lock)**: `SET key val NX PX 3000`(SETNX + TTL)으로 획득 시도, 실패하면 sleep 후 재시도 루프. Lettuce로 직접 구현하는 방식.
 
