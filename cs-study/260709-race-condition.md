@@ -46,6 +46,16 @@ suspend fun decrease(id: Long, qty: Long) = mutex.withLock {
 
 - **코루틴**: `synchronized`/`ReentrantLock`은 대기 시 **스레드 자체를 블로킹**해 코루틴의 이점을 없애고, `synchronized` 블록 안에선 suspend 호출도 못 한다. 대신 `kotlinx.coroutines.sync.Mutex` — `withLock`은 대기 중 스레드를 놓아주는 **suspend 락**. 동시 N개 허용은 `Semaphore(n)`.
 - **가상 스레드(virtual thread, Java 21+)**: `synchronized` 블록 안에서 블로킹하면 캐리어 스레드에 **피닝(pinning)** — 플랫폼 스레드가 그대로 묶여 VT의 장점이 사라진다. JDK 24(JEP 491)에서 해소됐지만, 그 전 버전이면 `ReentrantLock`이 정석.
+
+두 모델의 동시성 도구 대응표. 철학 차이가 핵심 — 코루틴은 "스레드 블로킹 금지"라서 **suspend 전용 도구를 새로** 배워야 하고, VT는 "블로킹이 싸졌다"라서 **기존 `java.util.concurrent`를 그대로** 쓴다:
+
+| 목적 | 코루틴 (kotlinx.coroutines) | 가상 스레드 (java.util.concurrent) | 주의 |
+|---|---|---|---|
+| 상호배제 (1개) | `Mutex.withLock { }` | `ReentrantLock` (블로킹돼도 VT가 캐리어에서 내려와 저렴) | **`Mutex`는 재진입 불가**(ReentrantLock과 다름!) · `synchronized`는 JDK 24 전 피닝 |
+| 동시 N개 제한 | `Semaphore(n).withPermit { }` | `j.u.c.Semaphore(n)` | 외부 API 동시 호출 제한 등. 이름까지 같지만 **다른 클래스** |
+| 완료 대기 | `Job.join()` / `Deferred.await()` | `Future.get()` / `CompletableFuture.join()` | VT에선 `get()` 블로킹이 죄가 아니다 |
+| 신호·조건 대기 | `Channel` / `CompletableDeferred` | `Condition` / `CountDownLatch` | |
+
 - 어느 쪽이든 **락의 범위는 여전히 프로세스 하나** — 스케일 아웃하면 똑같이 무력화.
 
 ## 1단계 — RDB를 붙였다: DB가 락의 진실 공급원
