@@ -23,8 +23,8 @@ cmp: "" {
     style: { stroke: "#C98A2B"; stroke-dash: 3 }
     db: "PostgreSQL" {
       class: db
-      t1: "filing\n(id, status, …)  ← hot" { class: tbl }
-      t2: "filing_payload\n(id, payload_snapshot)  ← cold" { class: tbl }
+      t1: "orders\n(id, status, …)  ← hot" { class: tbl }
+      t2: "order_details\n(id, payload)  ← cold" { class: tbl }
       t1 -> t2: "같은 PK"
     }
   }

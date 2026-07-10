@@ -5,24 +5,24 @@ classes: {
   vo:   { style: { fill: "#F4F4F5"; stroke: "#9AA0A6"; font-color: "#16191F" } }
 }
 
-est: "Estimate 애그리거트" {
+ord: "Order 애그리거트" {
   style: { stroke: "#3F8E55"; stroke-dash: 3; fill: "#F7FCF9" }
-  r: "Estimate  «root»" { class: root }
-  s: "input_snapshot «VO»" { class: vo }
-  v: "result «VO»" { class: vo }
+  r: "Order  «root»" { class: root }
+  s: "shipping_address «VO»" { class: vo }
+  v: "total_amount «VO»" { class: vo }
   r -> s
   r -> v
 }
-fil: "Filing 애그리거트" {
+pay: "Payment 애그리거트" {
   style: { stroke: "#3F8E55"; stroke-dash: 3; fill: "#F7FCF9" }
-  r: "Filing  «root»" { class: root }
-  p: "payload_snapshot «VO»" { class: vo }
+  r: "Payment  «root»" { class: root }
+  p: "payment_snapshot «VO»" { class: vo }
   r -> p
 }
-clm: "Claim 애그리거트" {
+shp: "Shipping 애그리거트" {
   style: { stroke: "#3F8E55"; stroke-dash: 3; fill: "#F7FCF9" }
-  r: "Claim  «root»" { class: root }
+  r: "Shipping  «root»" { class: root }
 }
 
-fil.r -> est.r: "estimate_id (ID 참조, 객체 X)" { style: { stroke: "#C2256B"; stroke-dash: 4 } }
-clm.r -> fil.r: "filing_id (ID 참조)" { style: { stroke: "#C2256B"; stroke-dash: 4 } }
+pay.r -> ord.r: "order_id (ID 참조, 객체 X)" { style: { stroke: "#C2256B"; stroke-dash: 4 } }
+shp.r -> ord.r: "order_id (ID 참조)" { style: { stroke: "#C2256B"; stroke-dash: 4 } }
