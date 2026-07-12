@@ -26,9 +26,10 @@
 | [260610-모의면접-timeout.md](./cs-study/260610-모의면접-timeout.md) | 모의면접 — 타임아웃 (종류·자원고갈·재시도·분산·게이트웨이) |
 | [260610-모의면접-redis.md](./cs-study/260610-모의면접-redis.md) | 모의면접 — Redis (싱글스레드·캐시 3대 장애·영속성/HA·분산락·게이트웨이 활용) |
 | [260617-kafka-구조.md](./cs-study/260617-kafka-구조.md) | Kafka 구조 (broker·topic·partition·offset·컨슈머 그룹·KRaft·토픽 설계 전략) |
-| [260618-샤딩-파티셔닝.md](./cs-study/260618-샤딩-파티셔닝.md) | 샤딩 vs 파티셔닝 (포함관계·복제 구분·샤드키/핫스팟·언제 무엇을) |
+| [260618-sharding-partitioning.md](./cs-study/260618-sharding-partitioning.md) | 샤딩 vs 파티셔닝 (포함관계·복제 구분·샤드키/핫스팟·언제 무엇을) |
 | [260618-ddd-aggregate.md](./cs-study/260618-ddd-aggregate.md) | DDD 애그리거트 (일관성 경계·루트·ID 참조·한 트랜잭션 한 애그리거트) |
 | [260618-index.md](./cs-study/260618-index.md) | 인덱스 (B-tree/GIN·복합 컬럼 순서·부분/커버링·트레이드오프·clustered vs heap) |
+| [260709-race-condition.md](./cs-study/260709-race-condition.md) | race condition (JVM 락·코루틴 Mutex→DB 낙관/비관/네임드 락→스케일 아웃→Redisson 분산 락→결과적 일관성) |
 
 ## [system-design](./system-design)
 
