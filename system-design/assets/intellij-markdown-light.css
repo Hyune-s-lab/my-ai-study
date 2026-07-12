@@ -1,0 +1,67 @@
+/* IntelliJ Markdown Preview — 흰 배경에서 본문 대비를 높이는 프로젝트용 스타일 */
+
+html,
+body {
+  background: #ffffff !important;
+  color: #1f2328 !important;
+}
+
+p,
+li,
+dt,
+dd,
+summary,
+figcaption,
+blockquote,
+table,
+thead,
+tbody,
+tr,
+th,
+td {
+  color: #24292f !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong,
+b {
+  color: #1f2328 !important;
+}
+
+a {
+  color: #0969da !important;
+}
+
+blockquote {
+  background: #f6f8fa !important;
+  border-left-color: #57606a !important;
+}
+
+table,
+th,
+td {
+  border-color: #8c959f !important;
+}
+
+th {
+  background: #eaeef2 !important;
+}
+
+tr:nth-child(2n) {
+  background: #f6f8fa !important;
+}
+
+code,
+pre {
+  color: #1f2328 !important;
+  background: #f6f8fa !important;
+}
+
+hr {
+  border-color: #8c959f !important;
+}
