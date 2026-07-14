@@ -28,8 +28,6 @@
 
 Spring Modulith는 Gradle 멀티모듈의 대체제가 아니다. 주문·재고처럼 **비즈니스 모듈** 경계를 검증하고 이벤트로 연결할 때 선택한다.
 
----
-
 ## 1. 서로 다른 세 가지 경계
 
 기존 글의 혼란은 헥사고날, Gradle 멀티모듈, Spring Modulith를 하나의 계층도로 본 데서 시작한다.
@@ -48,8 +46,6 @@ Bluetape4k의 Foundation·Data·Infrastructure·Domain Capability·Application L
 
 라이브러리는 역할로 고르고, 서비스 코드는 포트와 어댑터 경계로 배치한다.
 
----
-
 ## 2. 전체 아키텍처
 
 ```mermaid
@@ -61,6 +57,7 @@ config:
     background: "#ffffff"
     primaryTextColor: "#111827"
     lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
 ---
 flowchart LR
   subgraph canvas[" "]
@@ -126,8 +123,6 @@ flowchart LR
 3. inbound·outbound adapter는 `application`과 필요한 `domain` 타입에 의존한다.
 4. `boot`만 모든 adapter를 조립하고 실행한다.
 5. adapter 끼리 서로 호출하지 않는다.
-
----
 
 ## 3. Gradle 모듈과 패키지
 
@@ -315,8 +310,6 @@ Gradle의 `api`는 해당 의존성을 소비자에게도 노출한다. 모듈 �
 
 `domain`에서 쓰려면 해당 라이브러리가 Spring·DB·I/O 타입을 전이적으로 노출하지 않는지 확인한다. 편의 함수 몇 개를 위해 큰 Foundation JAR을 넣지 않는다.
 
----
-
 ## 4. 요청 하나가 흐르는 코드
 
 발주 완료 API를 예로 든다. 흐름은 Controller → inbound port → application service → domain → outbound port → adapter 순서다.
@@ -461,8 +454,6 @@ class TimeConfiguration {
 
 여러 transaction manager를 쓴다면 `@Primary` 또는 `@Transactional(transactionManager = "...")`로 선택한다.
 
----
-
 ## 5. 이벤트와 트랜잭션
 
 ### 5.1 내부 이벤트와 Kafka 메시지는 다르다
@@ -506,8 +497,6 @@ spring:
 Java 21+에서 이 설정을 켜면 Spring Boot는 지원되는 작업에 virtual thread 기반 executor를 자동 구성한다. 따라서 `fun` 반환의 동기식 port는 유지해도 된다.
 
 다만 virtual thread는 DB connection pool 크기나 외부 API의 처리량을 늘리지 않는다. 동시성 제한, timeout, circuit breaker, Kafka consumer 처리량은 별도로 설계한다.
-
----
 
 ## 6. Spring Modulith를 언제 쓰는가
 
@@ -580,8 +569,6 @@ import org.springframework.modulith.PackageInfo
 @PackageInfo
 class InventoryModule
 ```
-
----
 
 ## 7. 경계를 자동 검증하기
 
@@ -671,8 +658,6 @@ class HexagonalArchitectureTest {
 ☐ use case 통합 테스트
 ```
 
----
-
 ## 8. 도입 순서
 
 처음부터 adapter를 여러 JAR로 나누면 이동 비용만 커질 수 있다. 의존 방향을 먼저 고정하고, 변경 이유가 생길 때 물리 모듈을 늘린다.
@@ -696,8 +681,6 @@ com.example.shop.order
 
 Kafka 배포·테스트 전략이 DB adapter와 달라지거나, 서로 다른 팀이 소유하거나, 독립적으로 교체할 필요가 생길 때만 adapter 모듈을 분리한다.
 
----
-
 ## 9. 실무 체크리스트
 
 - 업무 규칙을 Spring·DB·Kafka 없이 테스트할 수 있는가?
@@ -708,8 +691,6 @@ Kafka 배포·테스트 전략이 DB adapter와 달라지거나, 서로 다른 �
 - DB 상태 변경과 Kafka 전송 사이의 실패 시나리오가 정의되었는가?
 - 콘슈머가 재전달에 대해 멱등한가?
 - 경계 규칙이 CI에서 자동 검증되는가?
-
----
 
 ## 참고 자료
 

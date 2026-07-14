@@ -9,8 +9,6 @@ Claude Desktop, Cursor 등 AI 도구에서 정확한 OpenGateway 연동 코드�
 - 문서 청킹 이론 (Spring AI MarkdownDocumentReader 사용)
 - BM25 키워드 검색 알고리즘 직접 구현
 
----
-
 ## 1. MCP (Model Context Protocol) 이론
 
 ### MCP란?
@@ -58,8 +56,6 @@ class OpenGatewayMcpTools {
 }
 ```
 
----
-
 ## 2. 문서 청킹 (Chunking) 이론
 
 ### 청킹이 필요한 이유
@@ -93,8 +89,6 @@ POST /v1/chat...
 
 Spring AI가 헤더 레벨(level)을 메타데이터로 제공하므로, 필요시 계층 구조로 활용 가능.
 
----
-
 ## 3. BM25 검색 이론
 
 ### TF-IDF 이해하기
@@ -118,8 +112,6 @@ Spring AI가 헤더 레벨(level)을 메타데이터로 제공하므로, 필요�
 - 해당 문서에 많이 나오면서 (TF ↑)
 - 다른 문서엔 잘 안 나오는 (IDF ↑)
 - → 검색에 중요한 단어
-
----
 
 ### BM25: TF-IDF의 개선
 
@@ -148,8 +140,6 @@ score(D, Q) = Σ IDF(qi) × (TF × (k1 + 1)) / (TF + k1 × (1 - b + b × |D|/avg
 | b | 문서 길이 보정 | 0.75 |
 | avgdl | 평균 문서 길이 | 계산값 |
 
----
-
 ### 역인덱스 (Inverted Index)
 
 RDB의 B-Tree 인덱스가 `컬럼값 → Row ID`를 매핑하듯,
@@ -167,8 +157,6 @@ RDB의 B-Tree 인덱스가 `컬럼값 → Row ID`를 매핑하듯,
 3. 점수 계산 → doc1이 둘 다 매칭 → 최고 점수
 ```
 
----
-
 ### 구현 선택: 인메모리 vs 인메모리 DB
 
 | 옵션 | 장점 | 단점 | 적합한 케이스 |
@@ -184,8 +172,6 @@ RDB의 B-Tree 인덱스가 `컬럼값 → Row ID`를 매핑하듯,
 
 **이 프로젝트**: 학습 목적 + 문서 수백 개 수준이라 직접 구현
 
----
-
 ## 향후 개선
 
 - [ ] **파라미터 외부화**: k1, b, topK 등을 application.yml로 분리
@@ -193,8 +179,6 @@ RDB의 B-Tree 인덱스가 `컬럼값 → Row ID`를 매핑하듯,
 - [ ] **관측성**: 검색 쿼리/결과 로깅, Micrometer 지표
 - [ ] **하이브리드 검색**: BM25 + 벡터 검색 조합
 - [ ] **리랭킹**: Cross-encoder로 상위 결과 재정렬
-
----
 
 ## 참고 자료
 

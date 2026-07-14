@@ -3,8 +3,6 @@
 > 면접관이 타임아웃으로 보려는 것은 **용어 암기가 아니라**: 장애가 어떻게 **전파(cascading failure)**되는지, **자원(스레드·커넥션)**이 어떻게 고갈되는지, 분산 환경에서 **타임아웃을 어떻게 설계**하는지에 대한 사고력이다.
 > 형식: **Q(질문) → 모범답안 → 꼬리질문 → 감점 포인트(이렇게 답하면 약하다)**.
 
----
-
 ## 레벨 1 — 개념
 
 ### Q1. 타임아웃의 종류를 설명해보세요.
@@ -33,12 +31,49 @@
 > 포인트 2: **hop1의 ①·②는 같은 연결의 두 끝**(클라 측 vs 내 서버 측), ③은 내가 OpenAI로 거는 또 다른 hop. 그래서 ②(내 서버)와 ③(SDK)은 **내 게이트웨이가 동시에 가진 두 얼굴**.
 > 포인트 3(핵심): **③ outbound 전체 예산 < ② inbound 수명 ≤ ① 클라 deadline**. 안 지키면 호출자는 끊었는데 나는 OpenAI에 매달리는 헛수고(→ Q8). 정석은 **deadline 전파**(→ Q7).
 
+```mermaid
+---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction LR
+
+    subgraph gw["내 게이트웨이 (서버 = 클라이언트, 두 얼굴)"]
+      direction LR
+      inbound["② 서버 (inbound)\naccept · connection-timeout\nrequest-timeout · keep-alive"]
+      outbound["③ SDK (outbound)\nconnect · pool · read\ninter-token · call timeout"]
+      inbound --> outbound
+    end
+
+    cli["① 클라이언트\nconnect · read · write\n전체 deadline"]
+    openai@{ img: "https://api.iconify.design/simple-icons/openai.svg", label: "", pos: "b", h: 48, constraint: "on" }
+
+    cli --> inbound
+    outbound --> openai
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
+  class cli,inbound,outbound app
+  class openai icon
+  style gw fill:#ffffff,stroke:#3B5BA5,stroke-width:1px
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
+
 **꼬리질문**: connection timeout과 read timeout 중 하나만 설정한다면?
 → 둘은 다른 장애를 잡으므로 **둘 다 필수**. connection만 두면 "연결은 됐는데 응답 안 오는" 행(hang)을 못 잡고, read만 두면 대상이 죽었을 때 OS 기본 SYN 재시도(수십 초~분)까지 매달린다.
 
 **감점 포인트**: "타임아웃은 응답이 늦으면 끊는 것" 한 문장으로 끝내는 것. **서버 쪽(inbound)과 클라이언트 쪽(outbound)을 구분 못 하면** 게이트웨이 개발자로서 깊이가 없다고 본다.
-
----
 
 ### Q2. HTTP 클라이언트의 기본 타임아웃은 보통 어떻게 돼 있고, 왜 위험한가요?
 
@@ -50,8 +85,6 @@
 무한대가 위험한 이유: 대상이 느려지거나 멈추면 **호출 스레드가 영원히 점유**되고, 요청이 쌓이면 **스레드 풀이 고갈**돼 그 서비스 전체가 멈춘다(뒤 Q5와 연결). "기본값을 믿지 말고 **명시적으로 설정**한다"가 핵심.
 
 **감점 포인트**: 기본값을 "알아서 적당히 잡혀 있다"고 가정. 실제로 무한대인 경우가 많아 사고의 단골 원인이다.
-
----
 
 ## 레벨 2 — 실무 (스택 전반)
 
@@ -68,8 +101,6 @@
 → 일시적 완화일 뿐. 근본은 다운스트림 지연이고, 풀을 키우면 **더 많은 스레드/커넥션이 같이 묶여** 오히려 자원만 더 태운다. 타임아웃·서킷브레이커로 **빨리 포기**하는 게 정석.
 
 > 🔌 게이트웨이 관점: 내 **OpenAI용 outbound 커넥션 풀**이 바로 그 급소다. OpenAI가 느려지면 이 풀이 고갈되고, 그러면 **OpenAI와 무관한 다른 라우트의 요청까지** 게이트웨이가 못 받는다. → 업스트림(프로바이더)별로 풀을 격리(Q4 bulkhead).
-
----
 
 ### Q4. 타임아웃이 없거나 너무 길면 어떤 식으로 시스템 전체 장애로 번지나요?
 
@@ -92,7 +123,39 @@
 
 > 🔌 게이트웨이 관점: 게이트웨이는 **모두가 거쳐 가는 공유 길목**이라 전파의 진앙이 되기 쉽다. OpenAI 하나가 느려졌다고 게이트웨이 전체가 죽으면 안 됨 → **프로바이더/라우트/모델별 bulkhead**로 격리하고, OpenAI 실패율이 높으면 **서킷 브레이커로 차단 후 빠른 503/폴백**(→ Q13).
 
+```mermaid
 ---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction LR
+
+    downD["다운스트림 D\n응답 지연 (느려짐)"]
+    wait["D 호출 스레드들\n타임아웃 없이 대기"]
+    exhaust["스레드/커넥션 풀 고갈"]
+    block["무관한 요청도 처리 불가"]
+    propagate["상위 서비스 B로 장애 전파"]
+
+    downD --> wait
+    wait --> exhaust
+    exhaust --> block
+    block --> propagate
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class downD,wait,exhaust,block,propagate app
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
 
 ### Q5. 타임아웃이 났는데 사실 서버는 처리를 끝냈을 수도 있죠. 이 문제를 어떻게 다루나요?
 
@@ -110,8 +173,6 @@
 
 > 🔌 게이트웨이 관점: OpenAI 호출이 read timeout 나도 **OpenAI는 생성을 끝내고 토큰만큼 과금**했을 수 있다. 여기서 재시도하면 **이중 과금 + 중복 요청**. 그래서 (a) outbound는 **연결을 확실히 끊어**(취소) 생성·과금을 멈추고(→ Q8), (b) OpenAI의 `idempotency key`(지원 시)를 실어 보낸다. 호출자에게도 게이트웨이가 멱등성 키를 받아 같은 응답을 돌려주는 설계가 안전.
 
----
-
 ### Q6. 타임아웃과 재시도(retry)는 어떻게 함께 설계하나요?
 
 **모범답안**: 둘은 **곱셈으로 엮인다** — 최악 소요시간 ≈ `타임아웃 × 시도 횟수`. 그래서 무지성 재시도는 위험.
@@ -123,9 +184,43 @@
 
 **감점 포인트**: jitter·retry budget 없이 "실패하면 3번 재시도" 수준. 재시도가 장애를 **증폭**시킬 수 있다는 인식이 핵심이다.
 
-> 🔌 게이트웨이 관점: 게이트웨이가 OpenAI에 무지성 재시도하면 **이미 힘든 OpenAI에 부하를 증폭**시킨다. OpenAI가 `429`로 주는 **`Retry-After` 헤더를 존중**하고, 프로바이더별 retry budget을 둔다. 그리고 재시도는 **남은 deadline 안에서만**(→ Q7) — 호출자가 준 시간을 넘기면 재시도 의미 없음.
-
+```mermaid
 ---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction LR
+
+    subgraph budget["호출자 deadline 내에서만 재시도"]
+      direction LR
+      try1["1차 시도"] --> wait1["backoff + jitter"]
+      wait1 --> try2["2차 시도"]
+      try2 --> wait2["backoff + jitter"]
+      wait2 --> try3["3차 시도"]
+    end
+
+    try3 --> giveup["retry budget 초과\n또는 deadline 도달\n→ 포기 (fast-fail)"]
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
+  class try1,try2,try3 app
+  class wait1,wait2,giveup ctrl
+  style budget fill:#ffffff,stroke:#3B5BA5,stroke-width:1px
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
+
+> 🔌 게이트웨이 관점: 게이트웨이가 OpenAI에 무지성 재시도하면 **이미 힘든 OpenAI에 부하를 증폭**시킨다. OpenAI가 `429`로 주는 **`Retry-After` 헤더를 존중**하고, 프로바이더별 retry budget을 둔다. 그리고 재시도는 **남은 deadline 안에서만**(→ Q7) — 호출자가 준 시간을 넘기면 재시도 의미 없음.
 
 ## 레벨 3 — 분산 시스템 (여기서 합격/불합격 갈림)
 
@@ -143,9 +238,39 @@ A(사용자 마감 3s) → B(2.5s) → C(1.5s) → D(800ms)
 **꼬리질문**: timeout과 deadline의 차이는?
 → timeout은 "지금부터 N초"(상대적, 각 hop마다 리셋되어 누적될 위험), deadline은 "오후 3시 0.0초까지"(절대적, 전파되며 전체 체인이 공유). deadline이 분산 환경에 더 안전.
 
-**감점 포인트**: 각 서비스에 독립적으로 타임아웃을 박으면 된다고만 답. "상위>하위 합", deadline 전파를 못 말하면 분산 사고가 약하다고 본다.
-
+```mermaid
 ---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction LR
+
+    a["서비스 A\n마감 3.0s (deadline)"]
+    b["서비스 B\n예산 2.5s"]
+    c["서비스 C\n예산 1.5s"]
+    d["서비스 D\n예산 0.8s"]
+
+    a --> b
+    b --> c
+    c --> d
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class a,b,c,d app
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
+
+**감점 포인트**: 각 서비스에 독립적으로 타임아웃을 박으면 된다고만 답. "상위>하위 합", deadline 전파를 못 말하면 분산 사고가 약하다고 본다.
 
 ### Q8. 클라이언트 타임아웃이 서버 처리시간보다 짧으면 서버 쪽에선 무슨 일이 생기나요?
 
@@ -162,9 +287,43 @@ A(사용자 마감 3s) → B(2.5s) → C(1.5s) → D(800ms)
 
 **감점 포인트**: "서버는 응답을 보내려다 실패한다" 정도. CLOSE_WAIT·자원 누수·취소 전파까지 가야 강한 답.
 
-> 🔌 게이트웨이 관점: 호출자가 끊으면 나는 **OpenAI로 향한 outbound 호출도 같이 취소**해야 한다. 안 그러면 아무도 안 받을 토큰을 OpenAI가 계속 생성하고 **그 비용은 나한테 청구**된다. Reactor면 inbound 구독 취소가 `doOnCancel`로 전파되게 파이프라인을 잇고(취소가 outbound 연결 종료까지 내려가게), 끊긴 연결엔 생성을 멈춘다. **취소 전파 = 비용 절감**이 게이트웨이에선 직접적이다.
-
+```mermaid
 ---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction LR
+
+    cli_disc["① 클라이언트\n연결 끊음 (timeout)"]
+    server_run["② 서버\n모른 채 계속 처리\n(자원 소모·과금)"]
+    close_wait["③ CLOSE_WAIT 누적\n커넥션·스레드 누수"]
+    downstream["④ 다운스트림 호출\n버려질 결과 생성"]
+
+    cli_disc --> cancel["취소 전파 (cancellation)\nReactor doOnCancel\ngRPC cancel · 자체 deadline"]
+    cancel --> downstream
+  end
+
+  cli_disc --> server_run
+  server_run --> close_wait
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
+  class cli_disc,server_run,close_wait,downstream app
+  class cancel ctrl
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
+
+> 🔌 게이트웨이 관점: 호출자가 끊으면 나는 **OpenAI로 향한 outbound 호출도 같이 취소**해야 한다. 안 그러면 아무도 안 받을 토큰을 OpenAI가 계속 생성하고 **그 비용은 나한테 청구**된다. Reactor면 inbound 구독 취소가 `doOnCancel`로 전파되게 파이프라인을 잇고(취소가 outbound 연결 종료까지 내려가게), 끊긴 연결엔 생성을 멈춘다. **취소 전파 = 비용 절감**이 게이트웨이에선 직접적이다.
 
 ### Q9. 타임아웃 값은 어떻게 정하나요? (얼마로 둘 거냐)
 
@@ -181,8 +340,6 @@ A(사용자 마감 3s) → B(2.5s) → C(1.5s) → D(800ms)
 
 > 🔌 게이트웨이 관점: **단일 글로벌 타임아웃은 틀린 답**이다. 라우트/모델마다 지연 분포가 천차만별 — 작은 모델 응답은 수백 ms인데 reasoning 모델은 수십 초, 스트리밍은 분 단위. **라우트·모델별로 타임아웃을 다르게**(설정 외부화) 잡아야 한다. "모든 요청 30초" 같은 한 값은 짧은 건 못 지키고 긴 건 죽인다.
 
----
-
 ## 레벨 4 — LLM 서빙 맥락 (이 레포 주제와 연결)
 
 ### Q10. LLM 추론 요청은 수초~수분 걸리기도 합니다. 일반적인 30초 게이트웨이 타임아웃이 왜 문제고, 어떻게 푸나요?
@@ -193,8 +350,6 @@ A(사용자 마감 3s) → B(2.5s) → C(1.5s) → D(800ms)
 - 동시에 **read timeout을 "전체 응답"이 아니라 "토큰 간 간격(inter-token/idle)"** 기준으로 잡아야 한다(아래 Q11).
 - 비동기 패턴: 아주 긴 작업은 **작업 제출 → job id → 폴링/웹훅**(OpenAI의 background 모드 같은)로 빼서 요청-응답 타임아웃에서 분리.
 
----
-
 ### Q11. 스트리밍(SSE)에서는 왜 평범한 read timeout을 그대로 쓰면 안 되나요?
 
 **모범답안**: 스트리밍은 데이터가 **드문드문** 온다. "전체 응답까지 N초" 같은 flat timeout을 걸면 **정상적인 긴 생성도 죽는다.** 봐야 할 건 "전체 시간"이 아니라:
@@ -204,6 +359,40 @@ A(사용자 마감 3s) → B(2.5s) → C(1.5s) → D(800ms)
 - **하트비트/keep-alive**: 생성이 잠깐 비어도 LB가 안 끊게 주기적 신호.
 
 **실무 함정**: **AWS ALB의 idle timeout 기본 60초**, nginx `proxy_read_timeout` 기본 60초. 스트리밍 중 토큰 간격이 이걸 넘기거나 prefill TTFT가 길면 **LB가 먼저 연결을 끊는다.** → LB idle timeout을 올리거나, 하트비트로 흐름을 유지하거나, 스트리밍으로 간격을 좁힌다.
+
+```mermaid
+---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction LR
+
+    nginx@{ img: "https://cdn.simpleicons.org/nginx", label: "", pos: "b", h: 48, constraint: "on" }
+    ttft["TTFT (첫 토큰까지)\nprefill 완료 대기"]
+    inter["inter-token timeout\n토큰 간격 제한"]
+    overall["전체 수명 (overall)\nstream 전체 상한"]
+
+    nginx --> ttft
+    ttft --> inter
+    inter --> overall
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
+  class ttft,inter,overall app
+  class nginx icon
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
 
 **감점 포인트**: "스트리밍이니까 타임아웃 길게 잡으면 됨". inter-token 개념·LB idle timeout 함정을 못 짚으면 약하다.
 
@@ -220,8 +409,6 @@ openAiTokenFlux
 - **yml로 안 되는 것**: inter-token(특정 스트림의 원소 간격이라 전역 설정 대상이 아님) → 연산자(코드). 단 **Duration 값만 `@ConfigurationProperties`로 yml 관리**하는 게 정석.
 - MVC `SseEmitter`만 쓴다면 inter-token은 **watchdog/heartbeat로 직접** 구현.
 
----
-
 ### Q12. 자체 서빙(vLLM 등)에서 요청이 큐에 대기할 수도 있습니다. 타임아웃을 어디에 둬야 하나요?
 
 **모범답안**: LLM 요청의 지연은 **큐 대기 + prefill + decode**로 쪼개진다. 단순 read timeout 하나로는 부족.
@@ -231,8 +418,6 @@ openAiTokenFlux
 - **전체 상한**: 폭주 방지를 위한 생성 전체 max time / max tokens.
 
 > 결국 Q7의 "타임아웃 예산"을 LLM 단계(큐/prefill/decode)에 맞게 분배하는 문제다. 부하가 높을 때 **빨리 거절(load shedding)**하는 게 모두를 매달리게 하는 것보다 낫다.
-
----
 
 ### Q13. 게이트웨이가 타임아웃 시 다른 프로바이더로 폴백(fallback)한다면, 타임아웃을 어떻게 설계하나요?
 
@@ -250,7 +435,48 @@ openAiTokenFlux
 
 **감점 포인트**: "타임아웃 나면 다른 모델 부르면 됨"만 답. **1차를 짧게 잡아 폴백 예산을 확보**한다는 점, 스트리밍 중엔 폴백이 까다롭다는 점을 못 짚으면 약하다.
 
+```mermaid
 ---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction LR
+
+    caller["호출자 마감\n10s (deadline)"]
+    subgraph primary["1차 (OpenAI) timeout 6s"]
+      direction TB
+      openai@{ img: "https://api.iconify.design/simple-icons/openai.svg", label: "", pos: "b", h: 48, constraint: "on" }
+    end
+    subgraph fallback["2차 폴백 (남은 4s)"]
+      direction TB
+      fb["폴백 프로바이더\n다른 모델/라우트"]
+    end
+    result["최종 응답\n(또는 포기)"]
+
+    caller --> primary
+    primary --> fallback
+    fallback --> result
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
+  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
+  class caller,fb,result app
+  class openai icon
+  style primary fill:#ffffff,stroke:#3B5BA5,stroke-width:1px
+  style fallback fill:#ffffff,stroke:#C98A2B,stroke-width:1px
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
 
 ### Q14. 스트리밍 도중 OpenAI 연결이 끊기면(부분 응답) 게이트웨이는 어떻게 처리하나요?
 
@@ -266,7 +492,52 @@ openAiTokenFlux
 
 **감점 포인트**: "재시도하면 된다". 스트리밍은 **상태코드를 이미 보낸 뒤**라 재시도·헤더 변경이 안 되고, "첫 토큰 전/후"로 처리가 갈린다는 걸 모르면 스트리밍 실패 의미론을 모르는 것.
 
+```mermaid
 ---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction LR
+
+    stream_start["스트림 시작"]
+    subgraph before["첫 토큰 이전"]
+      direction TB
+      no_token["아직 토큰 미전송\n상태코드 미전송"]
+    end
+    subgraph after["첫 토큰 이후"]
+      direction TB
+      partial["토큰 일부 전송 완료\n상태 200 이미 전송"]
+    end
+    upstream_down["업스트림 연결 끊김\n(inter-token timeout 등)"]
+
+    stream_start --> before
+    before --> upstream_down
+    upstream_down --> after
+
+    before_fail["5xx / 폴백 가능\n(상태코드 미전송)"]
+    after_error["에러 이벤트로 스트림 종료\n(event: error / data:{error})\n재시도·헤더 변경 불가"]
+    before --> before_fail
+    after --> after_error
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
+  class stream_start,no_token,partial,upstream_down app
+  class before_fail,after_error ctrl
+  style before fill:#ffffff,stroke:#3B5BA5,stroke-width:1px
+  style after fill:#ffffff,stroke:#C98A2B,stroke-width:1px
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
 
 ### Q15. 주요 LLM SDK의 디폴트 타임아웃은 얼마고, 게이트웨이에선 어떻게 설정하나요?
 
@@ -306,7 +577,7 @@ spring:
   mvc:
     async:
       request-timeout: 60000    # ms, non-stream 라우트 전체 수명 (SseEmitter 기본값)
-# 스트리밍 라우트의 inter-token은 yml 불가 → 코드에서 Flux.timeout, 값만 외부화:
+# 스트리밍 라우트의 inter-token은 yml 불가 → 코드에서 Flux.timeout, 값만 외부화 (아래는 yml 값만):
 llm:
   timeout:
     ttft: 20s
@@ -316,8 +587,6 @@ llm:
 > **예산 사슬**: `클라 deadline ≥ ② 전체 수명 ≥ ③ SDK + 오버헤드(50~200ms)` — 위에서 아래로 빠듯하게(deadline 전파).
 
 **감점 포인트**: "OpenAI 디폴트가 10분이니 그대로 쓴다". 디폴트가 게이트웨이엔 길다는 점, 워크로드/위치별로 분리한다는 점을 못 짚으면 약하다.
-
----
 
 ## 한 장 요약 (면접 직전 복습용)
 

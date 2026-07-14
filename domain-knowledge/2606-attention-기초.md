@@ -189,8 +189,6 @@ self-attention은 토큰 N개에 대해 **모든 쌍(N×N)**의 score를 계산�
 - sparse / sliding-window / linear attention — 긴 컨텍스트 대응 계열
 - multi-head의 head별 역할 해석 (attention 시각화)
 
----
-
 ## 참고
 
 - [Attention Is All You Need (Transformer 원논문)](https://arxiv.org/abs/1706.03762)
