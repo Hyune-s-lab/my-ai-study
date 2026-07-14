@@ -187,8 +187,6 @@ KV 캐시 풀 [10,000칸]
 - prompt caching의 cache write/read 과금 구조와 break-even 계산
 - 멀티 GPU 서빙 시 KV 캐시 분산(tensor parallel)
 
----
-
 ## 참고
 
 - [vLLM: PagedAttention 논문](https://arxiv.org/abs/2309.06180)

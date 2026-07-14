@@ -3,8 +3,6 @@
 > 면접관이 Redis로 보려는 것은 **명령어 암기가 아니라**: 왜 빠른지(아키텍처), 캐시가 무너지는 3대 패턴(stampede·penetration·avalanche)을 아는지, **데이터 유실·일관성의 한계**를 알고 쓰는지다.
 > 형식: **Q(질문) → 모범답안 → 꼬리질문 → 감점 포인트**.
 
----
-
 ## 레벨 1 — 개념
 
 ### Q1. Redis는 왜 빠른가요?
@@ -22,8 +20,6 @@
 
 **감점 포인트**: "메모리라서 빠르다" 한 줄로 끝. 싱글 스레드 모델과 그 **양날의 검**(다음 질문)을 못 엮으면 얕다고 본다.
 
----
-
 ### Q2. 싱글 스레드라서 생기는 위험은 뭔가요?
 
 **모범답안**: **느린 명령 하나가 전체를 막는다.** 이벤트 루프라 한 명령이 오래 걸리면 그 뒤 모든 클라이언트가 줄줄이 대기한다.
@@ -37,8 +33,6 @@
 → 찾기: `redis-cli --bigkeys`, `MEMORY USAGE key`. 해소: 키를 샤딩(해시 필드 분할, `user:1:orders:0~9`처럼 버킷팅)하거나 자료구조 재설계. 삭제는 `UNLINK`로.
 
 **감점 포인트**: `KEYS`를 아무렇지 않게 쓰는 사람. "운영 중 Redis가 순간 멈췄다" 류 장애의 단골 원인을 모르는 것.
-
----
 
 ### Q3. 자료구조별로 언제 뭘 쓰나요?
 
@@ -60,8 +54,6 @@
 
 **감점 포인트**: String/get/set만 답. 자료구조 선택이 곧 Redis 설계 능력이다.
 
----
-
 ## 레벨 2 — 캐시 설계 (실무 단골)
 
 ### Q4. 캐싱 전략(패턴)을 설명해보세요.
@@ -82,8 +74,6 @@
 
 **감점 포인트**: cache-aside 하나만 알고, 쓰기 경로(invalidate vs update)의 race를 생각 안 해본 답.
 
----
-
 ### Q5. 캐시 장애 3대 패턴 — stampede, penetration, avalanche를 설명해보세요.
 
 **모범답안**: 이름은 달라도 전부 "**미스가 폭주해 DB를 때리는**" 패턴이다.
@@ -99,7 +89,73 @@
 
 **감점 포인트**: 세 용어를 구분 못 하거나 대응책 없이 현상만 설명. **TTL jitter** 같은 구체 수단이 안 나오면 운영 경험 의심.
 
+> **캐시 3대 장애 패턴 흐름** — 미스가 폭주해 DB를 때리는 세 가지 양상과 대응.
+
+```mermaid
 ---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction TB
+
+    subgraph stampede["Cache Stampede — 인기 키 만료 폭주"]
+      direction LR
+      ST1["수천 요청 동시 도달"]
+      ST2@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "Redis MISS", pos: "b", h: 48, constraint: "on" }
+      ST3@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "DB 동시 조회", pos: "b", h: 48, constraint: "on" }
+      ST1 --> ST2 --> ST3
+    end
+
+    subgraph penetration["Cache Penetration — 없는 키 관통"]
+      direction LR
+      PT1["악의적 요청 (존재 않는 키)"]
+      PT2@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "Redis MISS", pos: "b", h: 48, constraint: "on" }
+      PT3@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "DB 직행 MISS", pos: "b", h: 48, constraint: "on" }
+      PT4["매번 DB 직행 반복"]
+      PT1 --> PT2 --> PT3 --> PT4
+    end
+
+    subgraph avalanche["Cache Avalanche — 일괄 만료"]
+      direction LR
+      AV1["다수 키 동시 만료 (같은 TTL)"]
+      AV2@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "대량 MISS 발생", pos: "b", h: 48, constraint: "on" }
+      AV3@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "DB 부하 폭증", pos: "b", h: 48, constraint: "on" }
+      AV1 --> AV2 --> AV3
+    end
+
+    subgraph fix["대응"]
+      direction LR
+      FX1["Stampede: 분산락·logical expire"]
+      FX2["Penetration: null 캐싱·Bloom filter"]
+      FX3["Avalanche: TTL jitter·다층 캐시"]
+    end
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
+  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
+  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
+
+  class ST1,PT1,PT4,AV1,FX1,FX2,FX3 app
+  class ST2,PT2,AV2,ST3,PT3,AV3 icon
+  class FX1,FX2,FX3 ctrl
+
+  style stampede fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  style penetration fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  style avalanche fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  style fix fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
 
 ### Q6. TTL 만료와 메모리 축출(eviction)은 어떻게 동작하나요?
 
@@ -122,8 +178,6 @@
 → 메모리 차면 쓰기가 전부 에러 → 캐시 적재 실패가 앱 에러로 번진다. 캐시 용도면 `allkeys-lru`(또는 lfu)로 바꾸는 게 첫 체크리스트.
 
 **감점 포인트**: 만료=즉시 삭제로 아는 것, 기본 정책이 `noeviction`인 걸 모르는 것.
-
----
 
 ## 레벨 3 — 영속성·HA·분산 (여기서 갈림)
 
@@ -149,7 +203,63 @@
 
 **감점 포인트**: "AOF가 안전하니 AOF" 식 단답. fork 비용·everysec 1초 유실·하이브리드를 모르면 운영 안 해본 것.
 
+> **RDB vs AOF 영속성 흐름** — 스냅샷 방식과 로그 방식의 차이.
+
+```mermaid
 ---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction TB
+
+    subgraph rdb["RDB (Snapshot)"]
+      direction TB
+      RD1@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "Redis 메모리", pos: "b", h: 48, constraint: "on" }
+      RD2["fork + COW"]
+      RD3["덤프 파일 (바이너리)"]
+      RD1 --> RD2 --> RD3
+      RD4["복구: 빠름 (파일 로드)"]
+      RD5["유실: 마지막 스냅샷 이후 분 단위"]
+      RD3 --> RD4
+      RD4 --> RD5
+    end
+
+    subgraph aof["AOF (Append-Only Log)"]
+      direction TB
+      AO1@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "쓰기 명령", pos: "b", h: 48, constraint: "on" }
+      AO2["append-only 로그 기록"]
+      AO3["everysec 동기화 (기본)"]
+      AO4["복구: 느림 (명령 재실행)"]
+      AO5["유실: 최대 1초"]
+      AO1 --> AO2 --> AO3
+      AO3 --> AO4
+      AO4 --> AO5
+    end
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
+  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
+  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
+
+  class RD1,AO1 icon
+  class RD2,RD3,RD4,AO2,AO3,AO4 db
+  class RD5,AO5 ctrl
+
+  style rdb fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  style aof fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
 
 ### Q8. Sentinel과 Cluster의 차이는? 언제 뭘 쓰나요?
 
@@ -167,7 +277,61 @@
 
 **감점 포인트**: Sentinel과 Cluster를 "둘 다 HA 솔루션" 정도로 뭉뚱그림. 비동기 복제 유실을 모르면 분산 이해 부족.
 
+> **Sentinel vs Cluster 구조** — HA 장애 감지 vs 샤딩 수평 확장.
+
+```mermaid
 ---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction TB
+
+    subgraph sentinel["Sentinel — HA (장애 감지 + Failover)"]
+      direction TB
+      SE1["Sentinel x3 (감지 투표)"]
+      SE2@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "Master 1대", pos: "b", h: 48, constraint: "on" }
+      SE3@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "Replica 1대", pos: "b", h: 48, constraint: "on" }
+      SE1 --> SE2
+      SE1 --> SE3
+      SE2 --> SE3
+      SE4["전체 데이터 1노드"]
+      SE2 --> SE4
+    end
+
+    subgraph cluster["Cluster — 샤딩 (수평 확장) + HA"]
+      direction TB
+      CL1@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "Slot 0~5460\nMaster A", pos: "b", h: 48, constraint: "on" }
+      CL2@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "Slot 5461~10922\nMaster B", pos: "b", h: 48, constraint: "on" }
+      CL3@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "Slot 10923~16383\nMaster C", pos: "b", h: 48, constraint: "on" }
+      CL4["16384 hash slot 분산"]
+      CL1 --> CL4
+      CL2 --> CL4
+      CL3 --> CL4
+    end
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
+  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
+  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
+
+  class SE2,SE3,CL1,CL2,CL3 icon
+  class SE4,CL4 ctrl
+
+  style sentinel fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  style cluster fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
 
 ### Q9. Redis 분산락을 구현해보세요. 주의점은?
 
@@ -191,7 +355,74 @@ SET lock:order:123 {uuid} NX PX 5000
 
 **감점 포인트**: `SETNX`만 말하고 끝. 내 락 검증·TTL 연장·failover 한계 중 두 개 이상 빠지면 실무에서 사고 낼 답. (반대로 직접 구현을 고집하는 것도 감점 — 검증된 라이브러리를 쓰는 게 답이다.)
 
+> **분산락 흐름** — SET NX PX 획득 → uuid 검증 → 해제, 그리고 TTL 연장·failover 한계.
+
+```mermaid
 ---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction TB
+
+    subgraph acquire["락 획득"]
+      direction LR
+      AC1["클라이언트"]
+      AC2["SET lock {uuid} NX PX 5000"]
+      AC3@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "락 획득 성공", pos: "b", h: 48, constraint: "on" }
+      AC1 --> AC2 --> AC3
+    end
+
+    subgraph work["작업 수행"]
+      direction LR
+      WK1["임계구역 실행"]
+      WK2["TTL 내 완료?\n(길어지면 watchdog 연장)"]
+      WK1 --> WK2
+    end
+
+    subgraph release["락 해제"]
+      direction LR
+      RL1["uuid 검증 (내 락인지 확인)"]
+      RL2["원자적 삭제\n(Redisson RLock)"]
+      RL3@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "락 해제 완료", pos: "b", h: 48, constraint: "on" }
+      RL1 --> RL2 --> RL3
+    end
+
+    subgraph risk["주의점"]
+      direction LR
+      RS1["TTL < 작업 시간\n→ 두 주체 동시 진입"]
+      RS2["failover 유실\n→ 비동기 복제로 락 소실"]
+    end
+
+    AC3 --> WK1
+    WK2 --> RL1
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
+  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
+  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
+
+  class AC1,WK1 app
+  class AC3,RL3 icon
+  class AC2,RL1,RL2 db
+  class WK2,RS1,RS2 ctrl
+
+  style acquire fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  style work fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  style release fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  style risk fill:#FEF2F2,stroke:#FCA5A5,stroke-width:1px,color:#991B1B
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
 
 ### Q10. Redis 트랜잭션(MULTI/EXEC)은 RDB 트랜잭션과 어떻게 다른가요?
 
@@ -202,8 +433,6 @@ SET lock:order:123 {uuid} NX PX 5000
 - 애플리케이션 개발자 관점의 우선순위: ① 애초에 **단일 원자 명령으로 풀리게 설계**(`INCR`, `SET NX EX`, ZSET 연산 등 — Redis 명령 하나는 그 자체로 원자) ② 여러 명령을 원자로 묶어야 하면 **그걸 내장한 검증된 라이브러리**(Redisson 락, Bucket4j 리미터). 서버 사이드 스크립트(Lua)로 직접 짜는 건 라이브러리가 없을 때의 최후 수단이고, 스크립트도 싱글 스레드를 점유한다는 비용이 있다.
 
 **감점 포인트**: "Redis도 트랜잭션 있으니 ACID 됨"이라는 오해. 롤백 없음을 모르면 위험.
-
----
 
 ## 레벨 4 — Spring & 게이트웨이 맥락
 
@@ -219,8 +448,6 @@ SET lock:order:123 {uuid} NX PX 5000
 
 **감점 포인트**: `@Cacheable` 붙이면 끝이라는 답. 직렬화·TTL 기본값을 모르면 실제로 안 써본 것.
 
----
-
 ### Q12. LLM 게이트웨이를 만든다면 Redis를 어디에 쓰겠습니까?
 
 **모범답안**: 게이트웨이의 **공유 상태 저장소**로 거의 모든 횡단 관심사에 등장한다.
@@ -235,8 +462,6 @@ SET lock:order:123 {uuid} NX PX 5000
 → 두 명령 사이가 원자적이지 않다 — INCR 후 앱이 죽으면 **TTL 없는 카운터가 영원히 남는다.** 이 원자성 문제를 이미 풀어둔 검증된 구현(Bucket4j, Redisson)을 쓰는 게 답. "명령 두 개를 이으면 원자성이 깨진다"는 감각 자체가 포인트다.
 
 **감점 포인트**: "캐시로 쓴다" 한 줄. 게이트웨이 횡단 관심사(rate limit·멱등성·집계)로 연결 못 하면 설계 경험 부족.
-
----
 
 ## 한 장 요약 (면접 직전 복습용)
 

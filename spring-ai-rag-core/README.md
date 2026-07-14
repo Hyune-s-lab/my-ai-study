@@ -109,8 +109,6 @@ val hybridScore = alpha * normVector + (1 - alpha) * normBm25
 | 0.5 | 균형 (기본값) |
 | 1.0 | Vector only (의미 검색) |
 
----
-
 ## 검색 기술 비교
 
 ### 전통 RDB vs Lexical vs Semantic
@@ -158,8 +156,6 @@ BM25 (토큰: "민법", "제750조")
   → "민법 750조" ✅ 찾음
   → "민법제750조" ✅ 찾음
 ```
-
----
 
 ## 도메인별 검색 전략
 
