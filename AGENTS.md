@@ -78,6 +78,13 @@
 ## 설계 원칙 (아키텍처)
 - **메시징은 Kafka 또는 MQ(RabbitMQ/Amazon MQ)를 우선**한다. 매니지드 **SQS/SNS는 가능하면 지양**(락인·세밀 제어 한계). AWS 다이어그램에서도 큐/스트림은 Amazon MSK(Kafka)로 그린다. 데드레터는 DLT(dead-letter topic).
 
+## GitHub PR 규칙
+
+- 에이전트는 생성하거나 수정하는 모든 PR의 assignee를 **반드시** 사용자 `@Hyune-c`로 지정해야 한다 (MUST).
+- 에이전트는 Draft PR을 생성하거나 유지해서는 안 된다 (MUST NOT). PR은 **반드시** 일반 Open PR로 생성·전환해야 한다.
+- PR 생성 또는 수정 뒤에는 assignee와 Draft 상태를 **반드시** 조회하여 검증해야 한다.
+- PR 본문과 제목은 변경 목적·영향·검증 방법을 포함해야 한다 (SHOULD).
+
 ## 진행 중인 프로젝트
 
 ### opengateway-mcp
