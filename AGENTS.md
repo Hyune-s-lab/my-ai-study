@@ -58,11 +58,20 @@
 - **화이트 캔버스**: 다크 IDE에서도 다이어그램 영역이 흰색이 되도록 모든 flowchart를 최상위 `subgraph canvas[" "]`로 감싸고 `style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827`을 적용한다. frontmatter에는 `theme: base`, `darkMode: false`, 진한 text/line color를 명시한다.
 - **상태 전이도**: IntelliJ에서 `stateDiagram-v2`는 SVG 배경이 투명하게 렌더링될 수 있으므로 쓰지 않는다. 상태 전이도도 `flowchart LR`와 최상위 white `canvas` subgraph로 작성하고, 상태 단계는 내부 `subgraph`로 묶는다.
 - **아이콘 없는 노드**: 일반 책임·외부 시스템은 흰색 rectangle로 표현하고 `classDef`로 `color:#111827`과 충분한 대비를 보장한다.
-- AWS 배포 아키텍처는 Spring·Kafka 로고로 대체하지 않고 EC2·ECS/Fargate·RDS·MSK·ElastiCache처럼 실제 배포 서비스의 AWS Architecture Icon을 우선한다.
-- **단일 벤더(AWS만) → terrastruct CDN** `https://icons.terrastruct.com/...`(한 세트라 통일감). 예: 종소세 설계.
-  - URL 인코딩 주의: 슬래시=`%2F`, **공백=`%20`**(예: 카테고리 `Application Integration` → `Application%20Integration`). AWS Users는 `aws/_General/Users_light-bg.svg`.
-  - 경로 확정: `curl -s https://icons.terrastruct.com/icons.json`에서 정확한 카테고리/파일명을 grep해 쓴다(추측 금지, 틀리면 403). 쓰기 전 `curl -o /dev/null -w '%{http_code}'`로 200 확인.
-- **멀티 벤더(Spring+Kafka+Redis+ELK…) → simpleicons** `https://cdn.simpleicons.org/<slug>`(예: `springboot`·`apachekafka`·`redis`·`postgresql`·`elasticsearch`·`kibana`·`logstash`·`grafana`·`prometheus`·`keycloak`). 전부 플랫 단색 글리프라 로고를 섞어도 통일감이 있다. terrastruct엔 AWS만 있어 이 스택은 simpleicons로. 없는 슬러그(zipkin 등)는 박스. 더 통일하려면 `…/<slug>/<hexcolor>`로 단색 지정. 예: 스프링 MSA 레퍼런스.
+
+### 아이콘 노드 규칙 (필수)
+
+아이콘 노드(`@{ img: "...", label: "...", pos: "b", h: 48, constraint: "on" }`)를 쓸 때 다음 규칙을 반드시 지킨다.
+
+1. **테두리 제거 (필수)**: 모든 icon 노드에 `classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827`를 선언하고 `class <노드들> icon`으로 적용한다. 테두리·배경이 남으면 네모 박스로 보여 시각 잡음이다.
+2. **라벨 최소화**: 아이콘만으로 의미가 전달되면 `label: ""`로 비운다. 아이콘 + 라벨 중복은 잡음이다. 보조 설명이 필요할 때만 라벨을 단다.
+3. **DB·캐시는 실제 기술 아이콘**: AWS 서비스 아이콘(RDS·ElastiCache) 대신 실제 기술 아이콘(PostgreSQL·Redis)을 쓴다 — 기술 자체가 국룰.
+4. **아이콘 소스**:
+   - DB·캐시 → terrastruct `dev/` 카테고리: `https://icons.terrastruct.com/dev/postgresql.svg`, `https://icons.terrastruct.com/dev/redis.svg`
+   - AWS 배포 서비스(EC2·ECS·MSK 등) → terrastruct: `https://icons.terrastruct.com/aws/<Category>/<File>_light-bg.svg` (`light-bg` 변형이 흰 캔버스에 맞음)
+   - Non-AWS (Spring·Anthropic 등) → simpleicons: `https://cdn.simpleicons.org/<slug>`
+   - OpenAI는 simpleicons CDN에 slug가 없으니 iconify 경유: `https://api.iconify.design/simple-icons/openai.svg`
+5. **경로 확정**: `curl -s https://icons.terrastruct.com/icons.json`에서 정확한 카테고리/파일명을 grep해 쓴다 (추측 금지). 쓰기 전 `curl -o /dev/null -w '%{http_code}'`로 200 확인. terrastruct URL은 `https://icons.terrastruct.com/<path>` (NOT `/icons/<path>` — `/icons/` prefix는 403).
 - 흐름 규칙: 동기=실선(`-->`), 비동기·폴링·구성 로드=`-.->`, 외부 호출은 label에 명시하고 필요하면 `linkStyle`로 빨강(`#D13212`)을 적용한다.
 - 산출물 검증: 문서의 Mermaid block을 추출해 Mermaid CLI 11.14+로 전부 렌더하고 lexical/parser 오류와 가독성을 확인한다.
 
