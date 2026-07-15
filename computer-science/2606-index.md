@@ -17,10 +17,10 @@ config:
 ---
 flowchart LR
   subgraph canvas[" "]
-    direction LR
+    direction TB
     q["쿼리: WHERE filing_id = 35"]
     subgraph idx["B-tree 인덱스 (정렬된 구조)"]
-      direction LR
+      direction TB
       root["Root\n[ 40 ]"]
       l["< 40\n[10 · 25 · 35]"]
       r["≥ 40\n[40 · 60 · 90]"]

@@ -2,6 +2,21 @@
 
 분산 **이벤트 로그**다. 메시지를 큐처럼 소비하고 버리는 게 아니라, **append-only 로그**에 쌓아두고(보관기간 동안) 여러 소비자가 각자 위치(offset)에서 읽는다.
 
+## 핵심 용어
+
+| 용어 | 뜻 |
+|---|---|
+| **Broker** | Kafka 서버 1대. 여러 broker = **Cluster**. 파티션을 나눠 보관·서빙. |
+| **Topic** | 메시지 카테고리(이름). 논리적 스트림. 예: `order.events`. |
+| **Partition** | 토픽을 쪼갠 단위 = **실제 append-only 로그**. **병렬성 + 순서**의 단위. |
+| **Offset** | 파티션 내 메시지의 순번(위치). 컨슈머는 "어디까지 읽었나"를 offset으로 기억. |
+| **Producer** | 발행자. 레코드의 **key**로 어느 파티션에 넣을지 결정(`hash(key) % partitions`). |
+| **Consumer / Consumer Group** | 구독자. **그룹** 단위로 파티션을 나눠 읽음. |
+| **Replication** | 파티션을 여러 broker에 복제(leader 1 + follower N, **ISR**). 내구성·HA. |
+| **Record** | key · value · headers · timestamp. |
+
+### 전체 구조 — Topic · Partition · Broker · Consumer
+
 ```mermaid
 ---
 config:
@@ -18,14 +33,13 @@ config:
 flowchart LR
   subgraph canvas[" "]
     direction LR
-    producer@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Producer\nkey=filing_id → 파티션 결정", pos: "b", h: 48, constraint: "on" }
+    producer@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Producer\nkey → hash(key) % partitions", pos: "b", h: 48, constraint: "on" }
 
-    subgraph cluster["Kafka Cluster (KRaft 모드)"]
+    subgraph topic["Topic: order.events (Kafka Cluster)"]
       direction TB
-      ctrl@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Controller Quorum (KRaft)\n메타데이터·리더 선출 (ZooKeeper 대체)", pos: "b", h: 48, constraint: "on" }
-      b1@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Broker 1\nPartition 0 (leader)\noffset 0,1,2,…", pos: "b", h: 48, constraint: "on" }
-      b2@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Broker 2\nPartition 1 (leader)\noffset 0,1,2,…", pos: "b", h: 48, constraint: "on" }
-      b3@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Broker 3\nPartition 2 (leader)\noffset 0,1,2,…", pos: "b", h: 48, constraint: "on" }
+      p0["Partition 0\nBroker 1 (leader), Broker 2 (follower)\noffset 0,1,2,…"]
+      p1["Partition 1\nBroker 2 (leader), Broker 3 (follower)\noffset 0,1,2,…"]
+      p2["Partition 2\nBroker 3 (leader), Broker 1 (follower)\noffset 0,1,2,…"]
     end
 
     subgraph g1["Consumer Group: 알림"]
@@ -35,39 +49,30 @@ flowchart LR
     end
 
     subgraph g2["Consumer Group: 회계"]
-      direction TB
       c3["Consumer C"]
     end
 
-    producer --> cluster
-    cluster --> g1
-    cluster --> g2
+    producer --> topic
+    p0 --> c1
+    p1 --> c2
+    p2 --> c3
   end
 
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
   classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
-  class producer,b1,b2,b3,ctrl icon
+  class producer icon
+  class p0,p1,p2 app
   class c1,c2,c3 app
-  style cluster fill:#ffffff,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  style topic fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
   style g1 fill:#ffffff,stroke:#3B5BA5,stroke-width:1px,color:#16213E
   style g2 fill:#ffffff,stroke:#3F8E55,stroke-width:1px,color:#14532D
   style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
 ```
 
-## 핵심 용어
-
-| 용어 | 뜻 |
-|---|---|
-| **Broker** | Kafka 서버 1대. 여러 broker = **Cluster**. 파티션을 나눠 보관·서빙. |
-| **Topic** | 메시지 카테고리(이름). 논리적 스트림. 예: `order.events`. |
-| **Partition** | 토픽을 쪼갠 단위 = **실제 append-only 로그**. **병렬성 + 순서**의 단위. |
-| **Offset** | 파티션 내 메시지의 순번(위치). 컨슈머는 "어디까지 읽었나"를 offset으로 기억. |
-| **Producer** | 발행자. 레코드의 **key**로 어느 파티션에 넣을지 결정(`hash(key) % partitions`). |
-| **Consumer / Consumer Group** | 구독자. **그룹** 단위로 파티션을 나눠 읽음. |
-| **Replication** | 파티션을 여러 broker에 복제(leader 1 + follower N, **ISR**). 내구성·HA. |
-| **Record** | key · value · headers · timestamp. |
+- **Topic** = 논리적 이름. `order.events` 토픽이 3개 파티션으로 구성.
+- **Partition** = 실제 로그. 각 파티션이 offset 0,1,2…를 가짐. 같은 key는 같은 파티션 → 순서 보장.
+- **Broker 분산**: Partition 0은 Broker 1이 leader, Broker 2가 follower. 복제로 내구성 확보.
+- **Consumer Group**: 각 그룹이 독립적으로 파티션을 할당받아 소비.
 
 ## 1. 파티션 = 순서와 병렬성의 단위
 
@@ -86,21 +91,21 @@ config:
 ---
 flowchart LR
   subgraph canvas[" "]
-    direction LR
+    direction TB
     producer@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Producer\nkey=filing_id → hash(key) % 파티션수\n로 어느 파티션에 넣을지 결정", pos: "b", h: 48, constraint: "on" }
 
     subgraph topic["Topic: tax.filing (파티션들의 묶음 = 논리적 이름일 뿐)"]
       direction TB
       subgraph p0["Partition 0 — 순서 보장되는 append-only 로그"]
-        direction LR
+        direction TB
         p0a["offset 0"] --- p0b["1"] --- p0c["2"] --- p0d["3"] --- p0e["다음 append →"]
       end
       subgraph p1["Partition 1"]
-        direction LR
+        direction TB
         p1a["offset 0"] --- p1b["1"] --- p1c["다음 append →"]
       end
       subgraph p2["Partition 2"]
-        direction LR
+        direction TB
         p2a["offset 0"] --- p2b["1"] --- p2c["2"] --- p2d["다음 append →"]
       end
     end
@@ -147,9 +152,9 @@ flowchart LR
 - 파티션 내 순서로 **받아도**, 컨슈머가 멀티스레드/비동기로 처리하면 **처리 순서가 깨짐**.
 - 파티션 단위로 **순차 처리**, 또는 key별 직렬화 큐로 처리 순서 보존.
 
-**(5) DLT vs 순서 트레이드오프**
-- 실패 메시지를 **DLT로 보내고 다음으로 진행**하면 그 key의 순서가 어긋남.
-- 순서 엄격: "실패 시 그 파티션 멈추고 재시도"(blocking) ↔ 가용성 우선: "DLT 후 진행". 도메인에 맞게 선택.
+**(5) DLQ vs 순서 트레이드오프**
+- 실패 메시지를 **DLQ로 보내고 다음으로 진행**하면 그 key의 순서가 어긋남.
+- 순서 엄격: "실패 시 그 파티션 멈추고 재시도"(blocking) ↔ 가용성 우선: "DLQ 후 진행". 도메인에 맞게 선택.
 
 **(6) 글로벌 순서가 정말 필요하면** → 파티션 1개(병렬성 포기). 보통은 **key 단위 순서로 충분**.
 
@@ -178,7 +183,7 @@ config:
 ---
 flowchart LR
   subgraph canvas[" "]
-    direction LR
+    direction TB
     subgraph zkmode["① ZooKeeper 모드 (레거시 · ~Kafka 3.x)"]
       direction TB
       z["ZooKeeper 앙상블\n(별도 클러스터 · 메타데이터·선출 보관)"]
