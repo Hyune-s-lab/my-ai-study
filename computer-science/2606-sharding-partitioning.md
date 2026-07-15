@@ -17,7 +17,7 @@ config:
 ---
 flowchart LR
   subgraph canvas[" "]
-    direction LR
+    direction TB
 
     subgraph h["① 수평 파티셔닝 (행 분할 · 단일 DB)"]
       direction TB

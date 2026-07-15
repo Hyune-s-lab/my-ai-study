@@ -11,12 +11,6 @@
 
 **모범답안**: 체인이 **`클라이언트 → 내 게이트웨이 → OpenAI`** 라, 같은 타임아웃 개념이 **세 군데**에서 다르게 나타난다. (특히 내 게이트웨이는 **서버이자 클라이언트**, 두 얼굴.)
 
-```
-[클라이언트] ──hop1──▶ [내 게이트웨이] ──hop2(SDK)──▶ [OpenAI]
- ① 클라 설정      ② 서버(inbound)·③ SDK(outbound)
-   hop1: 한 연결의 두 끝 = ①(클라 측) + ②(내 서버 측)
-```
-
 | 종류 | ① 클라이언트 (→게이트웨이) | ② 내 게이트웨이 서버 (inbound, =**서버**) | ③ SDK (게이트웨이→OpenAI, =**클라이언트**) |
 |---|---|---|---|
 | **connection(연결 수립)** | 게이트웨이에 TCP 연결(클라의 connect) | 호출자가 붙음(내가 accept) | **connect timeout** — 내가 OpenAI에 TCP 연결 |
@@ -323,7 +317,10 @@ flowchart LR
   style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
 ```
 
-> 🔌 게이트웨이 관점: 호출자가 끊으면 나는 **OpenAI로 향한 outbound 호출도 같이 취소**해야 한다. 안 그러면 아무도 안 받을 토큰을 OpenAI가 계속 생성하고 **그 비용은 나한테 청구**된다. Reactor면 inbound 구독 취소가 `doOnCancel`로 전파되게 파이프라인을 잇고(취소가 outbound 연결 종료까지 내려가게), 끊긴 연결엔 생성을 멈춘다. **취소 전파 = 비용 절감**이 게이트웨이에선 직접적이다.
+> 🔌 게이트웨이 관점: 호출자가 끊으면 outbound 호출도 같이 취소해야 한다.  
+> 안 그러면 아무도 안 받을 토큰을 OpenAI가 계속 생성하고, 비용은 나한테 청구된다.  
+> Reactor면 `doOnCancel`로 취소를 outbound 연결 종료까지 전파한다.  
+> **취소 전파 = 비용 절감**이 게이트웨이에선 직접적이다.
 
 ### Q9. 타임아웃 값은 어떻게 정하나요? (얼마로 둘 거냐)
 
@@ -454,11 +451,11 @@ flowchart LR
 
     caller["호출자 마감\n10s (deadline)"]
     subgraph primary["1차 (OpenAI) timeout 6s"]
-      direction TB
+      direction LR
       openai@{ img: "https://api.iconify.design/simple-icons/openai.svg", label: "", pos: "b", h: 48, constraint: "on" }
     end
     subgraph fallback["2차 폴백 (남은 4s)"]
-      direction TB
+      direction LR
       fb["폴백 프로바이더\n다른 모델/라우트"]
     end
     result["최종 응답\n(또는 포기)"]
@@ -511,11 +508,11 @@ flowchart LR
 
     stream_start["스트림 시작"]
     subgraph before["첫 토큰 이전"]
-      direction TB
+      direction LR
       no_token["아직 토큰 미전송\n상태코드 미전송"]
     end
     subgraph after["첫 토큰 이후"]
-      direction TB
+      direction LR
       partial["토큰 일부 전송 완료\n상태 200 이미 전송"]
     end
     upstream_down["업스트림 연결 끊김\n(inter-token timeout 등)"]

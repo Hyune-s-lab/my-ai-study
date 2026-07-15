@@ -7,6 +7,7 @@ DDD 전술 패턴의 핵심. **"함께 변경되어야 하고, 함께 일관성�
 config:
   theme: base
   darkMode: false
+  look: classic
   themeVariables:
     background: "#ffffff"
     primaryColor: "#ffffff"
@@ -17,7 +18,7 @@ config:
 ---
 flowchart LR
   subgraph canvas[" "]
-    direction LR
+    direction TB
     subgraph ord["Order 애그리거트"]
       direction TB
       ord_r["Order (root)"]

@@ -109,7 +109,7 @@ flowchart LR
     direction TB
 
     subgraph stampede["Cache Stampede — 인기 키 만료 폭주"]
-      direction LR
+      direction TB
       ST1["수천 요청 동시 도달"]
       ST2@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "Redis MISS", pos: "b", h: 48, constraint: "on" }
       ST3@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "DB 동시 조회", pos: "b", h: 48, constraint: "on" }
@@ -117,7 +117,7 @@ flowchart LR
     end
 
     subgraph penetration["Cache Penetration — 없는 키 관통"]
-      direction LR
+      direction TB
       PT1["악의적 요청 (존재 않는 키)"]
       PT2@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "Redis MISS", pos: "b", h: 48, constraint: "on" }
       PT3@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "DB 직행 MISS", pos: "b", h: 48, constraint: "on" }
@@ -126,7 +126,7 @@ flowchart LR
     end
 
     subgraph avalanche["Cache Avalanche — 일괄 만료"]
-      direction LR
+      direction TB
       AV1["다수 키 동시 만료 (같은 TTL)"]
       AV2@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "대량 MISS 발생", pos: "b", h: 48, constraint: "on" }
       AV3@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "DB 부하 폭증", pos: "b", h: 48, constraint: "on" }
@@ -134,7 +134,7 @@ flowchart LR
     end
 
     subgraph fix["대응"]
-      direction LR
+      direction TB
       FX1["Stampede: 분산락·logical expire"]
       FX2["Penetration: null 캐싱·Bloom filter"]
       FX3["Avalanche: TTL jitter·다층 캐시"]
@@ -375,7 +375,7 @@ flowchart LR
     direction TB
 
     subgraph acquire["락 획득"]
-      direction LR
+      direction TB
       AC1["클라이언트"]
       AC2["SET lock {uuid} NX PX 5000"]
       AC3@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "락 획득 성공", pos: "b", h: 48, constraint: "on" }
@@ -383,14 +383,14 @@ flowchart LR
     end
 
     subgraph work["작업 수행"]
-      direction LR
+      direction TB
       WK1["임계구역 실행"]
       WK2["TTL 내 완료?\n(길어지면 watchdog 연장)"]
       WK1 --> WK2
     end
 
     subgraph release["락 해제"]
-      direction LR
+      direction TB
       RL1["uuid 검증 (내 락인지 확인)"]
       RL2["원자적 삭제\n(Redisson RLock)"]
       RL3@{ img: "https://icons.terrastruct.com/dev/redis.svg", label: "락 해제 완료", pos: "b", h: 48, constraint: "on" }
@@ -398,7 +398,7 @@ flowchart LR
     end
 
     subgraph risk["주의점"]
-      direction LR
+      direction TB
       RS1["TTL < 작업 시간\n→ 두 주체 동시 진입"]
       RS2["failover 유실\n→ 비동기 복제로 락 소실"]
     end

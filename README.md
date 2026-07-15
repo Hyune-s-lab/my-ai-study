@@ -1,5 +1,8 @@
 # My AI Study
 
+> 이 레포의 문서들은 Mermaid 11.x 최신 문법(아이콘 노드 등)을 사용하여, GitHub 등 브라우저에서 일부 다이어그램이 렌더링되지 않을 수 있습니다.  
+> JetBrains 제품(IntelliJ 등)을 사용 중이라면 [MarkdownNeat](https://plugins.jetbrains.com/plugin/32856-markdownneat) 플러그인 사용을 권장하며, 브라우저에서도 정상 렌더링되도록 Chrome 확장 프로그램 개발을 로드맵에 두고 있습니다.
+
 ## Practice
 
 | 프로젝트 | 주제 |
@@ -31,6 +34,9 @@
 | [2606-index.md](./computer-science/2606-index.md) | 인덱스 (B-tree/GIN·복합 컬럼 순서·부분/커버링·트레이드오프·clustered vs heap) |
 | [2607-race-condition.md](./computer-science/2607-race-condition.md) | race condition (JVM 락·코루틴 Mutex→DB 낙관/비관/네임드 락→데드락·원자적 UPDATE→스케일 아웃→Redisson 분산 락→결과적 일관성) |
 | [2607-message-queue.md](./computer-science/2607-message-queue.md) | 메시지 큐 (전달 보장·순서·Outbox·DLQ·fan-out·RabbitMQ/SQS-SNS/Kafka 비교·Redis Streams) |
+| [2607-api-key-storage.md](./computer-science/2607-api-key-storage.md) | API Key 안전한 저장과 검증 (bcrypt·salt·pepper·key_id 분리·캐싱) |
+| [2607-connection-pool.md](./computer-science/2607-connection-pool.md) | 커넥션 풀 (Tomcat·Netty·HikariCP·가상 스레드·풀 고갈·누수·Bulkhead) |
+| [2607-rate-limiting.md](./computer-science/2607-rate-limiting.md) | Rate Limiting (Token Bucket·Leaky Bucket·Sliding Window·백프레셔·Bucket4j·429 응답) |
 
 ## [system-design](./system-design)
 

@@ -10,7 +10,7 @@
 | 순서 보장 | 단일 큐 내 FIFO (consumer 1개일 때) | FIFO 큐 별도 (표준 큐는 X) | 파티션 내 순서 보장 | 단일 스트림 내 순서 |
 | 메시지 보관 | 소비 후 삭제 | 소비 후 삭제 | 보관 기간 유지 (retention) | 보관 또는 trimming |
 | 중복 제거 | 애플리케이션 책임 | FIFO 큐는 content-based dedup | idempotent producer | 애플리케이션 책임 |
-| retry/DLQ | DLX(Dead Letter Exchange) 내장 | SQS DLQ 연결 | DLT(Dead Letter Topic) 직접 구성 | 미제공 (직접 구현) |
+| retry/DLQ | DLX(Dead Letter Exchange) 내장 | SQS DLQ 연결 | DLQ 직접 구성 | 미제공 (직접 구현) |
 | 지연 큐 | plugin / TTL + DLX | 지연 큐(DelaySeconds) | 지원 안 함 (직접 구현) | 미지원 |
 | 확장 | 클러스터·shovel·federation | AWS가 관리 | 파티션 추가 | 클러스터 (제한적) |
 | 장점 | 라우팅 유연성, retry/DLQ 추상화 | 운영 부담 제로 | 높은 처리량, replay 가능 | 가볍고 빠름 |
@@ -26,6 +26,7 @@ config:
 ---
 flowchart LR
   subgraph canvas[" "]
+    direction LR
     subgraph rabbit["RabbitMQ"]
       direction TB
       rProd["Producer"]:::app
@@ -70,6 +71,8 @@ flowchart LR
       kPart1 --> kConsumer1
       kPart2 --> kConsumer2
     end
+
+    rabbit ~~~ sns ~~~ kafka
   end
 
   classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
@@ -136,6 +139,7 @@ config:
 ---
 flowchart LR
   subgraph canvas[" "]
+    direction LR
     subgraph tx["DB 트랜잭션 (원자성 보장)"]
       direction TB
       app["애플리케이션"]:::app
@@ -187,6 +191,7 @@ config:
 ---
 flowchart LR
   subgraph canvas[" "]
+    direction LR
     broker@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Broker", pos: "b", h: 48, constraint: "on" }
     consumer["Consumer"]:::app
     process["비즈니스 처리"]:::app
@@ -247,7 +252,7 @@ public void handlePaymentPaid(PaymentPaidEvent event) {
 ### Kafka exactly-once
 
 - **Idempotent Producer**: `enable.idempotence=true`. PID + 시퀀스 번호로 브로커가 중복을 제거. 같은 파티션 내 중복 방지.
-- **트랜잭션**: consume → process → produce를 원자로 묶음. `transactional.id` 지정. `commit` 전까지下游 컨슈머는 `isolation_level=read_committed`로 uncommitted 메시지를 안 봄.
+- **트랜잭션**: consume → process → produce를 원자로 묶음. `transactional.id` 지정. `commit` 전까지 downstream 컨슈머는 `isolation_level=read_committed`로 uncommitted 메시지를 안 봄.
 - 비용이 크므로 "반드시 정확히 한 번"이 필요한 결제·재고에만 제한 적용.
 
 ## 3. 순서 보장 방법론
@@ -273,7 +278,7 @@ public void handlePaymentPaid(PaymentPaidEvent event) {
 | 사용자 활동 | `user_id` | 프로필 변경 이벤트 순서 |
 | 게임 상태 | `player_id` | 이동·공격 순서 |
 
-- key를 안 주면 round-robin으로 파티션이分散되어 순서 보장이 사라진다.
+- key를 안 주면 round-robin으로 파티션이 분산되어 순서 보장이 사라진다.
 - key를 너무 좁게 잡으면(예: `order_id + item_id`) 한 주문의 이벤트가 여러 파티션으로 흩어진다.
 - **스윗스팟: 애그리거트 ID를 key로.** 같은 애그리거트의 이벤트는 같은 파티션으로.
 
@@ -300,12 +305,12 @@ public void handle(List<ConsumerRecord<String, OrderEvent>> records, Acknowledgm
 }
 ```
 
-**(5) DLT vs 순서**: 실패 메시지를 DLT로 보내고 다음으로 진행하면 그 key의 순서가 어긋남. 순서 엄격: "실패 시 그 파티션 멈추고 재시도"(blocking) ↔ 가용성 우선: "DLT 후 진행".
+**(5) DLQ vs 순서**: 실패 메시지를 DLQ로 보내고 다음으로 진행하면 그 key의 순서가 어긋남. 순서 엄격: "실패 시 그 파티션 멈추고 재시도"(blocking) ↔ 가용성 우선: "DLQ 후 진행".
 
 | 전략 | 순서 | 가용성 | 언제 |
 |---|---|---|---|
 | blocking retry (그 파티션 멈춤) | 보장 | 낮음 | 순서가 생명 (결제 상태 전이) |
-| DLT 이동 후 진행 | 깨짐 | 높음 | 가용성 우선 (알림, 로그) |
+| DLQ 이동 후 진행 | 깨짐 | 높음 | 가용성 우선 (알림, 로그) |
 
 > 핵심: **순서 = 파티션 단위 + 같은 key + `enable.idempotence` + 파티션 수 고정 + 컨슈머 순차 처리.** 한 군데만 놓쳐도 깨진다.
 
@@ -321,7 +326,7 @@ RabbitMQ는 파티션 개념이 없다. 순서를 보장하려면:
 
 - **Message Group ID**: 같은 group ID를 가진 메시지가 같은 큐에서 순서대로 처리. group별로 독립.
 - **처리량 제한**: FIFO 큐는 표준 큐보다 처리량이 낮음 (300 TPS).
-- **순서 + DLQ**: 최대 수신 횟수 초과 시 DLQ로 이동. DLT처럼 순서가 깨질 수 있음.
+- **순서 + DLQ**: 최대 수신 횟수 초과 시 DLQ로 이동. DLQ처럼 순서가 깨질 수 있음.
 
 ### Kafka Streams — 순서 보장을 엔진 차원에서 지원
 
@@ -353,6 +358,7 @@ config:
 ---
 flowchart LR
   subgraph canvas[" "]
+    direction LR
     broker@{ img: "https://cdn.simpleicons.org/apachekafka", label: "MQ / Broker", pos: "b", h: 48, constraint: "on" }
     consume["메시지 수신\n(consume)"]:::app
     process["비즈니스 처리\n(process)"]:::app
@@ -360,7 +366,7 @@ flowchart LR
     retry["재시도\n(backoff + jitter)"]:::ctrl
     check{"성공?"}:::ctrl
     maxCheck{"최대 재시도\n초과?"}:::ctrl
-    dlq@{ img: "https://icons.terrastruct.com/aws/Application%20Integration/Amazon-Simple-Queue-Service-SQS_light-bg.svg", label: "DLQ / DLT", pos: "b", h: 48, constraint: "on" }
+    dlq@{ img: "https://icons.terrastruct.com/aws/Application%20Integration/Amazon-Simple-Queue-Service-SQS_light-bg.svg", label: "DLQ", pos: "b", h: 48, constraint: "on" }
 
     broker --> consume
     consume --> process
@@ -383,26 +389,26 @@ flowchart LR
 
 | | RabbitMQ | SQS | Kafka |
 |---|---|---|---|
-| DLQ 방식 | DLX (Dead Letter Exchange) | DLQ 큐 연결 | DLT (Dead Letter Topic) 직접 구성 |
+| DLQ 방식 | DLX (Dead Letter Exchange) | DLQ 큐 연결 | DLQ 직접 구성 |
 | 자동 여부 | 정책(x-args)으로 자동 이동 | maxReceiveCount 초과 시 자동 | Spring Kafka `DeadLetterPublishingRecoverer` |
-| 메시지 손실 | DLQ에 보존 | DLQ에 보존 | DLT에 보존 (retention 유지) |
+| 메시지 손실 | DLQ에 보존 | DLQ에 보존 | DLQ에 보존 (retention 유지) |
 
 ### Spring Kafka DLQ 예시
 
 ```java
-// DefaultErrorHandler로 재시도 + DLT 이동
+// DefaultErrorHandler로 재시도 + DLQ 이동
 DefaultErrorHandler handler = new DefaultErrorHandler(
     new DeadLetterPublishingRecoverer(kafkaTemplate),
     new ExponentialBackOffWithMaxRetries(3)
 );
-handler.addNotRetryableExceptions(DeserializationException.class); // 복구 불가는 바로 DLT
+handler.addNotRetryableExceptions(DeserializationException.class); // 복구 불가는 바로 DLQ
 
 factory.getCommonErrorHandler(); // ConcurrentKafkaListenerContainerFactory에 설정
 ```
 
 ### DLQ 설계 원칙
 
-- **DLT도 토픽이다**: Kafka DLT는 일반 토픽이므로 컨슈머가 붙을 수 있다. alert·수동 재처리·분석 용도.
+- **DLQ도 토픽이다**: Kafka DLQ는 일반 토픽이므로 컨슈머가 붙을 수 있다. alert·수동 재처리·분석 용도.
 - **원본 메시지 보존**: DLQ 메시지에 원본 topic, partition, offset, 실패 원인을 헤더/메타데이터로 포함.
 - **재처리 경로**: DLQ → 원본 큐로 재전송하는 도구나 CLI를 둔다. 단, 재처리 시 멱등성이 보장되어야 함.
 - **DLQ 적체 모니터링**: DLQ에 메시지가 쌓이면 알림. "DLQ는 임시가 아니라 영구 장애 신호"일 수 있음.
@@ -412,9 +418,9 @@ factory.getCommonErrorHandler(); // ConcurrentKafkaListenerContainerFactory에 �
 | 전략 | 순서 | 가용성 | 언제 |
 |---|---|---|---|
 | blocking retry (그 파티션 멈춤) | 보장 | 낮음 | 순서가 생명 (결제 상태 전이) |
-| DLT 이동 후 진행 | 깨짐 | 높음 | 가용성 우선 (알림, 로그) |
+| DLQ 이동 후 진행 | 깨짐 | 높음 | 가용성 우선 (알림, 로그) |
 
-도메인에 따라 선택. 순서가 생명이면 blocking, 가용성이 우선이면 DLT.
+도메인에 따라 선택. 순서가 생명이면 blocking, 가용성이 우선이면 DLQ.
 
 ## 5. produce 실패에 대한 대응
 
@@ -504,6 +510,7 @@ config:
 ---
 flowchart LR
   subgraph canvas[" "]
+    direction LR
     producer["Producer"]:::app
 
     subgraph rabbitFan["RabbitMQ (fanout exchange)"]
@@ -589,7 +596,7 @@ SNS topic에 여러 SQS 큐를 subscribe하면, SNS가 각 큐에 메시지를 p
 1. 전달 보장: 실무 기본은 at-least-once → 컨슈머 멱등성 필수 (멱등키 + 상태 머신 + DB 제약)
 2. 순서: 파티션/큐 단위 + 같은 key + 컨슈머 순차 처리. 글로벌 순서 = 병렬성 포기
 3. 결과적 일관성: DB 커밋과 발행의 원자성은 Outbox 패턴으로. 안 쓰면 send 실패 대응 필수
-4. DLQ: consume 후 처리 실패 → 재시도 → DLT/DLQ 이동. 순서 vs 가용성 트레이드오프
+4. DLQ: consume 후 처리 실패 → 재시도 → DLQ 이동. 순서 vs 가용성 트레이드오프
 5. produce 실패: acks=all, idempotent producer, delivery timeout. 중요하면 Outbox
 6. fan-out: RabbitMQ(exchange), SNS(SQS 구독), Kafka(consumer group). Kafka는 복사 없음
 7. 토픽 설계: per-애그리거트 + key=id가 스윗스팟. event_type 헤더로 가벼운 필터
