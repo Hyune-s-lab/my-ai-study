@@ -38,8 +38,9 @@
 | [2607-connection-pool.md](./computer-science/2607-connection-pool.md) | 커넥션 풀 (Tomcat·Netty·HikariCP·가상 스레드·풀 고갈·누수·JDBC 예외·재시도·Bulkhead) |
 | [2607-rate-limiting.md](./computer-science/2607-rate-limiting.md) | Rate Limiting (Token Bucket·Leaky Bucket·Sliding Window·백프레셔·Bucket4j·429 응답) |
 | [2607-data-structure.md](./computer-science/2607-data-structure.md) | 자료구조 (배열·연결리스트·스택/큐·해시테이블·트리·힙·그래프·시간복잡도) |
+| [2607-java-collections.md](./computer-science/2607-java-collections.md) | Java/Kotlin 자료구조 실전 (ArrayList capacity·HashMap 트리 전환·ConcurrentHashMap·BlockingQueue·구현체 선택) |
+| [2607-hash.md](./computer-science/2607-hash.md) | 해시 (해시 함수·충돌·equals/hashCode 계약·불변 키·JPA 엔티티 equals/hashCode·캐싱·중복 제거) |
 | [2607-network-fundamentals.md](./computer-science/2607-network-fundamentals.md) | 네트워크 기초 (OSI/TCP-IP·TCP vs UDP·3/4-way handshake·HTTP vs HTTPS·TLS) |
-| [2607-java-concurrency.md](./computer-science/2607-java-concurrency.md) | Java 동시성 기초 (JMM·volatile·Atomic CAS·fail-fast vs weakly consistent iterator·스레드 상태·덤프 분석) |
 
 ## [system-design](./system-design)
 

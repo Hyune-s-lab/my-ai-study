@@ -108,17 +108,101 @@ fun hashApiKey(rawApiKey: String): String {
 
 ## 3. 클라이언트 요청값과 영속화된 값의 매핑
 
-API Key는 `sk-{key_id}-{secret}` 같은 형태. 클라이언트는 이 원문을 보내고, DB에는 해시가 저장되어 있다.
+API Key는 `sk-{key_id}-{secret}` 같은 형태.  
+key_id는 아이디 역할(조회용), secret은 비밀번호 역할(검증용).  
+클라이언트는 원문을 보내고, DB에는 해시가 저장된다.
 
-### 검증 흐름
+### 생성 로직
 
+```kotlin
+@Service
+class ApiKeyService(
+    private val apiKeyRepository: ApiKeyRepository,
+    private val passwordEncoder: PasswordEncoder
+) {
+    fun generateApiKey(userId: Long): ApiKeyResponse {
+        // 1. key_id: DB 조회용 (아이디 역할). 평문으로 저장.
+        val keyId = UUID.randomUUID().toString().replace("-", "")
+        // → "f3a2b1c4d5e67890a1b2c3d4e5f67890"
+
+        // 2. secret: 비밀번호 역할. 절대 평문으로 저장하지 않는다.
+        //    사용자에게는 한 번만 보여주고, 다시 볼 수 없다.
+        val secret = BigInteger(130, SecureRandom()).toString(36)
+        // → "x7k2m9p3q8w1..."
+
+        // 3. secret을 bcrypt로 해싱해서 DB에 저장
+        val keyHash = passwordEncoder.encode(secret)
+        // → "$2a$10$N9qo8uLOickgx2ZMRZoMye...hash..."
+        //    (salt가 포함된 해시. 평문 secret은 어디에도 저장 안 됨)
+
+        apiKeyRepository.save(ApiKey(
+            keyId = keyId,          // 평문 저장 (조회용)
+            keyHash = keyHash,       // 해시 저장 (검증용)
+            userId = userId,
+            status = "ACTIVE",
+        ))
+
+        // 4. 사용자에게는 조합된 키를 한 번만 보여줌
+        return ApiKeyResponse(
+            apiKey = "sk-${keyId}-${secret}"
+            // → "sk-f3a2b1c4...-x7k2m9p3q8w1"
+            // 이걸 사용자가 복사해서 저장해둠. 서버는 다시 안 보여줌.
+        )
+    }
+}
 ```
-1. 클라이언트가 Authorization: Bearer sk-{key_id}-{secret} 로 요청
-2. 게이트웨이가 raw key 추출
-3. key_id로 DB 조회 (인덱스, 빠름)
-4. bcrypt.matches(secret, storedHash)로 비교 (느리지만 한 번만)
-5. 일치하면 인증 완료, 키 메타데이터(tenant_id, 권한 등) 반환
+
+### 검증 로직
+
+```kotlin
+fun validate(rawApiKey: String): ApiKey? {
+    // 1. 파싱: sk-{key_id}-{secret} → 3부분으로 쪼갬
+    val parts = rawApiKey.split("-", limit = 3)
+    if (parts.size < 3) return null
+    // parts[0] = "sk"       (prefix)
+    // parts[1] = keyId      (아이디 역할)
+    // parts[2] = secret     (비밀번호 역할)
+
+    // 2. key_id로 DB 조회 (인덱스, 빠름 — O(1))
+    //    전체 스캔 없이 key_id만으로 1행 찾기
+    val apiKey = apiKeyRepository.findByKeyIdAndStatus(parts[1], "ACTIVE")
+        ?: return null
+
+    // 3. 만료 확인
+    if (apiKey.expiresAt?.isBefore(LocalDateTime.now()) == true) {
+        return null
+    }
+
+    // 4. secret 비교 (bcrypt — 느리지만 정확히 한 번만)
+    //    DB에서 가져온 keyHash에서 salt를 추출하고,
+    //    입력받은 secret을 같은 salt로 다시 해싱해서 비교
+    if (!passwordEncoder.matches(parts[2], apiKey.keyHash)) {
+        return null  // 비밀번호 틀림
+    }
+
+    // 5. 여기까지 통과하면 인증 성공
+    return apiKey
+}
 ```
+
+### 흐름 요약
+
+```text
+발급:
+  key_id(랜덤) + secret(랜덤) 생성
+  → secret을 bcrypt 해싱해서 DB 저장
+  → 사용자에게 "sk-{key_id}-{secret}" 조합을 한 번만 보여줌
+
+요청:
+  클라이언트가 "sk-{key_id}-{secret}" 헤더로 전달
+  → key_id로 DB에서 1행 찾기 (빠름, 인덱스 조회)
+  → secret을 bcrypt 비교 (한 번만, 느림)
+  → 통과하면 인증 완료
+```
+
+> 사용자가 API Key를 잃어버리면 secret은 다시 볼 수 없다 — 해시만 있으니까.  
+> 재발급 버튼을 누르면 기존 키를 폐기하고 새 key_id + secret을 만든다.  
+> 비밀번호 재설정과 완전히 같은 패턴이다.
 
 ### 핵심 문제: 해시된 값으로는 직접 조회할 수 없다
 

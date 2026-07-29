@@ -1,14 +1,11 @@
 # Spring 멀티모듈 헥사고날 패키징
 
-> 관점: Kotlin·Spring Boot로 구현하는 발주·재고 관리 서비스  
-> 목표: 코드 배치, Gradle 의존성, Spring Modulith의 역할을 혼동하지 않는다.  
-> 기준: Java 21+, Spring Boot 4.x, Exposed, Kafka, PostgreSQL
+> Kotlin·Spring Boot로 구현하는 발주·재고 관리 서비스  
+> Java 21+, Spring Boot 4.x, Exposed, Kafka, PostgreSQL
 
 ## 0. 결론부터
 
 헥사고날 아키텍처의 핵심은 모듈 개수가 아니라 **의존성이 비즈니스 규칙 안쪽으로만 향하는 것**이다.
-
-이 문서의 권장 구조는 다음과 같다.
 
 ```text
 :boot
