@@ -280,7 +280,186 @@ fun findUser(id: Long): User {
 - Spring `@Transactional`은 트랜잭션 종료 시 커넥션을 자동 반납한다.
 - **가장 흔한 누수 원인**: `@Transactional` 안에서 외부 API를 호출하면, API 대기 시간만큼 DB 커넥션을 점유 → 풀 고갈. 외부 호출은 트랜잭션 밖으로 빼야 한다.
 
-## 7. 실무 체크리스트
+## 7. JDBC 예외 처리와 재시도
+
+커넥션 풀 관점에서 예외는 **어디서 발생했는가**가 중요하다.  
+발생 지점에 따라 재시도가 의미 있는지, 즉시 실패해야 하는지가 달라진다.
+
+### 예외 분류 — 3단계
+
+```mermaid
+---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart TB
+  subgraph canvas[" "]
+    direction TB
+    REQ["요청 도착"]
+    POOL{"풀에서 커넥션 획득"}
+    ACQ_FAIL["SQLTransientException<br/>(풀 고갈·타임아웃)<br/>→ 재시도 의미 있음"]
+    CONN["커넥션 획득 성공"]
+    EXEC{"쿼리 실행"}
+    TRANSIENT["일시적 오류<br/>(데드락·타임아웃·연결 끊김)<br/>→ 재시도"]
+    PERMANENT["영구적 오류<br/>(제약 위반·문법 오류)<br/>→ 재시도 금지"]
+    RES["응답 반환"]
+
+    REQ --> POOL
+    POOL --> ACQ_FAIL
+    POOL --> CONN
+    ACQ_FAIL --> RES
+    CONN --> EXEC
+    EXEC --> TRANSIENT
+    EXEC --> PERMANENT
+    TRANSIENT --> RES
+    PERMANENT --> RES
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
+  classDef warn fill:#FEF2F2,stroke:#FCA5A5,stroke-width:1px,color:#991B1B
+  class REQ,CONN,RES app
+  class POOL,EXEC ctrl
+  class ACQ_FAIL,TRANSIENT,PERMANENT warn
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
+
+### 예외 유형별 대응
+
+| 예외 | SQLState / 클래스 | 재시도 | 대응 |
+|---|---|---|---|
+| 풀 고갈 (timeout) | `SQLTransientException` | O (짧게) | `connectionTimeout` 확인, 풀 크기 점검 |
+| 데드락 | MySQL `1213`, PG `40P01` | O | `@Retryable`, 잠금 순서 정렬 |
+| 락 타임아웃 | PG `55P03` | O | `lock_timeout` 설정, 재시도 |
+| 연결 끊김 | `SQLRecoverableException` | O | 커넥션 무효화, 새 커넥션으로 재시도 |
+| 제약 위반 | `SQLIntegrityConstraintViolationException` | X | 데이터 수정, 재시도 무의미 |
+| 문법 오류 | `SQLSyntaxErrorException` | X | 쿼리 수정 |
+| 데이터 오류 | `SQLDataException` | X | 데이터 수정 |
+
+> 핵심: **일시적(transient) 오류만 재시도**한다.  
+> 영구적 오류를 재시도하면 같은 에러가 계속 반복된다.
+
+### Spring의 예외 계층
+
+Spring은 JDBC의 `SQLException`을 `DataAccessException` 계층으로 변환한다.  
+`SQLExceptionTranslator`가 SQLState·vendor code를 보고 매핑한다.
+
+```text
+DataAccessException (루트)
+  ├── NonTransientDataAccessException    → 재시도 금지
+  │     ├── DataIntegrityViolationException  (제약 위반)
+  │     └── DataAccessException              (문법 오류 등)
+  │
+  └── TransientDataAccessException       → 재시도 대상
+        ├── ConcurrencyFailureException      (데드락)
+        ├── PessimisticLockingFailureException (락 획득 실패)
+        └── QueryTimeoutException            (쿼리 타임아웃)
+```
+
+`SQLException`의 `getNextException()`으로 chained exception을 따라가면,  
+실제 원인(SQLState)을 찾을 수 있다.
+
+### 재시도 구현 — `@Retryable`
+
+```kotlin
+@Retryable(
+    retryFor = [
+        ConcurrencyFailureException::class,        // 데드락
+        PessimisticLockingFailureException::class,  // 락 타임아웃
+        QueryTimeoutException::class,               // 쿼리 타임아웃
+        CannotAcquireLockException::class,           // 락 획득 실패
+    ],
+    backoff = Backoff(delay = 100, multiplier = 2, maxDelay = 1000),
+    maxAttempts = 3
+)
+@Transactional
+fun deductStock(id: Long, qty: Long) {
+    val stock = stockRepository.findByIdForUpdate(id)
+    stock.decrease(qty)
+    stockRepository.save(stock)
+}
+```
+
+| `@Retryable` 설정 | 의미 |
+|---|---|
+| `retryFor` | 재시도할 예외 클래스 |
+| `noRetryFor` | 재시도하지 않을 예외 (영구적 오류) |
+| `maxAttempts` | 최대 시도 횟수 (기본 3) |
+| `backoff.delay` | 첫 재시도 대기 (ms) |
+| `backoff.multiplier` | 지수 백오프 배수 |
+| `backoff.maxDelay` | 최대 대기 시간 |
+| `recover` | 전부 실패 시 호출할 fallback 메서드 |
+
+> **`@Retryable`이 `@Transactional` 바깥에 와야 한다.**  
+> 재시도 = 새 트랜잭션으로 들어가야 하므로,  
+> 프록시 순서가 `Retry → Transaction`이어야 한다.  
+> 반대면 같은 트랜잭션 안에서 재시도 → 이미 롤백된 상태라 의미 없음.
+
+### 복구 — `@Recover`
+
+```kotlin
+@Recover
+fun recoverDeductStock(e: ConcurrencyFailureException, id: Long, qty: Long) {
+    // 3번 재시도 전부 실패
+    log.error("stock deduct failed after retries: id={}", id, e)
+    throw IllegalStateException("재고 차감 실패 — 잠시 후 다시 시도해주세요")
+}
+```
+
+`@Recover` 메서드는 첫 파라미터가 예외, 나머지가 원본 메서드 파라미터와 같아야 한다.  
+전부 실패 시 호출되며, 최종 응답을 사용자에게 반환한다.
+
+### 커넥션 풀 단위 예외 처리
+
+| 상황 | 예외 | 대응 |
+|---|---|---|
+| 풀 고갈 (대기 초과) | `SQLTimeoutException` | 503 Service Unavailable + 알림 |
+| 커넥션 검증 실패 | `SQLTransientConnectionException` | HikariCP `connectionTestQuery` / `keepaliveTime` |
+| 커넥션 누수 | `PoolInitializationException` | `leakDetectionThreshold` 로그 확인 |
+| DB 다운 | `SQLRecoverableException` | Circuit Breaker 차단 → 503 |
+
+### HikariCP 설정으로 예외 줄이기
+
+```yaml
+spring:
+  datasource:
+    hikari:
+      # 커넥션 생존 확인 (대여 시 + 주기적)
+      connection-test-query: SELECT 1          # 또는 connection-test-query 생략 (JDBC4 isValid)
+      keepalive-time: 300000                    # 5분마다 keepalive (HikariCP 4.x+)
+      # 커넥션 최대 수명 (DB 방화벽 타임아웃보다 짧게)
+      max-lifetime: 1800000                     # 30분
+      # 풀 획득 타임아웃 (길면 스레드 고갈)
+      connection-timeout: 5000                  # 5초
+      # 검증 타임아웃
+      validation-timeout: 3000                  # 3초
+      # 누수 감지
+      leak-detection-threshold: 30000           # 30초
+```
+
+| 설정 | 역할 | 장애 예방 |
+|---|---|---|
+| `connection-test-query` / `isValid` | 대여 전 커넥션이 살아있는지 확인 | 끊긴 커넥션으로 쿼리 → 예외 방지 |
+| `keepalive-time` | 유휴 커넥션 주기적 검증 | 방화벽이 끊은 dead 커넥션 제거 |
+| `max-lifetime` | 커넥션 주기적 교체 | 오래된 커넥션의 누적 불안정 방지 |
+| `connection-timeout` | 풀 대기 최대 시간 | 스레드가 무한 대기하지 않도록 |
+| `validation-timeout` | 검증 쿼리 타임아웃 | 검증 자체가 느려지는 것 방지 |
+| `leak-detection-threshold` | 대여 후 N초 미반납 시 로그 | 누수 조기 발견 |
+
+> `max-lifetime`은 DB나 방화벽의 idle timeout보다 **짧아야** 한다.  
+> AWS RDS의 기본 `wait_timeout`이 8시간이지만,  
+> 로드밸런서나 방화벽이 그보다 먼저 끊을 수 있다.  
+> 끊긴 커넥션을 풀이 모르고 대여하면 → `SQLRecoverableException`.
+
+## 8. 실무 체크리스트
 
 | 항목 | 권장 |
 |---|---|
