@@ -90,7 +90,12 @@ suspend fun decrease(id: Long, qty: Long) = mutex.withLock {
 | **낙관적 락(optimistic)** | `@Version` 컬럼. UPDATE 시 버전 비교, 다르면 실패 | 락 점유 없음 → 경합 **적을 때** 가장 저렴 | 충돌 시 **재시도 로직**을 직접 작성. 경합 높으면 재시도 폭증 |
 | **비관적 락 — 배타락 (X락)** | `SELECT … FOR UPDATE`. JPA `@Lock(PESSIMISTIC_WRITE)`. 다른 트랜잭션의 읽기·쓰기 모두 차단 | 충돌 자체를 차단 → 경합 **높을 때** 안정적. 갱신 목적에 적합 | 락 대기로 커넥션 점유·**[데드락 유발 가능](#데드락--락이-만드는-교착)** |
 | **비관적 락 — 공유락 (S락)** | `SELECT … FOR SHARE`. JPA `@Lock(PESSIMISTIC_READ)`. 다른 트랜잭션의 읽기는 허용, 쓰기만 차단 | 읽기 일관성 확보. 여러 트랜잭션이 동시에 공유락 보유 가능 | 배타락이 필요한 트랜잭션은 모든 공유락이 풀릴 때까지 대기 |
-| **네임드 락(named lock)** | 행이 아닌 **임의 문자열**에 락. MySQL `GET_LOCK('key')`, PG `pg_advisory_lock` | 행이 아직 없어도(INSERT 경합) 잠글 수 있음, 테이블 락 회피 | 트랜잭션과 별개로 **명시적 해제 필수**. 락용 커넥션이 따로 필요해 풀 고갈 주의 |
+| **SKIP LOCKED** | `SELECT … FOR UPDATE SKIP LOCKED`. 이미 잠긴 행은 **대기하지 않고 건너뛴다** | 락 대기 없음 → 데드락 회피 + 병렬 처리. 여러 컨슈머가 큐 테이블을 동시 폴링할 때 충돌 없이 각자 다른 행 처리 | 순서 보장 안 됨. 건너뛴 행은 이번 폴링에 미처리 |
+| **네임드 락(named lock)** | 행이 아닌 **임의 문자열**에 락. MySQL `GET_LOCK('key')`, Postgres `pg_advisory_lock` | 행이 아직 없어도(INSERT 경합) 잠글 수 있음, 테이블 락 회피 | 트랜잭션과 별개로 **명시적 해제 필수**. 락용 커넥션이 따로 필요해 풀 고갈 주의 |
+
+> `SKIP LOCKED`는 배타락의 변형이다 — `FOR UPDATE`로 잠그되, 이미 다른 트랜잭션이 잡고 있는 행은 기다리지 않고 skip.  
+> Postgres as Queue 패턴의 핵심 메커니즘이다.  
+> 자세한 구현(visibility timeout, sweeper, partial index)은 [메시지 큐(MQ) — Postgres as Queue](./2607-message-queue.md#postgresql-as-queue--for-update-skip-locked) 섹션에서.
 
 락 모드(배타/공유)가 "어떻게 잠그느냐"라면, 락 범위는 "어디까지 잠그느냐"다. 범위가 잘못되면 로우락이 테이블락으로 확장된다.
 
@@ -100,7 +105,7 @@ suspend fun decrease(id: Long, qty: Long) = mutex.withLock {
 | **갭락** | 범위 조회 `WHERE id BETWEEN 10 AND 20` | 빈 공간을 잠가 INSERT 대기 유발. MySQL InnoDB 기본(넥스트키락) |
 | **테이블락** | 인덱스 안 타는 `FOR UPDATE`, DDL | 풀스캔하면서 모든 행에 락 → 사실상 테이블락. **`FOR UPDATE`는 인덱스가 전제** |
 
-PostgreSQL은 갭락이 없고 로우락만 있다. MySQL InnoDB는 넥스트키락(로우락 + 갭락)이 기본 동작이다.
+Postgres은 갭락이 없고 로우락만 있다. MySQL InnoDB는 넥스트키락(로우락 + 갭락)이 기본 동작이다.
 
 ### MVCC — 락 없이 읽는 법
 
@@ -115,7 +120,7 @@ MVCC(Multi-Version Concurrency Control)는 읽기에 락을 안 잡는 핵심 �
 | 격리 수준 | Dirty Read | Non-Repeatable Read | Phantom Read | 설명 |
 |---|---|---|---|---|
 | READ UNCOMMITTED | ❌ 가능 | ❌ 가능 | ❌ 가능 | 커밋 안 된 데이터도 읽음. 거의 안 씀 |
-| READ COMMITTED (PG 기본) | ✅ 방지 | ❌ 가능 | ❌ 가능 | 커밋된 데이터만 읽지만, 같은 행을 다시 읽으면 값이 바뀔 수 있음 |
+| READ COMMITTED (Postgres 기본) | ✅ 방지 | ❌ 가능 | ❌ 가능 | 커밋된 데이터만 읽지만, 같은 행을 다시 읽으면 값이 바뀔 수 있음 |
 | REPEATABLE READ (MySQL 기본) | ✅ 방지 | ✅ 방지 | ❌ 가능(MySQL은 방지) | 트랜잭션 시작 시점 스냅샷 유지. MySQL은 갭락으로 phantom도 방지 |
 | SERIALIZABLE | ✅ 방지 | ✅ 방지 | ✅ 방지 | 모든 읽기에 락. 동시성 포기 |
 
@@ -143,11 +148,11 @@ transaction {
 
 ### 네임드 락 더 파기 — "Redis 없는 분산 락"
 
-- **네임드 락은 그 자체로 분산 락이다.** 락이 공유 지점(DB)에 있으므로 인스턴스 N대에 유효. 락 하나 때문에 Redis를 새로 들이기 싫을 때의 실용해 — Flyway(PG advisory lock)·ShedLock(JDBC)이 내부적으로 같은 원리를 쓴다.
+- **네임드 락은 그 자체로 분산 락이다.** 락이 공유 지점(DB)에 있으므로 인스턴스 N대에 유효. 락 하나 때문에 Redis를 새로 들이기 싫을 때의 실용해 — Flyway(Postgres advisory lock)·ShedLock(JDBC)이 내부적으로 같은 원리를 쓴다.
 - **유량이 돌면 부적합.** 락 대기가 **커넥션을 통째로 점유**하는데, RDB 커넥션은 스레드+메모리가 붙는 비싼 자원 — 경합이 잦으면 풀 고갈 → 전면 장애. 락 전용 DataSource 분리가 정석이지만, 그 수고를 할 시점이면 Redis가 낫다. **적정선은 저빈도 조정**(배치 중복 방지·마이그레이션·리더 흉내).
 - **서버가 죽으면 락도 풀린다.** 커넥션 종료 = 락 자동 해제라 고아 락이 없다(Redis처럼 TTL 튜닝이 필요 없는 장점). 단, **프로세스만 죽으면** OS가 소켓을 닫아 즉시 해제되지만 **머신 다운·네트워크 단절**이면 DB가 죽은 커넥션을 인지할 때까지(TCP keepalive·`wait_timeout`) 락이 한동안 남을 수 있다.
-- **락 상태를 SQL로 조회할 수 있다**: MySQL `IS_USED_LOCK('key')`·`performance_schema.metadata_locks`(USER LEVEL LOCK, 대기 세션까지 표시), PG `pg_locks WHERE locktype='advisory'`(키가 숫자 해시라 문자열→숫자 매핑 규칙 필요). 락 릭 의심 시 범인 세션을 찾아 `KILL`하면 회수.
-- PG엔 `pg_advisory_xact_lock`(트랜잭션 종료 시 자동 해제)이 있어 MySQL `GET_LOCK`의 "명시적 해제 깜빡" 함정을 피할 수 있다.
+- **락 상태를 SQL로 조회할 수 있다**: MySQL `IS_USED_LOCK('key')`·`performance_schema.metadata_locks`(USER LEVEL LOCK, 대기 세션까지 표시), Postgres `pg_locks WHERE locktype='advisory'`(키가 숫자 해시라 문자열→숫자 매핑 규칙 필요). 락 릭 의심 시 범인 세션을 찾아 `KILL`하면 회수.
+- Postgres엔 `pg_advisory_xact_lock`(트랜잭션 종료 시 자동 해제)이 있어 MySQL `GET_LOCK`의 "명시적 해제 깜빡" 함정을 피할 수 있다.
 
 ### DB 락의 두 가지 한계
 
@@ -311,12 +316,12 @@ public void transfer(Long from, Long to, Long amount) {
 
 ### DB가 잡아준다 — 데드락 탐지 (detection)
 
-**RDB는 교착을 자동으로 탐지**한다 — 대기 그래프(wait-for graph)를 유지하다가 순환(cycle)이 발견되면, 한 트랜잭션을 **희생자(victim)** 로 골라 강제 롤백시킨다. MySQL은 `SHOW ENGINE INNODB STATUS`, PostgreSQL은 `pg_stat_activity` + `pg_locks`로 대기 관계를 볼 수 있다.
+**RDB는 교착을 자동으로 탐지**한다 — 대기 그래프(wait-for graph)를 유지하다가 순환(cycle)이 발견되면, 한 트랜잭션을 **희생자(victim)** 로 골라 강제 롤백시킨다. MySQL은 `SHOW ENGINE INNODB STATUS`, Postgres은 `pg_stat_activity` + `pg_locks`로 대기 관계를 볼 수 있다.
 
 희생 트랜잭션은 에러를 던진다 — Spring에선 `@Transactional`이 잡지 못하는 **언체크 예외**로 전파:
 
 - MySQL: `SQLException` — `errno 1213` (Deadlock found)
-- PostgreSQL: `PSQLException` — SQLSTATE `40P01` (deadlock_detected)
+- Postgres: `PSQLException` — SQLSTATE `40P01` (deadlock_detected)
 
 Spring 재시도:
 
@@ -340,10 +345,10 @@ public void transfer(Long from, Long to, Long amount) { ... }
 | DB | 설정 | 기본값 |
 |---|---|---|
 | MySQL | `innodb_lock_wait_timeout` | 50초 |
-| PostgreSQL | `lock_timeout` | 0 (무한) — **명시 설정 필수** |
+| Postgres | `lock_timeout` | 0 (무한) — **명시 설정 필수** |
 
 ```sql
--- PostgreSQL: 세션 레벨 타임아웃
+-- Postgres: 세션 레벨 타임아웃
 SET lock_timeout = '5s';
 ```
 
@@ -453,7 +458,7 @@ transaction {
 "중복 가입 검사 후 INSERT" (check-then-act) 패턴은 SELECT와 INSERT 사이에 틈이 있다. UNIQUE 제약 + upsert로 원자적으로:
 
 ```sql
--- PostgreSQL
+-- Postgres
 INSERT INTO coupon_usage (user_id, coupon_id, used_at)
 VALUES (?, ?, now())
 ON CONFLICT (user_id, coupon_id) DO NOTHING

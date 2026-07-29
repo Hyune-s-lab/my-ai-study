@@ -2,59 +2,72 @@
 
 메시지 큐(MQ)는 프로듀서가 메시지를 발행하고, 브로커가 저장·전달하며, 컨슈머가 소비하는 비동기 분리 구조다. 핵심은 "언제 메시지가 유실되고, 언제 중복되며, 순서가 언제 깨지는가"를 아는 것.
 
-## 구현체 비교 — RabbitMQ · SQS/SNS · Kafka · Redis Streams
+## 구현체 비교 — Postgres as Queue · RabbitMQ · SQS/SNS · Kafka
 
-| | RabbitMQ | SQS/SNS | Kafka | Redis Streams |
+| | Postgres as Queue (DB 기반) | RabbitMQ | SQS/SNS | Kafka |
 |---|---|---|---|---|
-| 모델 | 전통적 AMQP, exchange→queue 라우팅 | 매니지드 큐(SQS) + pub/sub(SNS) | 분산 append-only 로그 | 인메모리 로그 (PEL) |
-| 순서 보장 | 단일 큐 내 FIFO (consumer 1개일 때) | FIFO 큐 별도 (표준 큐는 X) | 파티션 내 순서 보장 | 단일 스트림 내 순서 |
-| 메시지 보관 | 소비 후 삭제 | 소비 후 삭제 | 보관 기간 유지 (retention) | 보관 또는 trimming |
-| 중복 제거 | 애플리케이션 책임 | FIFO 큐는 content-based dedup | idempotent producer | 애플리케이션 책임 |
-| retry/DLQ | DLX(Dead Letter Exchange) 내장 | SQS DLQ 연결 | DLQ 직접 구성 | 미제공 (직접 구현) |
-| 지연 큐 | plugin / TTL + DLX | 지연 큐(DelaySeconds) | 지원 안 함 (직접 구현) | 미지원 |
-| 확장 | 클러스터·shovel·federation | AWS가 관리 | 파티션 추가 | 클러스터 (제한적) |
-| 장점 | 라우팅 유연성, retry/DLQ 추상화 | 운영 부담 제로 | 높은 처리량, replay 가능 | 가볍고 빠름 |
-| 단점 | 운영 부담, 클러스터 복잡 | 벤더 종속, 세밀 제어 한계 | 무겁다, 운영 복잡 | 영속성·HA 한계, 추상화 부족 |
-
-> Redis Streams는 가볍고 빠르지만, retry/DLQ·파티션 rebalance·메시지 보관 측면에서 추상화가 부족하다. 운영 도구도 빈약해 프로덕션 메시징 백본으로는 권장하지 않는다. 경량 로그 스트림이나 PoC 용도에 적합.
+| 모델 | RDBMS 테이블 + FOR UPDATE SKIP LOCKED | 전통적 AMQP, exchange→queue 라우팅 | 매니지드 큐(SQS) + pub/sub(SNS) | 분산 append-only 로그 |
+| 소비 방식 | **polling** (폴링) — 컨슈머가 주기적으로 쿼리 | **push** — 브로커가 컨슈머에게 밀어넣음 | **polling** — 컨슈머가 주기적으로 pull | **polling** — 컨슈머가 offset을 올리며 pull |
+| 순서 보장 | `ORDER BY`로 글로벌 순서 가능. 단, `SKIP LOCKED`는 순서 무시 | 단일 큐 내 FIFO (consumer 1개일 때만) | FIFO 큐 별도 (표준 큐는 순서 보장 X) | 파티션 내 순서 보장. 파티션이 여러 개면 파티션 간 순서는 X |
+| 전달 보장 | **at-least-once** (sweeper가 stuck row 재처리) | **at-least-once** (ack 실패 시 재전송) | **at-least-once** (visibility timeout 후 재전송) | **at-least-once** (consumer offset). exactly-once는 트랜잭션(EOS) 옵션 |
+| 메시지 보관 | 직접 관리 (status update 또는 DELETE) | 소비 후 삭제 | 소비 후 삭제 | 보관 기간 유지 (retention) |
+| 중복 제거 | UNIQUE 제약 + 멱등키 | 애플리케이션 책임 | FIFO 큐는 content-based dedup | idempotent producer |
+| retry/DLQ | 수동 구현 (retry_count, status 컬럼) | DLX(Dead Letter Exchange) 내장 | SQS DLQ 연결 | DLQ 직접 구성 |
+| 지연 큐 | visible_at 컬럼 + 폴링 조건 | plugin / TTL + DLX | 지연 큐(DelaySeconds) | 지원 안 함 (직접 구현) |
+| 확장 | 읽기 복제만, 쓰기 단일 노드 | 클러스터·shovel·federation | AWS가 관리 | 파티션 추가 |
+| 장점 | 트랜잭션 원자성, 외부 의존성 없음 | 라우팅 유연성, retry/DLQ 추상화 | 운영 부담 제로 | 높은 처리량, replay 가능 |
+| 단점 | 처리량 한계, lock 경합, VACUUM 압박 | 운영 부담, 클러스터 복잡 | 벤더 종속, 세밀 제어 한계 | 무겁다, 운영 복잡 |
 
 ```mermaid
 ---
 config:
   theme: base
   darkMode: false
+  look: classic
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
 ---
 flowchart LR
   subgraph canvas[" "]
     direction LR
+
+    subgraph pg["Postgres as Queue"]
+      direction TB
+      pgProd["Producer"]:::app
+      pgTable["queue_table\n(FOR UPDATE SKIP LOCKED)"]:::db
+      pgProd --> pgTable
+      pgTable --> pgC1["Consumer A"]:::app
+      pgTable --> pgC2["Consumer B"]:::app
+      pgTable --> pgC3["Consumer C"]:::app
+    end
+
     subgraph rabbit["RabbitMQ"]
       direction TB
       rProd["Producer"]:::app
-      rRabbit@{ img: "https://cdn.simpleicons.org/rabbitmq", label: "Exchange\n(routing)", pos: "b", h: 48, constraint: "on" }
-      rQueue1["Queue A"]:::db
-      rQueue2["Queue B"]:::db
-      rConsumer1["Consumer A"]:::app
-      rConsumer2["Consumer B"]:::app
+      rRabbit@{ img: "https://cdn.simpleicons.org/rabbitmq", label: "", pos: "b", h: 48, constraint: "on" }
+      rQueue["Queue"]:::db
       rProd --> rRabbit
-      rRabbit --> rQueue1
-      rRabbit --> rQueue2
-      rQueue1 --> rConsumer1
-      rQueue2 --> rConsumer2
+      rRabbit --> rQueue
+      rQueue --> rC1["Consumer A"]:::app
+      rQueue --> rC2["Consumer B"]:::app
+      rQueue --> rC3["Consumer C"]:::app
     end
 
     subgraph sns["SNS + SQS"]
       direction TB
       sProd["Producer"]:::app
-      snsTopic@{ img: "https://icons.terrastruct.com/aws/Application%20Integration/Amazon-Simple-Notification-Service-SNS_light-bg.svg", label: "SNS Topic", pos: "b", h: 48, constraint: "on" }
-      sqs1@{ img: "https://icons.terrastruct.com/aws/Application%20Integration/Amazon-Simple-Queue-Service-SQS_light-bg.svg", label: "SQS A", pos: "b", h: 48, constraint: "on" }
-      sqs2@{ img: "https://icons.terrastruct.com/aws/Application%20Integration/Amazon-Simple-Queue-Service-SQS_light-bg.svg", label: "SQS B", pos: "b", h: 48, constraint: "on" }
-      sConsumer1["Consumer A"]:::app
-      sConsumer2["Consumer B"]:::app
+      snsTopic@{ img: "https://icons.terrastruct.com/aws/Application%20Integration/Amazon-Simple-Notification-Service-SNS_light-bg.svg", label: "", pos: "b", h: 48, constraint: "on" }
+      sqs1@{ img: "https://icons.terrastruct.com/aws/Application%20Integration/Amazon-Simple-Queue-Service-SQS_light-bg.svg", label: "SQS", pos: "b", h: 48, constraint: "on" }
       sProd --> snsTopic
       snsTopic --> sqs1
-      snsTopic --> sqs2
-      sqs1 --> sConsumer1
-      sqs2 --> sConsumer2
+      sqs1 --> sC1["Consumer A"]:::app
+      sqs1 --> sC2["Consumer B"]:::app
+      sqs1 --> sC3["Consumer C"]:::app
     end
 
     subgraph kafka["Kafka"]
@@ -63,30 +76,328 @@ flowchart LR
       kTopic@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Topic", pos: "b", h: 48, constraint: "on" }
       kPart1["Partition 0"]:::db
       kPart2["Partition 1"]:::db
-      kConsumer1["Consumer\n(group A)"]:::app
-      kConsumer2["Consumer\n(group B)"]:::app
       kProd --> kTopic
       kTopic --> kPart1
       kTopic --> kPart2
-      kPart1 --> kConsumer1
-      kPart2 --> kConsumer2
+      kPart1 --> kC1["Consumer A\n(partition 0)"]:::app
+      kPart2 --> kC2["Consumer B\n(partition 1)"]:::app
+      kC3["Consumer C\n(idle)"]:::app
     end
 
-    rabbit ~~~ sns ~~~ kafka
+    pg ~~~ rabbit ~~~ sns ~~~ kafka
   end
 
   classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
   classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
   classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  class snsTopic,sqs1,sqs2,kTopic,rRabbit icon
-  class rProd,rConsumer1,rConsumer2,sProd,sConsumer1,sConsumer2,kProd,kConsumer1,kConsumer2 app
-  class rQueue1,rQueue2,kPart1,kPart2 db
+  class rRabbit,snsTopic,sqs1,kTopic icon
+  class pgProd,pgC1,pgC2,pgC3,rProd,rC1,rC2,rC3,sProd,sC1,sC2,sC3,kProd,kC1,kC2,kC3 app
+  class pgTable,rQueue,kPart1,kPart2 db
+  style pg fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
   style rabbit fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
   style sns fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
   style kafka fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
   style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
 ```
+
+## 메시징 발전 단계 — 인메모리 → Postgres → 외부 MQ
+
+외부 MQ를 처음부터 도입하는 팀은 없다.  
+요구사항이 바뀌면서 단계를 밟게 된다.  
+각 단계는 "영속성 · 원자성 · 처리량" 3축의 트레이드오프다.
+
+> 각 단계는 필수 경로가 아니다.  
+> 트래픽 특성에 따라 건너뛸 수 있으며,  
+> Postgres as Queue에서 영구 정착하는 팀도 많다.
+
+### 3축 비교 — 영속성 · 원자성 · 처리량
+
+| 구현 | 영속성 | 원자성 (비즈니스와의) | 처리량 | 운영 복잡도 | 적합 시점 |
+|---|---|---|---|---|---|
+| Spring Application Events | ✗ | ✗ | 높음 (JVM 내) | 낮음 | 단일 JVM 도메인 이벤트 |
+| Postgres as Queue | ✓ (WAL) | ✓ (트랜잭션) | ~수백 TPS | 낮음~중간 | 외부 MQ 도입 전, 원자성 중요 |
+| RabbitMQ | ✓ (브로커) | 분리 (Outbox 필요) | ~수만 TPS | 중간 | 라우팅·워크큐 |
+| Kafka | ✓ (로그) | 분리 (Outbox 필요) | ~수십만 TPS | 높음 | 고처리량 스트리밍 |
+
+```mermaid
+---
+config:
+  theme: base
+  darkMode: false
+  look: classic
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction LR
+    mem["1. 인메모리\nApplicationEventPublisher\n영속성 ✗ · 원자성 ✗"]:::app
+    pg["2. Postgres as Queue\nFOR UPDATE SKIP LOCKED\n영속성 ✓ · 원자성 ✓ · ~수백 TPS"]:::db
+    mq["3. 외부 MQ\nRabbitMQ · Kafka\n영속성 ✓ · 수만~수십만 TPS"]:::ctrl
+
+    mem --> pg --> mq
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
+  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
+
+### 인메모리 — Spring ApplicationEventPublisher
+
+같은 JVM 내에서 이벤트를 발행하고 수신한다.  
+앱이 죽으면 메시지가 유실된다 — 영속성이 없다.
+
+```kotlin
+// 이벤트 발행
+applicationEventPublisher.publishEvent(OrderCompletedEvent(orderId))
+
+// 이벤트 수신
+@EventListener
+fun handle(event: OrderCompletedEvent) {
+    notificationService.send(event.orderId)
+}
+```
+
+- **장점**: 외부 인프라 없음, 구조가 단순, 지연 최소
+- **한계**: 앱 크래시 = 메시지 유실, 다중 인스턴스 시 중복 처리 위험
+- **적합**: 알림·로그 등 유실 허용되는 도메인 이벤트
+
+### Postgres as Queue — FOR UPDATE SKIP LOCKED
+
+Postgres 테이블 자체를 큐로 쓴다.  
+비즈니스 트랜잭션과 메시지 저장이 원자적으로 묶인다는 것이 핵심 장점이다.
+
+#### 핵심 쿼리 — FOR UPDATE SKIP LOCKED
+
+```sql
+-- 여러 컨슈머가 동시에 폴링해도 서로 다른 행을 가져간다
+SELECT id, payload FROM queue_table
+WHERE status = 'pending' AND visible_at <= now()
+ORDER BY created_at
+FOR UPDATE SKIP LOCKED
+LIMIT 10;
+```
+
+`SKIP LOCKED`는 이미 다른 컨슈머가 잡고 있는 행을 건너뛴다.  
+여러 컨슈머가 병렬로 폴링해도 충돌 없이 각자 다른 메시지를 처리한다.
+
+```mermaid
+---
+config:
+  theme: base
+  darkMode: false
+  look: classic
+  themeVariables:
+    background: "#ffffff"
+    primaryColor: "#ffffff"
+    primaryTextColor: "#111827"
+    primaryBorderColor: "#475569"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction LR
+
+    prod["Producer\nINSERT INTO queue_table"]:::app
+
+    subgraph queue["queue_table"]
+      direction TB
+      row1["row 1\nstatus=pending"]:::db
+      row2["row 2\nstatus=processing\n(visible_at +30s)"]:::db
+      row3["row 3\nstatus=pending"]:::db
+      row4["row 4\nstatus=done"]:::db
+    end
+
+    poll["SELECT ...\nFOR UPDATE SKIP LOCKED"]:::ctrl
+    c1["Consumer A\n→ row 1"]:::app
+    c2["Consumer B\n→ row 3"]:::app
+    sweep["sweeper\nrow 2 타임아웃 시\n→ pending 복구"]:::ctrl
+
+    prod --> row1
+    row1 --> poll
+    poll --> c1
+    poll --> c2
+    sweep --> row2
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
+  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
+  style queue fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
+
+#### partial index — 없으면 풀 스캔 + lock 경합
+
+```sql
+-- 필수: status='pending'인 행만 인덱싱
+CREATE INDEX idx_queue_pending ON queue_table (created_at)
+WHERE status = 'pending';
+```
+
+partial index가 없으면 폴링 쿼리가 테이블 전체를 스캔하면서  
+모든 행에 lock을 시도한다 → 동시 컨슈머가 경합 → 처리량 급락.  
+Postgres as Queue에서 가장 흔한 실수다.
+
+#### visibility timeout 구현
+
+SQS의 `visibility_timeout`을 PG로 직접 구현한다.  
+컨슈머가 메시지를 가져간 후 처리 중 죽었을 때 재처리를 보장한다.
+
+```sql
+-- 메시지 확보 (visibility timeout 30초)
+UPDATE queue_table
+SET status = 'processing', visible_at = now() + interval '30 seconds'
+WHERE id IN (
+  SELECT id FROM queue_table
+  WHERE status = 'pending' AND visible_at <= now()
+  ORDER BY created_at
+  FOR UPDATE SKIP LOCKED
+  LIMIT 10
+)
+RETURNING *;
+
+-- 처리 완료
+UPDATE queue_table SET status = 'done', processed_at = now()
+WHERE id = $1;
+```
+
+#### sweeper — stuck row 회수
+
+컨슈머가 `processing` 상태로 가져간 후 hang되면,  
+`visible_at`이 지나도 `status`가 `processing`인 채로 갇힌다.  
+별도 sweeper 프로세스가 주기적으로 회수한다.
+
+```sql
+-- 타임아웃된 메시지 재큐잉 (30초마다 실행)
+UPDATE queue_table
+SET status = 'pending', visible_at = now(), retry_count = retry_count + 1
+WHERE status = 'processing' AND visible_at < now();
+```
+
+> visibility timeout + sweeper 조합이 at-least-once를 보장한다.  
+> 컨슈머 크래시 → 롤백 → 락 해제 → 재처리 (OK).  
+> 컨슈머 hang (연결 살아있음) → 락이 안 풀림 → sweeper가 회수.
+
+#### LISTEN/NOTIFY — 보조 트리거, 주력이 아님
+
+`LISTEN/NOTIFY`로 폴링 주기를 보완할 수 있다.  
+하지만 **신뢰할 수 없으므로 보조 수단이다**:
+
+- **유실 가능성**: listener가 연결 끊김 중 발생한 NOTIFY는 사라진다
+- **payload 제한**: 8,000 bytes
+- **재전송 없음**: at-least-once 보장이 안 된다
+- **커넥션 풀 점유**: LISTEN 중인 커넥션은 풀에서 빠져 전용으로 점유된다
+
+정석 패턴: **폴링이 주력, LISTEN/NOTIFY는 idle 시 wake-up용 보조**.  
+LISTEN/NOTIFY가 유실돼도 폴백 폴링(30초 주기)이 있으니 at-least-once가 보장된다.
+
+#### VACUUM 압박 — soft delete vs DELETE
+
+```sql
+-- 나쁜 패턴: 매 소비마다 DELETE → dead tuple 폭증
+DELETE FROM queue_table WHERE id = $1;
+
+-- 나은 패턴: status update + 주기적 cleanup
+UPDATE queue_table SET status = 'done', processed_at = now() WHERE id = $1;
+-- 주기적: DELETE FROM queue_table WHERE status = 'done'
+--   AND processed_at < now() - interval '7 days';
+```
+
+DELETE가 매 소비마다 발생하면 dead tuple이 피크 시간에 집중된다.  
+autovacuum이 따라가지 못하면 테이블 bloat → 디스크 압박.
+
+soft delete(`status = 'done'`) + batch purge가 나은 이유는 dead tuple이 줄어서가 아니다 —  
+UPDATE도 dead tuple을 1개 만든다 (Postgres MVCC).  
+차이는 **삭제 시점 통제**에 있다:
+
+| | 매번 DELETE | soft delete + batch purge |
+|---|---|---|
+| dead tuple 발생 시점 | 소비 타이밍 (피크) | purge 타이밍 (한산한 시간) |
+| VACUUM 부담 | 소비 속도에 비례 | purge 주기로 통제 |
+| 이력 보존 | 즉시 삭제 | `done` 행으로 추적 가능 |
+
+#### JPA / Exposed 코드 예시
+
+```kotlin
+// JPA — FOR UPDATE SKIP LOCKED는 JPA 표준이 아니므로 native query 사용
+@Query(
+    value = """
+        SELECT * FROM queue_table
+        WHERE status = 'pending' AND visible_at <= :now
+        ORDER BY created_at
+        FOR UPDATE SKIP LOCKED
+        LIMIT :limit
+        """,
+    nativeQuery = true
+)
+List<QueueEntity> findPendingForUpdate(
+    @Param("now") Instant now,
+    @Param("limit") Int limit
+)
+```
+
+```kotlin
+// Exposed — forUpdate(SkipLocked) 로 직접 지원
+transaction {
+    QueueTable
+        .select {
+            (QueueTable.status eq "pending") and
+            (QueueTable.visibleAt lessEq now())
+        }
+        .orderBy(QueueTable.createdAt to SortOrder.ASC)
+        .forUpdate(SkipLocked)
+        .limit(10)
+        .toList()
+}
+```
+
+Exposed는 `forUpdate(SkipLocked)`로 `SKIP LOCKED`를 직접 지원한다.
+
+### Outbox vs Postgres as Queue — 개념 구분
+
+두 패턴은 모두 Postgres을 사용하지만, **구조적으로 다른 결정**이다.
+
+| | Outbox 패턴 | Postgres as Queue |
+|---|---|---|
+| Postgres 역할 | 임시 대기소 (relay target) | 최종 큐 (최종 목적지) |
+| 외부 MQ | 있음 (Postgres → MQ로 relay) | 없음 (Postgres이 곧 큐) |
+| 해결 문제 | Dual-write (DB + MQ 원자적 쓰기) | 외부 MQ 도입 비용 회피 |
+| 데이터 흐름 | App → Postgres(outbox) → relay → MQ → consumer | App → Postgres(queue) → consumer |
+| 트랜잭션 | 비즈니스 쓰기 + outbox 쓰기 동일 트랜잭션 | 큐 행 insert가 별도 트랜잭션 |
+
+> Outbox는 Postgres이 외부 MQ로의 릴레이 창구다.  
+> Postgres as Queue는 Postgres 자체가 큐다.  
+"외부 MQ를 도입할 것인가?"에 대한 다른 답이다.
+
+### 외부 MQ로 넘어가는 시점
+
+Postgres as Queue의 한계가 체감되면 외부 MQ를 검토한다:
+
+- 폴링 쿼리의 p99 지연이 서비스 SLO 위반
+- Postgres 커넥션 풀 고갈 빈도 증가
+- VACUUM 후에도 dead tuple 비율이 20% 이상
+- sweeper가 stuck row를 정리하는 빈도 증가
+- 동시 컨슈머 증가 시 lock 경합으로 처리량 정체
+
+> 실무에서는 처음부터 외부 MQ를 도입하지 않는다.  
+> Postgres as Queue로 시작하고, 한계가 보이면 RabbitMQ(워크큐) 또는 Kafka(스트리밍)로 전환한다.
+
+> **실무 팁 — Redis를 경량 큐로 쓰는 경우**  
+> `BRPOP`/`LPUSH`로 Redis 리스트 기반 큐를 만드는 패턴이 있다.  
+> Sidekiq(Ruby), Celery(Python), Bull(Node.js)에서 사실상 표준이다.  
+> 인메모리와 Postgres 사이의 가벼운 중간 단계로 적합하지만,  
+> 비즈니스 DB 쓰기와 Redis 큐 쓰기가 원자적이지 않다 (dual-write 문제).  
+> 영속성은 RDB/AOF로 부분 보장되나, 트랜잭션 원자성이 필요하면 Postgres as Queue가 낫다.
 
 ## 용어 정리 — produce/publish vs consume/subscribe
 
@@ -131,6 +442,10 @@ DB 커밋과 MQ 발행은 분리된 두 작업이다. 둘 중 하나만 성공�
 
 같은 트랜잭션이라 DB 원자성이 보장되고, 발행은 별도 프로세스가 재시도한다. Kafka용으로는 Debezium CDC 연동이 대표적.
 
+> outbox 패턴에서 poller가 outbox 테이블을 읽을 때 `FOR UPDATE SKIP LOCKED`를 쓰는 것이 정석이다.  
+> [Postgres as Queue](#postgresql-as-queue--for-update-skip-locked) 섹션과 비교하라 —  
+> Outbox는 Postgres이 외부 MQ로의 릴레이 창구고, Postgres as Queue는 Postgres 자체가 최종 큐다.
+
 ```mermaid
 ---
 config:
@@ -143,7 +458,7 @@ flowchart LR
     subgraph tx["DB 트랜잭션 (원자성 보장)"]
       direction TB
       app["애플리케이션"]:::app
-      pg@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "PostgreSQL", pos: "b", h: 48, constraint: "on" }
+      pg@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "Postgres", pos: "b", h: 48, constraint: "on" }
       bizTable["비즈니스 테이블\n(orders 등)"]:::db
       outboxTable["outbox 테이블\n(event, status=pending)"]:::db
       app --> pg
@@ -593,6 +908,9 @@ SNS topic에 여러 SQS 큐를 subscribe하면, SNS가 각 큐에 메시지를 p
 ## 한 장 요약
 
 ```
+0. 발전 단계: 인메모리(유실 위험) → Postgres as Queue(원자성, ~수백 TPS) → 외부 MQ(전용 인프라)
+   - Postgres as Queue: FOR UPDATE SKIP LOCKED + partial index + visibility timeout + sweeper
+   - Outbox ≠ Postgres as Queue: Outbox는 임시 대기소(→ 외부 MQ relay), Postgres as Queue는 최종 큐
 1. 전달 보장: 실무 기본은 at-least-once → 컨슈머 멱등성 필수 (멱등키 + 상태 머신 + DB 제약)
 2. 순서: 파티션/큐 단위 + 같은 key + 컨슈머 순차 처리. 글로벌 순서 = 병렬성 포기
 3. 결과적 일관성: DB 커밋과 발행의 원자성은 Outbox 패턴으로. 안 쓰면 send 실패 대응 필수
@@ -600,7 +918,6 @@ SNS topic에 여러 SQS 큐를 subscribe하면, SNS가 각 큐에 메시지를 p
 5. produce 실패: acks=all, idempotent producer, delivery timeout. 중요하면 Outbox
 6. fan-out: RabbitMQ(exchange), SNS(SQS 구독), Kafka(consumer group). Kafka는 복사 없음
 7. 토픽 설계: per-애그리거트 + key=id가 스윗스팟. event_type 헤더로 가벼운 필터
-8. Redis Streams: 경량·빠르지만 retry/DLQ/파티션 rebalance 추상화 부족 → PoC/경량 용도
 9. Kafka Streams: 파티션별 상태 store로 순서+상태+윈도우 처리를 엔진 차원에서 지원
 ```
 
