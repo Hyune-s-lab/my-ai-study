@@ -570,6 +570,108 @@ import org.springframework.modulith.PackageInfo
 class InventoryModule
 ```
 
+### 6.4 모듈 간 흐름: orchestration
+
+vertical 모델에서 `order`와 `inventory`가 각자의 공개 usecase를 가지면,  
+"발주 완료 후 재고 차감"처럼 두 모듈에 걸친 흐름은 어디에 둘까?
+
+선택지는 두 가지다.
+
+| 방식 | 구조 | 특징 |
+|---|---|---|
+| 직접 호출 | `order` application이 `inventory` 공개 usecase 호출 | 간단하지만 `order` → `inventory` 의존 발생. 반대도 필요하면 cycle |
+| orchestration 모듈 | 별도 모듈이 양쪽 공개 usecase를 조합 | cycle을 끊지만 양쪽 usecase 시그니처를 모두 알아야 함 |
+
+직접 호출이 간단하지만, 양방향 의존이 필요해지면 순환이 생긴다.  
+orchestration 모듈은 이 cycle을 한 곳으로 모은다.  
+결합을 제거한 게 아니라 한 곳으로 옮긴 것이므로,  
+이름은 "cycle breaker"보다 **"cross-module 조정 경계"**가 정확하다.
+
+```mermaid
+---
+config:
+  theme: base
+  darkMode: false
+  themeVariables:
+    background: "#ffffff"
+    primaryTextColor: "#111827"
+    lineColor: "#334155"
+    edgeLabelBackground: "#ffffff"
+---
+flowchart LR
+  subgraph canvas[" "]
+    direction LR
+    WEB[":adapters:web<br/>REST Controller"] --> ORCH[":orchestration<br/>cross-module usecase<br/>순서 · transaction"]
+    ORCH --> ORDER[":order<br/>공개 usecase"]
+    ORCH --> INV[":inventory<br/>공개 usecase"]
+  end
+
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
+  class WEB,ORDER,INV app
+  class ORCH ctrl
+  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+```
+
+orchestration 모듈은 `domain`과 `persistence`가 없다.  
+state를 소유하지 않고 다른 모듈의 공개 usecase만 조합한다.
+
+```text
+orchestration/
+├── usecase/
+│   └── model/
+├── application/
+└── port/outbound/
+```
+
+```kotlin
+// orchestration 모듈의 공개 usecase
+fun interface CompleteOrderOrchestration {
+    fun complete(orderId: OrderId)
+}
+
+// orchestration 모듈의 application 구현
+@Service
+class CompleteOrderOrchestrationService(
+    private val completeOrder: CompleteOrderUseCase,
+    private val deductStock: DeductStockUseCase,
+) : CompleteOrderOrchestration {
+
+    @Transactional
+    override fun complete(orderId: OrderId) {
+        completeOrder.complete(orderId)
+        deductStock.deduct(orderId)
+    }
+}
+```
+
+`@Transactional`이 두 모듈의 table을 하나의 transaction으로 묶는다.  
+modular monolith에서는 가능하지만, service를 분리하려면  
+이 transaction을 saga로 먼저 바꿔야 한다.
+
+#### 네이밍
+
+`orchestration`은 "여러 컴포넌트를 중앙에서 순서대로 호출해  
+하나의 요청을 완결하는" 패턴의 업계 표준 용어다.  
+`application`(단일 모듈 내 조정)과 대비되어 의미가 명확하다.
+
+| 후보 | 장점 | 단점 |
+|---|---|---|
+| `:orchestration` | 업계 표준. `application`과 정확히 대비 | — |
+| `:workflow` | 직관적 | 워크플로우 엔진 암시 |
+| `:composition` | "조합한다"는 동작에 충실 | `application` 역할과 혼동 가능 |
+
+추천은 `:orchestration`이다.
+
+#### 도입 시점
+
+처음부터 orchestration 모듈을 만들 필요는 없다.  
+§8의 도입 순서 원칙대로, cycle이 실제로 문제가 될 때 도입한다.
+
+1. 한 모듈의 application이 다른 모듈의 공개 usecase를 직접 호출
+2. 양방향 의존이 필요해지면 orchestration 모듈로 끌어올림
+3. service 분리 시 orchestration의 transaction을 saga로 전환
+
 ## 7. 경계를 자동 검증하기
 
 Gradle로 막힐 수 있는 의존성은 Gradle이 막게 한다. 하나의 모듈 안에서 어댑터가 domain 내부 구현을 접근하는 문제는 ArchUnit으로 보완한다.
