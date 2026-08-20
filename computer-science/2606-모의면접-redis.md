@@ -220,7 +220,7 @@ config:
 ---
 flowchart LR
   subgraph canvas[" "]
-    direction TB
+    direction LR
 
     subgraph rdb["RDB (Snapshot)"]
       direction TB
@@ -372,7 +372,7 @@ config:
 ---
 flowchart LR
   subgraph canvas[" "]
-    direction TB
+    direction LR
 
     subgraph acquire["락 획득"]
       direction TB
