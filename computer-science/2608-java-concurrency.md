@@ -594,3 +594,26 @@ map.merge(k, 1L, Long::sum)
 - `containsKey` → `put` 패턴을 `putIfAbsent` / `computeIfAbsent`로 바꾼다.
 - 스케일 아웃 계획이 있다면, JVM 락으로 지키던 불변식을 DB 제약으로 옮긴다.
 - 지표에 `activeCount`, `queue.size()`, 거부 횟수를 노출한다. 큐 길이는 조용히 자란다.
+
+## 참고
+
+주제 구성의 출처. 저자 Vladyslav Kekukh, *Revolut Interview Prep Series* (Level Up Coding).  
+전편 member-only이며 본문은 확보하지 못했다 — 이 문서의 서술은 자체 작성이다.
+
+- [Java Memory Model & volatile](https://levelup.gitconnected.com/java-memory-model-volatile-theory-practice-for-senior-fintech-interviews-e0eaa5088e04) — 1장
+- [synchronized, Intrinsic Locks & Monitor](https://levelup.gitconnected.com/synchronized-intrinsic-locks-monitor-the-engine-behind-thread-safe-banking-f6fa35396f96) — 2장
+- [ReentrantLock, ReadWriteLock & Condition](https://levelup.gitconnected.com/reentrantlock-readwritelock-condition-when-synchronized-isnt-enough-924c2e5d7727) — 3장
+- [Atomic Classes, CAS, and Lock-Free Programming](https://levelup.gitconnected.com/atomic-classes-cas-and-lock-free-programming-when-a-lock-is-too-expensive-6df24728ae9c) — 4장
+- [ThreadPoolExecutor: Stop Using Factory Methods in Production](https://levelup.gitconnected.com/threadpoolexecutor-stop-using-factory-methods-in-production-a74ab0d5cb04) — 5장
+- [CompletableFuture: Async Pipelines That Don't Fall Apart Under Load](https://levelup.gitconnected.com/completablefuture-async-pipelines-that-dont-fall-apart-under-load-bdaa408f70f7) — 6장
+- [Concurrent Collections: Fine-Grained Locking and When to Use Each](https://levelup.gitconnected.com/concurrent-collections-fine-grained-locking-and-when-to-use-each-8da8ec669352) — 7장
+- [Deadlock, Livelock, and Starvation](https://levelup.gitconnected.com/deadlock-livelock-and-starvation-the-bugs-that-dont-throw-exceptions-aebf6e65e188) — 3장 말미로 흡수 (본체는 race-condition 문서)
+- [Rate Limiting: Five Algorithms, One Production System](https://levelup.gitconnected.com/rate-limiting-five-algorithms-one-production-system-ced36787d040) — 제외, [rate-limiting](./2607-rate-limiting.md) 참조
+- [Idempotency in Payment Systems](https://levelup.gitconnected.com/idempotency-in-payment-systems-how-revolut-prevents-double-charges-04e31977d990) — 제외, [payment-ledger-design](./2608-payment-ledger-design.md) 참조
+
+### 관련 문서
+
+- [race condition과 동시성 제어](./2607-race-condition.md) — DB 락·Redis 분산 락·deadlock 본체
+- [Java / Kotlin 자료구조 실전](./2607-java-collections.md) — concurrent collection 구현체 선택표
+- [커넥션 풀](./2607-connection-pool.md) — Tomcat 요청 스레드·HikariCP·virtual thread
+- [Rate Limiting](./2607-rate-limiting.md) — 요청량 제어 알고리즘
