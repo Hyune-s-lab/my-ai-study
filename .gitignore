@@ -16,3 +16,6 @@ hs_err_pid*
 !.env.example
 !.env.*.example
 _local-draft/
+
+# IDE 부산물 및 민감 개인 파일
+.hermes/
