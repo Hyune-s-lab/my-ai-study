@@ -32,10 +32,14 @@
 - 외부 자료(논문·아티클·공식 문서)를 기반으로 작성했으면  
   말미에 `## 참고` 섹션을 두고 원문 링크와 **반영 범위**를 남긴다 (MUST).  
   일부만 반영했거나 제외한 항목이 있으면 그 사유와 대체 문서를 함께 적는다.
-- 특정 시리즈·출처에서 파생된 문서는 **문서 1개부터**  
-  주제 폴더 안에 시리즈 subfolder로 nest한다 (SHOULD).  
-  선례: `system-design/enterprise-ai-platform/`, `computer-science/revolut-interview-prep/`.  
-  최상위에 새 폴더를 만들지 않는다.
+- 외부 시리즈 아티클을 정리한 문서는 **문서 1개부터**  
+  주제 폴더 안 `article-series/`에 모은다 (SHOULD).  
+  예: `computer-science/article-series/2608-java-concurrency.md`.
+- `article-series/` 하위에 **매체·브랜드·저자 이름으로 폴더를 만들지 않는다** (MUST NOT).  
+  출처 식별은 문서의 `## 참고` 섹션이 담당한다.  
+  폴더가 브랜드에 묶이면 다음 시리즈를 넣을 곳이 없어진다.
+- 주제 클러스터가 여러 문서로 자란 경우는 클러스터 이름으로 nest한다 (SHOULD).  
+  선례: `system-design/enterprise-ai-platform/`. 최상위에 새 폴더를 만들지 않는다.
 - nest한 문서의 상대 링크는 한 단계 올라간다 (`../2607-*.md`).  
   이동 시 README 링크와 문서 내부 링크를 함께 고치고 대상 파일 실존을 확인한다 (MUST).
 - 커밋하지 않을 초안만 `_local-draft/`에 둔다 (gitignored).  
