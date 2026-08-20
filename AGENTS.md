@@ -32,9 +32,12 @@
 - 외부 자료(논문·아티클·공식 문서)를 기반으로 작성했으면  
   말미에 `## 참고` 섹션을 두고 원문 링크와 **반영 범위**를 남긴다 (MUST).  
   일부만 반영했거나 제외한 항목이 있으면 그 사유와 대체 문서를 함께 적는다.
-- 한 시리즈의 편당 노트가 3개 이상 쌓이면  
+- 특정 시리즈·출처에서 파생된 문서는 **문서 1개부터**  
   주제 폴더 안에 시리즈 subfolder로 nest한다 (SHOULD).  
-  선례: `system-design/enterprise-ai-platform/`. 최상위에 새 폴더를 만들지 않는다.
+  선례: `system-design/enterprise-ai-platform/`, `computer-science/revolut-interview-prep/`.  
+  최상위에 새 폴더를 만들지 않는다.
+- nest한 문서의 상대 링크는 한 단계 올라간다 (`../2607-*.md`).  
+  이동 시 README 링크와 문서 내부 링크를 함께 고치고 대상 파일 실존을 확인한다 (MUST).
 - 커밋하지 않을 초안만 `_local-draft/`에 둔다 (gitignored).  
   게시할 문서는 처음부터 주제 폴더에 만든다.
 

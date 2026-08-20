@@ -11,16 +11,16 @@ DB 락·Redis 분산 락·요청량 제어·멱등성은 이미 별도 문서가
 |------|---------|-----------|
 | 가시성·happens-before·volatile | ✅ | — |
 | monitor 내부·lock 팽창 | ✅ | — |
-| `ReentrantLock` / `ReadWriteLock` / `Condition` | ✅ | [race-condition](./2607-race-condition.md) 0단계에 개요 |
-| CAS·`Atomic*`·`LongAdder`·ABA | ✅ (JVM 레벨) | [race-condition](./2607-race-condition.md) (DB 낙관적 락·조건부 UPDATE) |
-| `ThreadPoolExecutor` | ✅ | [connection-pool](./2607-connection-pool.md) (Tomcat 요청 스레드) |
+| `ReentrantLock` / `ReadWriteLock` / `Condition` | ✅ | [race-condition](../2607-race-condition.md) 0단계에 개요 |
+| CAS·`Atomic*`·`LongAdder`·ABA | ✅ (JVM 레벨) | [race-condition](../2607-race-condition.md) (DB 낙관적 락·조건부 UPDATE) |
+| `ThreadPoolExecutor` | ✅ | [connection-pool](../2607-connection-pool.md) (Tomcat 요청 스레드) |
 | `CompletableFuture` | ✅ | — |
 | livelock·starvation | ✅ | — |
-| deadlock (Coffman·탐지·타임아웃) | 진단 도구만 | [race-condition](./2607-race-condition.md) |
+| deadlock (Coffman·탐지·타임아웃) | 진단 도구만 | [race-condition](../2607-race-condition.md) |
 | concurrent collection **동시성 계약** | ✅ | — |
-| concurrent collection **구현체 선택표** | — | [java-collections](./2607-java-collections.md) |
-| rate limiting | — | [rate-limiting](./2607-rate-limiting.md) |
-| 결제 멱등성 | — | [payment-ledger-design](./2608-payment-ledger-design.md) |
+| concurrent collection **구현체 선택표** | — | [java-collections](../2607-java-collections.md) |
+| rate limiting | — | [rate-limiting](../2607-rate-limiting.md) |
+| 결제 멱등성 | — | [payment-ledger-design](../2608-payment-ledger-design.md) |
 
 전제: JDK 21+ (virtual thread GA), Kotlin, Spring MVC.  
 비동기 프레임워크(WebFlux) 없이 블로킹 코드 + virtual thread를 기본 스택으로 둔다.
@@ -164,7 +164,7 @@ biased locking은 JDK 15에서 기본 비활성·deprecated, JDK 18에서 제거
 
 virtual thread에서 `synchronized` 안에서 블로킹하면 캐리어 스레드 피닝이 발생한다.  
 JDK 24(JEP 491)에서 해소됐으나 그 이전 런타임이면 `ReentrantLock`이 정석이다.  
-자세한 내용은 [race-condition 문서](./2607-race-condition.md)에 있다.
+자세한 내용은 [race-condition 문서](../2607-race-condition.md)에 있다.
 
 ### 최소 예제 — wait/notify의 필수 관용구
 
@@ -327,7 +327,7 @@ CAS는 "값이 같다"만 본다. A→B→A로 되돌아온 사이를 구분하�
 
 스케일 아웃하면 JVM CAS는 **아무것도 보장하지 않는다.**  
 인스턴스가 2대면 각자의 `AtomicLong`을 올릴 뿐이다.  
-분산 환경의 원자적 갱신은 [race-condition 문서](./2607-race-condition.md)를 본다.
+분산 환경의 원자적 갱신은 [race-condition 문서](../2607-race-condition.md)를 본다.
 
 ### 최소 예제
 
@@ -518,7 +518,7 @@ Executors.newVirtualThreadPerTaskExecutor().use { ex ->
 
 ## 7. Concurrent Collections — 동시성 계약 읽기
 
-구현체 선택표는 [java-collections 문서](./2607-java-collections.md)에 있다.  
+구현체 선택표는 [java-collections 문서](../2607-java-collections.md)에 있다.  
 여기서는 그 문서에 없는 **계약**을 본다. 스레드 안전이 무엇을 보장하지 않는가.
 
 ### `HashMap`을 공유하면 무슨 일이 나는가
@@ -581,7 +581,7 @@ map.merge(k, 1L, Long::sum)
 | IO 팬아웃 | virtual thread + `Future.get()` |
 | CPU-bound 병렬 처리 | 고정 크기 `ThreadPoolExecutor` |
 | 외부 API 동시 호출 상한 | `Semaphore` 또는 bounded 풀 |
-| 여러 인스턴스 간 상호배제 | JVM 락 아님 → [분산 락](./2607-race-condition.md) |
+| 여러 인스턴스 간 상호배제 | JVM 락 아님 → [분산 락](../2607-race-condition.md) |
 
 ## 9. 실무 체크리스트
 
@@ -608,12 +608,12 @@ map.merge(k, 1L, Long::sum)
 - [CompletableFuture: Async Pipelines That Don't Fall Apart Under Load](https://levelup.gitconnected.com/completablefuture-async-pipelines-that-dont-fall-apart-under-load-bdaa408f70f7) — 6장
 - [Concurrent Collections: Fine-Grained Locking and When to Use Each](https://levelup.gitconnected.com/concurrent-collections-fine-grained-locking-and-when-to-use-each-8da8ec669352) — 7장
 - [Deadlock, Livelock, and Starvation](https://levelup.gitconnected.com/deadlock-livelock-and-starvation-the-bugs-that-dont-throw-exceptions-aebf6e65e188) — 3장 말미로 흡수 (본체는 race-condition 문서)
-- [Rate Limiting: Five Algorithms, One Production System](https://levelup.gitconnected.com/rate-limiting-five-algorithms-one-production-system-ced36787d040) — 제외, [rate-limiting](./2607-rate-limiting.md) 참조
-- [Idempotency in Payment Systems](https://levelup.gitconnected.com/idempotency-in-payment-systems-how-revolut-prevents-double-charges-04e31977d990) — 제외, [payment-ledger-design](./2608-payment-ledger-design.md) 참조
+- [Rate Limiting: Five Algorithms, One Production System](https://levelup.gitconnected.com/rate-limiting-five-algorithms-one-production-system-ced36787d040) — 제외, [rate-limiting](../2607-rate-limiting.md) 참조
+- [Idempotency in Payment Systems](https://levelup.gitconnected.com/idempotency-in-payment-systems-how-revolut-prevents-double-charges-04e31977d990) — 제외, [payment-ledger-design](../2608-payment-ledger-design.md) 참조
 
 ### 관련 문서
 
-- [race condition과 동시성 제어](./2607-race-condition.md) — DB 락·Redis 분산 락·deadlock 본체
-- [Java / Kotlin 자료구조 실전](./2607-java-collections.md) — concurrent collection 구현체 선택표
-- [커넥션 풀](./2607-connection-pool.md) — Tomcat 요청 스레드·HikariCP·virtual thread
-- [Rate Limiting](./2607-rate-limiting.md) — 요청량 제어 알고리즘
+- [race condition과 동시성 제어](../2607-race-condition.md) — DB 락·Redis 분산 락·deadlock 본체
+- [Java / Kotlin 자료구조 실전](../2607-java-collections.md) — concurrent collection 구현체 선택표
+- [커넥션 풀](../2607-connection-pool.md) — Tomcat 요청 스레드·HikariCP·virtual thread
+- [Rate Limiting](../2607-rate-limiting.md) — 요청량 제어 알고리즘
