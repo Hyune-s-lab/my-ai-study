@@ -9,7 +9,7 @@ Billing은 Team의 결제·충전·잔액·사용료를 다루는 상위 도메�
 
 이 문서의 Gateway는 preflight를 수행하는 현재 진입 컴포넌트다.
 전체 topology는 [Admission Control](./2608-admission-control.md)을 기준으로 한다.
-이 문서는 [Phase 1 — Rate Limit](./2608-rate-control.md) 다음 단계다.
+이 문서는 [Phase 1 — Rate Limit](./2608-p1-rate-limit.md) 다음 단계다.
 
 ## 1. Billing 안에서의 위치
 
