@@ -41,6 +41,7 @@
 | [2607-java-collections.md](./computer-science/2607-java-collections.md) | Java/Kotlin 자료구조 실전 (ArrayList capacity·HashMap 트리 전환·ConcurrentHashMap·BlockingQueue·구현체 선택) |
 | [2607-hash.md](./computer-science/2607-hash.md) | 해시 (해시 함수·충돌·equals/hashCode 계약·불변 키·JPA 엔티티 equals/hashCode·캐싱·중복 제거) |
 | [2607-network-fundamentals.md](./computer-science/2607-network-fundamentals.md) | 네트워크 기초 (OSI/TCP-IP·TCP vs UDP·3/4-way handshake·HTTP vs HTTPS·TLS) |
+| [2608-java-concurrency.md](./computer-science/article-series/2608-java-concurrency.md) | Java Concurrency (JMM/volatile·happens-before·monitor·ReentrantLock/Condition·CAS/LongAdder·ThreadPoolExecutor·CompletableFuture·concurrent collection 계약) |
 
 ## [system-design](./system-design)
 
@@ -49,4 +50,4 @@
 | [2606-종소세-환급-설계.md](./system-design/2606-종소세-환급-설계.md) | 종소세 환급/연말정산 — 아키텍처(L0→L2 점진 설계) + 도메인 모델·ERD·정합성·증적 |
 | [2606-스프링-마이크로서비스-레퍼런스.md](./system-design/2606-스프링-마이크로서비스-레퍼런스.md) | 스프링 클라우드 MSA 레퍼런스 아키텍처 (게이트웨이·Eureka·Resilience4j·Kafka·관측) |
 | [2607-spring-멀티모듈-헥사고날-패키징.md](./system-design/2607-spring-멀티모듈-헥사고날-패키징.md) | Spring 멀티모듈 헥사고날 패키징 — Layer Map·포트·어댑터·Spring Modulith·Gradle 멀티모듈·테스트 전략 |
-| [enterprise-ai-platform/](./system-design/enterprise-ai-platform/) | AI 설계 4축 — Knowledge Base, Public Model API Gateway, Internal Human AI, Internal Server AI |
+| [admission-control/](./system-design/admission-control/) | Model API Admission Control — Billing의 Team Balance와 요청 경계 |
