@@ -6,7 +6,7 @@ Admission Control은 인증된 Team·API Key를 기준으로 Provider 요청을 
 
 | 하위 정책 | scope | 판단 상태 |
 | --- | --- | --- |
-| Rate Limit | Team · API Key | 현재 요청 수 |
+| Tier Rate Limit | Team Tier | 로컬 Tier catalog · Redis request/token GCRA TAT |
 | Balance Control | Team Account | rough debit이 반영된 Account Balance |
 | Concurrency Control | Team · API Key | 현재 실행 중인 요청 수 |
 
@@ -33,7 +33,7 @@ Admission Control은 인증된 Team·API Key를 기준으로 Provider 요청을 
 
 | 컴포넌트 | 가까운 운영 형태의 역할 |
 | --- | --- |
-| Control Plane | Gateway 역할, API Key 인증, Rate Limit, Balance Control, Admin API, Usage Query, Usage Ingest |
+| Control Plane | Gateway 역할, API Key 인증, Tier Rate Limit, Balance Control, Admin API, Usage Query, Usage Ingest |
 | Data Plane | Model Provider inference, 성공 뒤 rough debit과 inference record 전달 |
 
 ![Admission Control 2-tier — Control Plane이 Gateway 역할을 겸하는 구조](./assets/2608-admission-control-2-tier.svg)
@@ -49,7 +49,7 @@ Admission Control은 인증된 Team·API Key를 기준으로 Provider 요청을 
 
 | 컴포넌트 | 장기 역할 |
 | --- | --- |
-| Gateway | API Key 인증, Rate Limit, Balance Control request path |
+| Gateway | API Key 인증, Redis Tier 기반 분당 요청·토큰 제한, Balance Control request path |
 | Data Plane | inference path, 성공 뒤 rough debit과 inference record 전달 |
 | Control Plane | Admin API, Rate Limit Policy, Usage Query, Record ingest, Account 상태 |
 | Admin Console | Gateway가 아닌 Control Plane 직접 호출 |
@@ -61,8 +61,8 @@ Admission Control은 인증된 Team·API Key를 기준으로 Provider 요청을 
 | Gateway·Data Plane | PostgreSQL 직접 읽기 금지 |
 | OLAP (ClickHouse 후보) | 고유량 inference·usage와 Team·Model·기간별 분석 조회 |
 | S3 Parquet | 원본 event 장기 보관·재처리 |
-| PostgreSQL | Rate Limit Policy와 Account Balance·Account Ledger의 권위 |
-| Redis | Rate counter·policy cache와 성공 inference rough debit이 반영된 balance projection |
+| PostgreSQL | Team Tier Policy와 Account Balance·Account Ledger의 권위 |
+| Redis | request/token GCRA state와 성공 inference rough debit이 반영된 balance projection |
 | Worker | Charge·`DEBIT · USAGE`·Account 차감을 PostgreSQL transaction으로 확정하고 Redis를 짧은 주기로 보정 |
 
 ## 4. Admission Control 안의 정책
@@ -72,18 +72,18 @@ Admission Control은 인증된 Team·API Key를 기준으로 Provider 요청을 
 
 | 정책 | 상태 출처 | 상태 |
 |---|---|---|
-| Phase 1 — Rate Limit | Redis request counter | [문서](./2608-rate-control.md) |
-| Phase 2 — Balance Control | Redis projection · PostgreSQL Account | [문서](./2608-balance-control.md) |
+| Phase 1 — Tier Rate Limit | 로컬 Tier catalog · Redis request/token GCRA TAT | [문서](./2608-p1-rate-limit.md) |
+| Phase 2 — Balance Control | Redis projection · PostgreSQL Account | [문서](./2608-p2-balance-control.md) |
 | Concurrency Control | Redis in-flight counter | 추후 |
 
 Billing은 결제·충전·원장·Account를 다루는 상위 도메인이다. Balance Control은 Admission Control 안에서 Redis의 rough debit이 반영된 Account Balance projection을 읽는 하위 정책이다.
 
-모든 하위 정책은 공통 오류 형식을 쓴다. `type`은 `insufficient_quota`, `rate_limit_error`, `service_unavailable`처럼 큰 분기이고, `code`는 `credit_balance_exhausted`, `requests_per_minute_exceeded`처럼 정확한 원인이다.
+모든 하위 정책은 공통 오류 형식을 쓴다. Rate Limit은 `rate_limit_error` · `requests_per_minute_exceeded`, admission 상태를 신뢰할 수 없을 때는 `service_unavailable` · `admission_state_unavailable`을 쓴다.
 
 ## 5. 구현 순서
 
-1. [Phase 1 — Rate Limit](./2608-rate-control.md)에서 Team·API Key별 요청량을 요청 전에 원자적으로 제한한다.
-2. [Phase 2 — Balance Control](./2608-balance-control.md)에서 호출 뒤에 확정되는 사용료를 앞단 balance 판정으로 연결한다.
+1. [Phase 1 — Tier Rate Limit](./2608-p1-rate-limit.md)에서 Team Tier의 분당 요청·토큰을 요청 전에 원자적으로 제한한다.
+2. [Phase 2 — Balance Control](./2608-p2-balance-control.md)에서 호출 뒤에 확정되는 사용료를 앞단 balance 판정으로 연결한다.
 
 ## 참고
 
