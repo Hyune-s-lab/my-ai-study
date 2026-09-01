@@ -52,4 +52,3 @@
 | [2607-spring-멀티모듈-헥사고날-패키징.md](./system-design/2607-spring-멀티모듈-헥사고날-패키징.md) | Spring 멀티모듈 헥사고날 패키징 — Layer Map·포트·어댑터·Spring Modulith·Gradle 멀티모듈·테스트 전략 |
 | [2608-admission-control/](./system-design/2608-admission-control/) | Model API Admission Control — Rate Limit과 Billing의 Team Balance 요청 경계 |
 | [BACKLOG.md](./system-design/BACKLOG.md) | 시스템 디자인 아이디어 백로그 |
-| [2608-상품권-3p-발주.md](./system-design/2608-상품권-3p-발주.md) | 컬리페이 RedeemCode — 3P 발주·취소·장애 복구 설계 |
