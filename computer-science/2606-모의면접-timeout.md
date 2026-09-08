@@ -26,42 +26,30 @@
 > 포인트 3(핵심): **③ outbound 전체 예산 < ② inbound 수명 ≤ ① 클라 deadline**. 안 지키면 호출자는 끊었는데 나는 OpenAI에 매달리는 헛수고(→ Q8). 정석은 **deadline 전파**(→ Q7).
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
-
+  
     subgraph gw["내 게이트웨이 (서버 = 클라이언트, 두 얼굴)"]
-      direction LR
-      inbound["② 서버 (inbound)\naccept · connection-timeout\nrequest-timeout · keep-alive"]
-      outbound["③ SDK (outbound)\nconnect · pool · read\ninter-token · call timeout"]
+      inbound["② 서버 (inbound)<br/>accept · connection-timeout<br/>request-timeout · keep-alive"]
+      outbound["③ SDK (outbound)<br/>connect · pool · read<br/>inter-token · call timeout"]
       inbound --> outbound
     end
-
-    cli["① 클라이언트\nconnect · read · write\n전체 deadline"]
-    openai@{ img: "https://api.iconify.design/simple-icons/openai.svg", label: "", pos: "b", h: 48, constraint: "on" }
-
+  
+    cli["① 클라이언트<br/>connect · read · write<br/>전체 deadline"]
+    openai["OpenAI"]
+  
     cli --> inbound
     outbound --> openai
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
-  class cli,inbound,outbound app
-  class openai icon
-  style gw fill:#ffffff,stroke:#3B5BA5,stroke-width:1px
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class inbound,outbound,cli,openai app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 **꼬리질문**: connection timeout과 read timeout 중 하나만 설정한다면?
@@ -118,37 +106,29 @@ flowchart LR
 > 🔌 게이트웨이 관점: 게이트웨이는 **모두가 거쳐 가는 공유 길목**이라 전파의 진앙이 되기 쉽다. OpenAI 하나가 느려졌다고 게이트웨이 전체가 죽으면 안 됨 → **프로바이더/라우트/모델별 bulkhead**로 격리하고, OpenAI 실패율이 높으면 **서킷 브레이커로 차단 후 빠른 503/폴백**(→ Q13).
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
-
-    downD["다운스트림 D\n응답 지연 (느려짐)"]
-    wait["D 호출 스레드들\n타임아웃 없이 대기"]
+  
+    downD["다운스트림 D<br/>응답 지연 (느려짐)"]
+    wait["D 호출 스레드들<br/>타임아웃 없이 대기"]
     exhaust["스레드/커넥션 풀 고갈"]
     block["무관한 요청도 처리 불가"]
     propagate["상위 서비스 B로 장애 전파"]
-
+  
     downD --> wait
     wait --> exhaust
     exhaust --> block
     block --> propagate
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
   class downD,wait,exhaust,block,propagate app
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 ### Q5. 타임아웃이 났는데 사실 서버는 처리를 끝냈을 수도 있죠. 이 문제를 어떻게 다루나요?
@@ -165,7 +145,7 @@ flowchart LR
 
 **감점 포인트**: "타임아웃 나면 재시도하면 된다"고만 답. 쓰기 요청의 중복 위험·멱등성을 못 짚으면 실무 경험이 의심받는다.
 
-> 🔌 게이트웨이 관점: OpenAI 호출이 read timeout 나도 **OpenAI는 생성을 끝내고 토큰만큼 과금**했을 수 있다. 여기서 재시도하면 **이중 과금 + 중복 요청**. 그래서 (a) outbound는 **연결을 확실히 끊어**(취소) 생성·과금을 멈추고(→ Q8), (b) OpenAI의 `idempotency key`(지원 시)를 실어 보낸다. 호출자에게도 게이트웨이가 멱등성 키를 받아 같은 응답을 돌려주는 설계가 안전.
+> 🔌 게이트웨이 관점: OpenAI 호출이 read timeout 나도 **OpenAI는 생성을 끝내고 토큰만큼 과금**했을 수 있다. 여기서 재시도하면 **이중 과금 + 중복 요청**. 그래서 (a) outbound는 **연결을 확실히 끊어**(취소) 추가 자원 소모를 줄이되, Provider의 작업 취소·과금 중단까지 보장하지는 않고(→ Q8), (b) OpenAI의 `idempotency key`(지원 시)를 실어 보낸다. 호출자에게도 게이트웨이가 멱등성 키를 받아 같은 응답을 돌려주는 설계가 안전.
 
 ### Q6. 타임아웃과 재시도(retry)는 어떻게 함께 설계하나요?
 
@@ -173,45 +153,34 @@ flowchart LR
 
 - **Exponential backoff + jitter**: 재시도 간격을 지수적으로 늘리고 **무작위(jitter)**를 더한다. jitter가 없으면 모든 클라이언트가 동시에 재시도해 **retry storm(재시도 폭주)** → 회복 중인 서버를 다시 죽인다.
 - **Retry budget / 상한**: 전체 트래픽 중 재시도 비율을 제한(예: 10%). 무한 재시도 금지.
-- **재시도 대상 구분**: connection timeout·5xx·네트워크 오류는 재시도 OK, **4xx(클라 잘못)·멱등성 없는 쓰기**는 재시도 금지.
+- **재시도 대상 구분**: 일시적 오류인지, 요청이 멱등한지, 결과가 확정됐는지 함께 본다.  
+  429·503 등은 `Retry-After`와 예산을 고려하고, 인증·검증 오류나 결과 불명의 쓰기를 무조건 반복하지 않는다.
 - **상위 deadline 고려**: 전체 마감시간을 넘기면서까지 재시도하면 의미 없다(아래 Q7).
 
 **감점 포인트**: jitter·retry budget 없이 "실패하면 3번 재시도" 수준. 재시도가 장애를 **증폭**시킬 수 있다는 인식이 핵심이다.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
-flowchart LR
+flowchart TD
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    direction LR
-
-    subgraph budget["호출자 deadline 내에서만 재시도"]
-      direction LR
-      try1["1차 시도"] --> wait1["backoff + jitter"]
-      wait1 --> try2["2차 시도"]
-      try2 --> wait2["backoff + jitter"]
-      wait2 --> try3["3차 시도"]
-    end
-
-    try3 --> giveup["retry budget 초과\n또는 deadline 도달\n→ 포기 (fast-fail)"]
+    direction TD
+    attempt["요청 시도"] --> result{"결과"}
+    result -->|"성공"| done["응답 반환"]
+    result -->|"실패"| safe{"재시도 가능한 오류·멱등 작업?"}
+    safe -->|"아니요"| fail["오류 반환 또는 결과 조회"]
+    safe -->|"예"| budget{"횟수와 deadline 여유?"}
+    budget -->|"없음"| fail
+    budget -->|"있음"| backoff["backoff + jitter"]
+    backoff --> attempt
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  class try1,try2,try3 app
-  class wait1,wait2,giveup ctrl
-  style budget fill:#ffffff,stroke:#3B5BA5,stroke-width:1px
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class attempt,result,done,fail,budget app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  class safe,backoff worker
 ```
 
 > 🔌 게이트웨이 관점: 게이트웨이가 OpenAI에 무지성 재시도하면 **이미 힘든 OpenAI에 부하를 증폭**시킨다. OpenAI가 `429`로 주는 **`Retry-After` 헤더를 존중**하고, 프로바이더별 retry budget을 둔다. 그리고 재시도는 **남은 deadline 안에서만**(→ Q7) — 호출자가 준 시간을 넘기면 재시도 의미 없음.
@@ -233,35 +202,27 @@ A(사용자 마감 3s) → B(2.5s) → C(1.5s) → D(800ms)
 → timeout은 "지금부터 N초"(상대적, 각 hop마다 리셋되어 누적될 위험), deadline은 "오후 3시 0.0초까지"(절대적, 전파되며 전체 체인이 공유). deadline이 분산 환경에 더 안전.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
-
-    a["서비스 A\n마감 3.0s (deadline)"]
-    b["서비스 B\n예산 2.5s"]
-    c["서비스 C\n예산 1.5s"]
-    d["서비스 D\n예산 0.8s"]
-
+  
+    a["서비스 A<br/>마감 3.0s (deadline)"]
+    b["서비스 B<br/>예산 2.5s"]
+    c["서비스 C<br/>예산 1.5s"]
+    d["서비스 D<br/>예산 0.8s"]
+  
     a --> b
     b --> c
     c --> d
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
   class a,b,c,d app
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 **감점 포인트**: 각 서비스에 독립적으로 타임아웃을 박으면 된다고만 답. "상위>하위 합", deadline 전파를 못 말하면 분산 사고가 약하다고 본다.
@@ -271,7 +232,8 @@ flowchart LR
 **모범답안**: 클라이언트는 끊고 떠났지만 **서버는 그걸 모르고 계속 일한다**(기본적으로). 결과:
 
 - 연산·DB·다운스트림 호출이 **버려질 결과를 위해 계속 자원 소모.**
-- 소켓이 한쪽만 닫혀 **CLOSE_WAIT** 누적, 커넥션/스레드 누수.
+- FIN을 받은 뒤 애플리케이션이 소켓을 닫지 않으면 **CLOSE_WAIT이 장기 누적**될 수 있다.  
+  클라이언트 타임아웃 자체가 곧 누수라는 뜻은 아니다.
 - 부하가 높을수록 "아무도 안 받을 응답"을 만드느라 서버가 더 느려지는 **악순환**.
 
 대응: **취소 전파(cancellation propagation)**. 클라이언트 연결이 끊기면 서버가 이를 감지해 작업을 중단해야 한다.
@@ -282,39 +244,26 @@ flowchart LR
 **감점 포인트**: "서버는 응답을 보내려다 실패한다" 정도. CLOSE_WAIT·자원 누수·취소 전파까지 가야 강한 답.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
-flowchart LR
+flowchart TD
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    direction LR
-
-    cli_disc["① 클라이언트\n연결 끊음 (timeout)"]
-    server_run["② 서버\n모른 채 계속 처리\n(자원 소모·과금)"]
-    close_wait["③ CLOSE_WAIT 누적\n커넥션·스레드 누수"]
-    downstream["④ 다운스트림 호출\n버려질 결과 생성"]
-
-    cli_disc --> cancel["취소 전파 (cancellation)\nReactor doOnCancel\ngRPC cancel · 자체 deadline"]
-    cancel --> downstream
+    direction TD
+    disconnect["클라이언트 연결 종료"] --> detect{"서버가 취소를 감지·전파?"}
+    detect -->|"아니요"| work["서버·다운스트림 작업 계속"]
+    work --> waste["버려질 결과에 자원·비용 소모"]
+    detect -->|"예"| cancel["협력적 작업 취소·자원 정리"]
+    cancel --> outbound["outbound 호출 종료 요청"]
+    disconnect --> close{"로컬 소켓 close 누락?"}
+    close -->|"예"| leak["CLOSE_WAIT 장기 누적 가능"]
+    close -->|"아니요"| released["소켓 자원 정리"]
   end
-
-  cli_disc --> server_run
-  server_run --> close_wait
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  class cli_disc,server_run,close_wait,downstream app
-  class cancel ctrl
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class disconnect,detect,work,waste,cancel,outbound,close,leak,released app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 > 🔌 게이트웨이 관점: 호출자가 끊으면 outbound 호출도 같이 취소해야 한다.  
@@ -358,37 +307,20 @@ flowchart LR
 **실무 함정**: **AWS ALB의 idle timeout 기본 60초**, nginx `proxy_read_timeout` 기본 60초. 스트리밍 중 토큰 간격이 이걸 넘기거나 prefill TTFT가 길면 **LB가 먼저 연결을 끊는다.** → LB idle timeout을 올리거나, 하트비트로 흐름을 유지하거나, 스트리밍으로 간격을 좁힌다.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
-flowchart LR
-  subgraph canvas[" "]
-    direction LR
-
-    nginx@{ img: "https://cdn.simpleicons.org/nginx", label: "", pos: "b", h: 48, constraint: "on" }
-    ttft["TTFT (첫 토큰까지)\nprefill 완료 대기"]
-    inter["inter-token timeout\n토큰 간격 제한"]
-    overall["전체 수명 (overall)\nstream 전체 상한"]
-
-    nginx --> ttft
-    ttft --> inter
-    inter --> overall
+sequenceDiagram
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
+  box rgb(255, 255, 255)
+    participant G as Gateway
+    participant P as Model Provider
   end
-
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
-  class ttft,inter,overall app
-  class nginx icon
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  rect rgb(255, 255, 255)
+    G->>P: inference 요청
+    Note over G,P: 첫 토큰 대기 한도<br/>큐 대기 + prefill + 전송
+    P-->>G: 첫 토큰
+    Note over G,P: 이후 토큰 간 무응답 한도 적용
+    P-->>G: 다음 토큰
+    Note over G,P: 전체 deadline 별도 적용<br/>요청 시작부터 종료까지
+  end
 ```
 
 **감점 포인트**: "스트리밍이니까 타임아웃 길게 잡으면 됨". inter-token 개념·LB idle timeout 함정을 못 짚으면 약하다.
@@ -433,46 +365,25 @@ openAiTokenFlux
 **감점 포인트**: "타임아웃 나면 다른 모델 부르면 됨"만 답. **1차를 짧게 잡아 폴백 예산을 확보**한다는 점, 스트리밍 중엔 폴백이 까다롭다는 점을 못 짚으면 약하다.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
-flowchart LR
+flowchart TD
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    direction LR
-
-    caller["호출자 마감\n10s (deadline)"]
-    subgraph primary["1차 (OpenAI) timeout 6s"]
-      direction LR
-      openai@{ img: "https://api.iconify.design/simple-icons/openai.svg", label: "", pos: "b", h: 48, constraint: "on" }
-    end
-    subgraph fallback["2차 폴백 (남은 4s)"]
-      direction LR
-      fb["폴백 프로바이더\n다른 모델/라우트"]
-    end
-    result["최종 응답\n(또는 포기)"]
-
-    caller --> primary
-    primary --> fallback
-    fallback --> result
+    direction TD
+    call["호출자 deadline: 10초"] --> primary["1차 Provider: 최대 6초"]
+    primary -->|"성공"| done["응답 반환"]
+    primary -->|"실패·타임아웃"| budget{"응답 미커밋·폴백 가능·예산 남음?"}
+    budget -->|"예"| fallback["남은 예산 내 폴백 Provider 호출"]
+    budget -->|"아니요"| fail["오류 반환"]
+    fallback -->|"성공"| done
+    fallback -->|"실패·deadline 도달"| fail
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
-  class caller,fb,result app
-  class openai icon
-  style primary fill:#ffffff,stroke:#3B5BA5,stroke-width:1px
-  style fallback fill:#ffffff,stroke:#C98A2B,stroke-width:1px
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class call,primary,done,budget,fallback,fail app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 ### Q14. 스트리밍 도중 OpenAI 연결이 끊기면(부분 응답) 게이트웨이는 어떻게 처리하나요?
@@ -482,58 +393,31 @@ flowchart LR
 - **깔끔한 재시도가 불가능**하다 — 처음부터 다시 하면 호출자는 같은 앞부분을 두 번 받는다. 그래서 보통 **중간 폴백/재시도는 포기**하고 스트림을 **에러로 종료**한다.
 - SSE에선 HTTP 상태코드를 이미 200으로 보내버린 뒤라, 실패를 **본문 안의 에러 이벤트**(예: `event: error` 또는 `data: {"error": ...}`)로 알려야 한다. 헤더로는 못 바꾼다.
 - **부분 usage/과금**: 거기까지 생성된 토큰은 과금됐을 수 있으니, 가능한 만큼 부분 usage를 집계·기록.
-- 첫 토큰 **이전**(아직 아무것도 안 보냄)이라면 아직 상태코드 전이라 → 그땐 깔끔하게 5xx/폴백 가능. **"첫 토큰을 보냈는가"가 분기점.**
+- **HTTP 응답 커밋 이전**이면 상태코드 변경이나 폴백이 가능하다.  
+  첫 토큰 전이라도 헤더·SSE 하트비트를 이미 보냈다면 응답이 커밋됐을 수 있다.
 
 **꼬리질문**: inter-token timeout이 스트림 중간에 걸리면?
 → 그 시점까지의 토큰은 이미 호출자에게 갔고, 더는 안 오므로 **에러 이벤트로 스트림 종료**. 호출자 입장에선 "부분 응답 + 끊김"을 받는다. 그래서 클라이언트도 부분 응답·중단을 처리할 수 있게 설계돼야 한다.
 
-**감점 포인트**: "재시도하면 된다". 스트리밍은 **상태코드를 이미 보낸 뒤**라 재시도·헤더 변경이 안 되고, "첫 토큰 전/후"로 처리가 갈린다는 걸 모르면 스트리밍 실패 의미론을 모르는 것.
+**감점 포인트**: "재시도하면 된다". 스트리밍은 **상태코드를 이미 보낸 뒤**라 재시도·헤더 변경이 안 되고, "응답 커밋 전/후"로 처리가 갈린다는 걸 모르면 스트리밍 실패 의미론을 모르는 것.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
-flowchart LR
+flowchart TD
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    direction LR
-
-    stream_start["스트림 시작"]
-    subgraph before["첫 토큰 이전"]
-      direction LR
-      no_token["아직 토큰 미전송\n상태코드 미전송"]
-    end
-    subgraph after["첫 토큰 이후"]
-      direction LR
-      partial["토큰 일부 전송 완료\n상태 200 이미 전송"]
-    end
-    upstream_down["업스트림 연결 끊김\n(inter-token timeout 등)"]
-
-    stream_start --> before
-    before --> upstream_down
-    upstream_down --> after
-
-    before_fail["5xx / 폴백 가능\n(상태코드 미전송)"]
-    after_error["에러 이벤트로 스트림 종료\n(event: error / data:{error})\n재시도·헤더 변경 불가"]
-    before --> before_fail
-    after --> after_error
+    direction TD
+    error["업스트림 오류·타임아웃"] --> committed{"HTTP 응답이 이미 커밋됐나?"}
+    committed -->|"아니요"| before["상태코드 변경 또는 예산 내 폴백"]
+    committed -->|"예"| after["합의된 SSE 오류 이벤트 후 종료"]
+    after --> partial["부분 응답 여부를 클라이언트에 전달"]
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  class stream_start,no_token,partial,upstream_down app
-  class before_fail,after_error ctrl
-  style before fill:#ffffff,stroke:#3B5BA5,stroke-width:1px
-  style after fill:#ffffff,stroke:#C98A2B,stroke-width:1px
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class error,committed,before,after,partial app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 ### Q15. 주요 LLM SDK의 디폴트 타임아웃은 얼마고, 게이트웨이에선 어떻게 설정하나요?
@@ -600,7 +484,7 @@ llm:
 8. LLM: 긴 생성은 스트리밍, read timeout은 inter-token 기준, ALB/nginx idle 60s 함정
         Spring: 전체=SseEmitter/yml, inter-token=Flux.timeout(코드, 값만 yml)
 9. 폴백: 1차를 짧게 잡아야 폴백 예산 확보. 스트리밍 중간 폴백은 어려움
-10. 스트리밍 실패: "첫 토큰 전/후"가 분기점. 보낸 뒤엔 재시도·헤더변경 불가 → 본문 에러 이벤트로 종료
+10. 스트리밍 실패: "응답 커밋 전/후"가 분기점. 보낸 뒤엔 재시도·헤더변경 불가 → 본문 에러 이벤트로 종료
 11. SDK 디폴트: OpenAI·Anthropic 10분 / GenAI 없음 → 게이트웨이는 override. connect 2~3s, stream read(=inter-token) 15~30s, max_retries=0
 ```
 

@@ -19,65 +19,64 @@ Spring Batch는 대량 데이터를 안전하게 처리하기 위한 프레임�
 ## Job, Step, JobRepository 관계
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  look: classic
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
-
-    subgraph jobFlow["Job: settlementJob (Step 흐름)"]
-      direction TB
-      job["Job\n(Step 흐름 + 조건분기)"]:::ctrl
-      stepA["Step 1\nvalidateBusinessDate"]:::app
-      stepB["Step 2\ncreateSettlement"]:::app
-      stepC["Step 3\npublishReport"]:::app
-      job --> stepA
-      job --> stepB
-      job --> stepC
-    end
-
-    subgraph chunkLayer["Step 내부: Chunk 지향 처리 (chunkSize=500)"]
-      direction TB
-      reader["ItemReader\nread x 500"]:::ctrl
-      proc["ItemProcessor\nPayment → SettlementRow"]:::ctrl
-      writer["ItemWriter\nwrite(chunk)"]:::ctrl
-      commit["commit\nchunk 1개 = 트랜잭션 1회"]:::app
-      reader --> proc
-      proc --> writer
-      writer --> commit
-    end
-
-    subgraph store["JobRepository (메타데이터)"]
-      direction TB
-      ji[("BATCH_JOB_INSTANCE")]:::db
-      je[("BATCH_JOB_EXECUTION")]:::db
-      se[("BATCH_STEP_EXECUTION\n실패 지점 기록")]:::db
-      ec[("EXECUTION_CONTEXT\nreader 체크포인트")]:::db
-    end
+    validate["Step 1: 영업일 검증"] --> settlement["Step 2: 정산 생성"]
+    settlement --> report["Step 3: 보고서 발행"]
   end
-
-  stepB --> reader
-  commit --> se
-  job --> je
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
-  style jobFlow fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style chunkLayer fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style store fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  class validate,report app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  class settlement worker
+```
+
+위 Job은 세 Step을 순차 실행한다. 정산 Step은 아래 chunk 경계를 반복한다.
+
+```mermaid
+flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
+  subgraph canvas[" "]
+    direction LR
+    reader["Reader: 항목 읽기"] --> processor["Processor: 정산 행 변환"]
+    processor --> writer["Writer: chunk 저장"]
+    writer --> commit["chunk transaction commit"]
+  end
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class reader,writer,commit app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  class processor worker
+```
+
+`chunkSize=500`이면 최대 500개 입력을 한 chunk로 처리한다. 필터링·skip·마지막 chunk에 따라 출력 수는 달라진다.  
+체크포인트는 커밋된 작업을 기준으로 저장하고, Reader·Writer의 재시작 지원도 확인한다.
+
+```mermaid
+flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
+  subgraph canvas[" "]
+    direction LR
+    instance["JobInstance: Job + 식별 파라미터"] --> execution["JobExecution: 실행 시도"]
+    execution --> step["StepExecution: Step 실행"]
+    execution --> jobContext["Job ExecutionContext"]
+    step --> stepContext["Step ExecutionContext: 체크포인트"]
+  end
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class instance,execution,step,jobContext,stepContext app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 - **Job** = 실제 처리 코드가 아니라 여러 Step의 **실행 흐름**. 순차 실행이 기본이고 `ExitStatus`로 조건 분기.
@@ -286,63 +285,27 @@ where job_execution_id = :jobExecutionId;
 세 패턴은 **데이터를 누가 읽고 어떻게 분배하는가**가 다르다.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  look: classic
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
-
-    subgraph mt["다중 스레드 Step (단일 JVM)"]
-      direction TB
-      mtStep["Step"]:::app
-      mtT1["Thread 1\nchunk"]:::ctrl
-      mtT2["Thread 2\nchunk"]:::ctrl
-      mtReader["공유 Reader\n(thread-safe 필수)"]:::db
-      mtStep --> mtT1
-      mtStep --> mtT2
-      mtT1 --> mtReader
-      mtT2 --> mtReader
-    end
-
-    subgraph part["Partitioning (데이터 분할)"]
-      direction TB
-      partMgr["manager\n파티션 범위 생성"]:::ctrl
-      partW1["worker 1\nid 1~50K"]:::app
-      partW2["worker 2\nid 50K~100K"]:::app
-      partMgr --> partW1
-      partMgr --> partW2
-    end
-
-    subgraph rc["Remote Chunking (다중 JVM)"]
-      direction TB
-      rcMgr["manager\nread 후 chunk 전송"]:::ctrl
-      rcQ["Message Channel\n(Kafka/RabbitMQ)"]:::db
-      rcW1["worker 1"]:::app
-      rcW2["worker 2"]:::app
-      rcMgr --> rcQ
-      rcQ --> rcW1
-      rcQ --> rcW2
-    end
+    mt["다중 스레드 Step: 단일 JVM"] --> threads["여러 chunk worker"]
+    threads --> shared["공유 Reader·Writer의 동시성 확인"]
+    part["Partitioning manager"] --> w1["Worker 1: id 1~50000"]
+    part --> w2["Worker 2: id 50001~100000"]
+    remote["Remote Chunking manager: read"] -.-> mq["Message Channel"]
+    mq -.-> workers["외부 worker: process·write"]
+    workers -.->|"처리 결과"| remote
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
-  style mt fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style part fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style rc fill:#FEF2F2,stroke:#FCA5A5,stroke-width:1px,color:#991B1B
+  class mt,shared,remote,mq app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  class part db
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  class threads,w1,w2,workers worker
 ```
 
 ### 비교표

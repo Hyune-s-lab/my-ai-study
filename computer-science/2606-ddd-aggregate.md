@@ -3,24 +3,11 @@
 DDD 전술 패턴의 핵심. **"함께 변경되어야 하고, 함께 일관성을 지켜야 하는 객체들의 묶음"** = 애그리거트. 그 묶음의 **일관성 경계(consistency boundary)** 이자 **트랜잭션 단위**다.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  look: classic
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FBF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1", "titleColor": "#16213E", "nodeTextColor": "#16213E", "labelColor": "#16213E"}}}%%
   subgraph canvas[" "]
-    direction TB
+    direction LR
     subgraph ord["Order 애그리거트"]
-      direction TB
       ord_r["Order (root)"]
       ord_s["shipping_address (VO)"]
       ord_v["total_amount (VO)"]
@@ -28,7 +15,6 @@ flowchart LR
       ord_r --> ord_v
     end
     subgraph pay["Payment 애그리거트"]
-      direction TB
       pay_r["Payment (root)"]
       pay_p["payment_snapshot (VO)"]
       pay_r --> pay_p
@@ -36,18 +22,16 @@ flowchart LR
     subgraph shp["Shipping 애그리거트"]
       shp_r["Shipping (root)"]
     end
-    pay_r --> ord_r
-    shp_r --> ord_r
+    pay_r -->|"order_id 참조"| ord_r
+    shp_r -->|"order_id 참조"| ord_r
   end
-
-  classDef root fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef vo fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
-  class ord_r,pay_r,shp_r root
-  class ord_s,ord_v,pay_p vo
-  style ord fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style pay fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style shp fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  style canvas fill:#FFFFFF,stroke:#FFFFFF,stroke-width:0px,color:#16213E
+  style ord fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#16213E
+  style pay fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#16213E
+  style shp fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#16213E
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px,color:#16213E
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1.4px,color:#16213E
+  class ord_r,ord_s,ord_v,pay_r,pay_p,shp_r app
 ```
 
 ## 구성 요소

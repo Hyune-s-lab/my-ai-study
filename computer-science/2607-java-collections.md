@@ -41,42 +41,22 @@ System.arraycopy(oldArr, 0, newArr, 0, size);  // O(n) 복사
 > 대량의 데이터를 넣을 게 확실하면 `new ArrayList<>(expectedSize)`로 미리 잡는 것이 성능에 유리.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  look: classic
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
-    subgraph cap["capacity = 10 (배열 크기)"]
-      direction LR
-      S0["[1]"]:::app
-      S1["[2]"]:::app
-      S2["[3]"]:::app
-      E0["[ ]"]:::ctrl
-      E1["[ ]"]:::ctrl
-      E2["[ ]"]:::ctrl
-      E3["[ ]"]:::ctrl
-      E4["[ ]"]:::ctrl
-      E5["[ ]"]:::ctrl
-      E6["[ ]"]:::ctrl
-      S0 ~~~ S1 ~~~ S2 ~~~ E0 ~~~ E1 ~~~ E2 ~~~ E3 ~~~ E4 ~~~ E5 ~~~ E6
+    subgraph array["ArrayList: capacity 10, size 3"]
+      used["인덱스 0~2: 원소 1, 2, 3"]
+      spare["인덱스 3~9: 빈 슬롯 7개"]
     end
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#9CA3AF
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
-  style cap fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  class used,spare app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 > 파란 칸 = 원소(size=3), 회색 칸 = 빈 공간(capacity=10).  
@@ -121,7 +101,7 @@ flowchart LR
 | `LinkedList` | 연결 리스트 기반. `ArrayDeque`보다 느림 | 거의 안 씀 |
 | `PriorityQueue` | 힙 기반. 우선순위 순으로 poll | 작업 스케줄링 |
 | `ArrayBlockingQueue` | 배열 기반. 스레드 안전. bounded | 스레드 풀 작업 대기열 (Tomcat) |
-| `LinkedBlockingQueue` | 연결 리스트 기반. 스레드 안전. unbounded | `ExecutorService` 기본 큐 |
+| `LinkedBlockingQueue` | 연결 리스트 기반. 스레드 안전. capacity 지정 가능 | `newFixedThreadPool`은 사실상 무한 용량으로 사용 |
 
 > `BlockingQueue`는 큐 + 동기화.  
 > 큐가 비어 있으면 `take()`가 대기하고, 꽉 차면 `put()`이 대기한다.  
@@ -135,56 +115,40 @@ Java `HashMap`은 Chaining을 쓰되,
 버킷당 원소가 많아지면 리스트를 **트리로 승격**시킨다.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  look: classic
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
-flowchart TB
+flowchart TD
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    direction TB
-    subgraph threshold["버킷 내 원소 수"]
-      direction LR
-      LT8["≤ 7<br/>연결 리스트<br/>O(n) 최악"]:::app
-      GE8["≥ 8<br/>Red-Black Tree<br/>O(log n)"]:::ctrl
-      LT8 ~~~ GE8
-    end
-    subgraph reverse["다시 줄어들면"]
-      direction LR
-      LE6["≤ 6<br/>리스트로 강등"]:::app
-      GE7["≥ 7<br/>트리 유지"]:::ctrl
-      LE6 ~~~ GE7
-    end
-    LT8 --> GE8
-    GE8 --> LE6
+    direction TD
+    insert["충돌 버킷에 새 원소 삽입"] --> check{"트리화 검사 조건 도달?"}
+    check -->|"아니요"| list["리스트 유지"]
+    check -->|"예"| capacity{"테이블 용량 64 이상?"}
+    capacity -->|"아니요"| resize["먼저 테이블 확장"]
+    capacity -->|"예"| tree["Red-Black Tree로 전환"]
+    tree --> split["resize로 버킷 분할"]
+    split --> small{"분할된 원소 수 6 이하?"}
+    small -->|"예"| untree["분할 버킷을 리스트로 전환"]
+    small -->|"아니요"| keep["트리 유지"]
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
-  style threshold fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style reverse fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  class insert,check,list,tree,split,small,untree,keep app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  class capacity,resize db
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
-| 임계값 | 의미 |
+| OpenJDK 21 구현 조건 | 의미 |
 |---|---|
-| 버킷당 원소 ≥ **8** | 리스트 → Red-Black Tree로 전환 |
-| 버킷당 원소 ≤ **6** | 트리 → 리스트로 강등 (7은 중간 지대) |
-| 버킷 수 × load factor(0.75) | 배열 resize (2배 확장) |
+| `TREEIFY_THRESHOLD = 8` | 충돌 리스트가 길어지면 트리화 검사. 일반 `putVal` 경로에서는 기존 8개에 새 노드를 붙일 때 호출 |
+| `MIN_TREEIFY_CAPACITY = 64` | 테이블 용량이 64 미만이면 트리화 대신 먼저 resize |
+| `UNTREEIFY_THRESHOLD = 6` | resize로 트리를 분할할 때, 분할된 쪽의 원소가 6개 이하면 리스트로 전환 |
+| 원소 삭제 | 트리 모양과 내부 조건에 따라 리스트로 돌아갈 수 있음. 항상 6개라는 규칙은 아님 |
+| `size > capacity × loadFactor` | 일반적인 전체 테이블 resize 조건. 기본 load factor는 0.75 |
 
-> 왜 8인가?  
-> 8개 이하면 리스트가 더 가볍다.  
-> 8을 넘으면 트리의 O(log n)가 리스트의 O(n)보다 유리해진다.  
-> 6과 8 사이에 **히스테리시스**(왕복 지연)를 둬서,  
-> 경계에서 리스트↔트리가 빈번히 전환되는 것을 막는다.
+이 값은 Java API의 영구 계약이 아니라 특정 OpenJDK 구현의 선택이다.  
+트리화는 충돌 비용을 줄이지만, 올바른 `hashCode()`와 키 설계를 대신하지 않는다.
 
 ### 해시 충돌 DoS 공격
 
@@ -220,3 +184,7 @@ Java 8의 트리 전환이 이것을 O(log n)으로 완화했다.
 |---|---|
 | `PriorityQueue` | 최소 힙 기본. `Comparator`로 우선순위 변경 |
 | `PriorityBlockingQueue` | 스레드 안전 버전 |
+
+## 참고
+
+- [OpenJDK 21 — HashMap](https://github.com/openjdk/jdk21u/blob/master/src/java.base/share/classes/java/util/HashMap.java) — 트리화·resize·리스트 복귀 조건의 구분을 반영했다.

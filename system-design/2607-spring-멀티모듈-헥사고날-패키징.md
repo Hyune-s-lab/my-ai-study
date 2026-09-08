@@ -46,39 +46,30 @@ Bluetape4k의 Foundation·Data·Infrastructure·Domain Capability·Application L
 ## 2. 전체 아키텍처
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryTextColor: "#111827"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
-flowchart LR
+flowchart TD
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    direction LR
-
+    direction TD
+  
     web[":adapters:web<br/>REST Controller"]
     scheduler[":adapters:scheduling<br/>Scheduler"]
     consumer[":adapters:kafka<br/>Kafka Consumer"]
-
+  
     input[":application<br/>Inbound Port"]
     service[":application<br/>Application Service"]
     aggregate[":domain<br/>Aggregate · Value Object"]
     rule[":domain<br/>Rule · Domain Event"]
     output[":application<br/>Outbound Port"]
-
+  
     persistence[":adapters:persistence<br/>Exposed Adapter"]
     producer[":adapters:kafka<br/>Kafka Producer"]
     client[":adapters:supplier<br/>Supplier API Client"]
-
-    kafkaIn@{ img: "https://cdn.simpleicons.org/apachekafka/231F20", label: "Kafka inbound topic", pos: "b", h: 48, constraint: "on" }
-    postgres@{ img: "https://cdn.simpleicons.org/postgresql/336791", label: "PostgreSQL", pos: "b", h: 48, constraint: "on" }
-    kafkaOut@{ img: "https://cdn.simpleicons.org/apachekafka/231F20", label: "Kafka outbound topic", pos: "b", h: 48, constraint: "on" }
+  
+    kafkaIn["Kafka inbound topic"]
+    postgres["PostgreSQL"]
+    kafkaOut["Kafka outbound topic"]
     supplier["Supplier API"]
-
+  
     kafkaIn -.-> consumer
     web --> input
     scheduler --> input
@@ -86,25 +77,23 @@ flowchart LR
     input --> service
     service --> aggregate --> rule
     service --> output
-    output -.-> persistence
-    output -.-> producer
-    output -.-> client
+    output --> persistence
+    output --> producer
+    output --> client
     persistence --> postgres
     producer -.-> kafkaOut
     client --> supplier
   end
-
-  classDef inbound fill:#f5f3ff,stroke:#7c3aed,color:#111827
-  classDef application fill:#eff6ff,stroke:#2563eb,color:#111827
-  classDef domain fill:#ecfdf5,stroke:#059669,color:#111827
-  classDef outbound fill:#fff7ed,stroke:#ea580c,color:#111827
-  classDef external fill:#ffffff,stroke:#475569,color:#111827
-  class web,scheduler,consumer inbound
-  class input,service,output application
-  class aggregate,rule domain
-  class persistence,producer,client outbound
-  class supplier external
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class input,service,aggregate,rule,output,persistence,client,supplier app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  class consumer,producer,kafkaIn,postgres,kafkaOut db
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  class web policy
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  class scheduler worker
 ```
 
 노드의 첫 줄은 Gradle module path, 둘째 줄은 그 모듈의 실행 컴포넌트다. `:adapters:kafka`는 Consumer와 Producer를 함께 가지므로 양쪽에 표시된다.
@@ -585,29 +574,22 @@ orchestration 모듈은 이 cycle을 한 곳으로 모은다.
 이름은 "cycle breaker"보다 **"cross-module 조정 경계"**가 정확하다.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryTextColor: "#111827"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
     WEB[":adapters:web<br/>REST Controller"] --> ORCH[":orchestration<br/>cross-module usecase<br/>순서 · transaction"]
     ORCH --> ORDER[":order<br/>공개 usecase"]
     ORCH --> INV[":inventory<br/>공개 usecase"]
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  class WEB,ORDER,INV app
-  class ORCH ctrl
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class ORCH,ORDER,INV app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  class WEB policy
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 orchestration 모듈은 `domain`과 `persistence`가 없다.  

@@ -3,43 +3,29 @@
 테이블에서 행을 빨리 찾기 위한 **별도의 정렬된 자료구조**. 책 뒤 색인처럼, 전체를 훑지(Seq Scan) 않고 위치로 점프(Index Scan).
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    direction TB
+    direction LR
     q["쿼리: WHERE filing_id = 35"]
     subgraph idx["B-tree 인덱스 (정렬된 구조)"]
-      direction TB
-      root["Root\n[ 40 ]"]
-      l["< 40\n[10 · 25 · 35]"]
-      r["≥ 40\n[40 · 60 · 90]"]
+      root["Root<br/>[ 40 ]"]
+      l["< 40<br/>[10 · 25 · 35]"]
+      r["≥ 40<br/>[40 · 60 · 90]"]
       root --> l
       root --> r
     end
-    pg@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "Heap (실제 행 데이터)", pos: "b", h: 48, constraint: "on" }
+    pg["Heap (실제 행 데이터)"]
     q --> root
     l --> pg
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
-  class root,l,r app
-  class q ctrl
-  class pg icon
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
-  style idx fill:#FBFCFE,stroke:#3B5BA5,stroke-width:1px
+  class q,root,l,r,pg app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 ## 자료구조별 (PostgreSQL)

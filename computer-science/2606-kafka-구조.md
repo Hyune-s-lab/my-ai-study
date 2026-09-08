@@ -18,114 +18,76 @@
 ### 전체 구조 — Topic · Partition · Broker · Consumer
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
-    producer@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Producer\nkey → hash(key) % partitions", pos: "b", h: 48, constraint: "on" }
-
-    subgraph topic["Topic: order.events (Kafka Cluster)"]
-      direction TB
-      p0["Partition 0\nBroker 1 (leader), Broker 2 (follower)\noffset 0,1,2,…"]
-      p1["Partition 1\nBroker 2 (leader), Broker 3 (follower)\noffset 0,1,2,…"]
-      p2["Partition 2\nBroker 3 (leader), Broker 1 (follower)\noffset 0,1,2,…"]
+    producer["Producer: key로 파티션 선택"]
+    subgraph topic["Topic: order.events"]
+      p0["Partition 0"]
+      p1["Partition 1"]
+      p2["Partition 2"]
     end
-
-    subgraph g1["Consumer Group: 알림"]
-      direction TB
-      c1["Consumer A"]
-      c2["Consumer B"]
+    subgraph notification["Consumer Group: 알림"]
+      a["Consumer A: P0, P2"]
+      b["Consumer B: P1"]
     end
-
-    subgraph g2["Consumer Group: 회계"]
-      c3["Consumer C"]
+    subgraph accounting["Consumer Group: 회계"]
+      c["Consumer C: P0, P1, P2"]
     end
-
-    producer --> topic
-    p0 --> c1
-    p1 --> c2
-    p2 --> c3
+    producer --> p0
+    producer --> p1
+    producer --> p2
+    p0 --> a
+    p2 --> a
+    p1 --> b
+    p0 --> c
+    p1 --> c
+    p2 --> c
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
-  class producer icon
-  class p0,p1,p2 app
-  class c1,c2,c3 app
-  style topic fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style g1 fill:#ffffff,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  style g2 fill:#ffffff,stroke:#3F8E55,stroke-width:1px,color:#14532D
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class producer,a,b,c app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  class p0,p1,p2 db
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 - **Topic** = 논리적 이름. `order.events` 토픽이 3개 파티션으로 구성.
 - **Partition** = 실제 로그. 각 파티션이 offset 0,1,2…를 가짐. 같은 key는 같은 파티션 → 순서 보장.
-- **Broker 분산**: Partition 0은 Broker 1이 leader, Broker 2가 follower. 복제로 내구성 확보.
-- **Consumer Group**: 각 그룹이 독립적으로 파티션을 할당받아 소비.
+- **Broker 분산**: 각 파티션은 leader와 follower replica를 서로 다른 broker에 배치한다.  
+  예를 들어 P0의 leader는 Broker 1, follower는 Broker 2에 둘 수 있다.
+- **Consumer Group**: 같은 토픽을 구독한 각 그룹은 모든 파티션을 독립적으로 소비한다.  
+  그룹 안에서는 한 파티션을 한 consumer에 배정하며, 한 consumer가 여러 파티션을 맡을 수 있다.
 
 ## 1. 파티션 = 순서와 병렬성의 단위
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    direction TB
-    producer@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Producer\nkey=filing_id → hash(key) % 파티션수\n로 어느 파티션에 넣을지 결정", pos: "b", h: 48, constraint: "on" }
-
-    subgraph topic["Topic: tax.filing (파티션들의 묶음 = 논리적 이름일 뿐)"]
-      direction TB
-      subgraph p0["Partition 0 — 순서 보장되는 append-only 로그"]
-        direction TB
-        p0a["offset 0"] --- p0b["1"] --- p0c["2"] --- p0d["3"] --- p0e["다음 append →"]
-      end
-      subgraph p1["Partition 1"]
-        direction TB
-        p1a["offset 0"] --- p1b["1"] --- p1c["다음 append →"]
-      end
-      subgraph p2["Partition 2"]
-        direction TB
-        p2a["offset 0"] --- p2b["1"] --- p2c["2"] --- p2d["다음 append →"]
-      end
+    direction LR
+    producer["Producer"]
+    route["key=filing_id로 파티션 선택"]
+    subgraph topic["Topic: tax.filing"]
+      p0["P0: offset 0, 1, 2, 3, ..."]
+      p1["P1: offset 0, 1, ..."]
+      p2["P2: offset 0, 1, 2, ..."]
     end
-
-    producer --> p0
-    producer --> p1
-    producer --> p2
+    producer --> route
+    route --> p0
+    route --> p1
+    route --> p2
   end
-
-  classDef cell fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef tail fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
-  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
-  class p0a,p0b,p0c,p0d,p1a,p1b,p2a,p2b,p2c cell
-  class p0e,p1c,p2d tail
-  class producer icon
-  style topic fill:#FBFCFE,stroke:#3B5BA5,stroke-width:1px
-  style p0 fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style p1 fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style p2 fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class producer,route,p0,p1,p2 app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 - **Topic = 논리적 이름**(파티션들의 묶음). **Partition = 실제 데이터** = 순서 보장되는 **append-only 로그**(offset 0,1,2…).
@@ -137,12 +99,13 @@ flowchart LR
 카프카 설계의 핵심. **순서 단위는 파티션**이고, 그걸 지키려면 발행·파티션·소비 3군데를 다 봐야 한다.
 
 **(1) key 라우팅 — 순서 단위 정하기**
-- `hash(key) % 파티션수` 로 파티션 결정 → **같은 key = 같은 파티션 = 순서 보장**. key 없으면 라운드로빈이라 순서 X.
+- `hash(key) % 파티션수` 로 파티션 결정 → **같은 key = 같은 파티션 = 순서 보장**. key가 없으면 partitioner 정책에 따라 배정되므로 업무 단위의 순서를 기대할 수 없다.
 - **무엇을 key로?** = "무엇 단위로 순서를 지킬까". 예: `key=order_id` → 한 주문의 사건들(`Created→Paid`)이 순서대로. (서로 다른 주문끼리는 순서 무관)
 
 **(2) 프로듀서 함정 — 재시도 순서 역전**
 - `max.in.flight.requests.per.connection > 1` + 재시도면, 앞 메시지가 실패·재전송되는 사이 **뒤 메시지가 먼저** 들어가 순서가 뒤집힐 수 있음.
-- **해결: `enable.idempotence=true`** (현대 기본 권장). 시퀀스 번호로 브로커가 **정렬 + 중복 제거** → in-flight 5까지도 순서·정확히 한 번 보장. (옛날엔 `max.in.flight=1`로 낮췄지만 처리량 손해)
+- **해결: `enable.idempotence=true`** (현대 기본 권장). producer ID·epoch·시퀀스 번호로 재시도 중복과 순서를 관리한다.  
+  지원 설정(`acks=all`, retries 활성화, in-flight ≤ 5)에서 파티션 내 순서를 보존하지만, 별도 업무 요청이나 DB 부작용까지 중복 제거하지는 않는다. (옛날엔 `max.in.flight=1`로 낮췄지만 처리량 손해)
 
 **(3) 파티션 수 변경 함정**
 - 파티션을 **늘리면** `% N`의 N이 바뀜 → 같은 key가 **다른 파티션**으로 감 → 과거·신규가 흩어져 **순서 보장 깨짐**.
@@ -169,53 +132,40 @@ flowchart LR
 ## 4. ZooKeeper vs KRaft
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    direction TB
+    direction LR
     subgraph zkmode["① ZooKeeper 모드 (레거시 · ~Kafka 3.x)"]
       direction TB
-      z["ZooKeeper 앙상블\n(별도 클러스터 · 메타데이터·선출 보관)"]
-      zk_b1@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Broker 1\n(+ Active Controller · 선출됨)", pos: "b", h: 48, constraint: "on" }
-      zk_b2@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Broker 2", pos: "b", h: 48, constraint: "on" }
-      zk_b3@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Broker 3", pos: "b", h: 48, constraint: "on" }
+      z["ZooKeeper 앙상블<br/>(별도 클러스터 · 메타데이터·선출 보관)"]
+      zk_b1["Broker 1<br/>(+ Active Controller · 선출됨)"]
+      zk_b2["Broker 2"]
+      zk_b3["Broker 3"]
       zk_b1 --> z
       zk_b2 --> z
       zk_b3 --> z
     end
-
+  
     subgraph kraftmode["② KRaft 모드 (Kafka 3.3+ · 4.0 전용)"]
       direction TB
-      cq@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Controller Quorum\n(__cluster_metadata · 내부 Raft 합의)", pos: "b", h: 48, constraint: "on" }
-      k_b1@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Broker 1", pos: "b", h: 48, constraint: "on" }
-      k_b2@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Broker 2", pos: "b", h: 48, constraint: "on" }
-      k_b3@{ img: "https://cdn.simpleicons.org/apachekafka", label: "Broker 3", pos: "b", h: 48, constraint: "on" }
+      cq["Controller Quorum<br/>(__cluster_metadata · 내부 Raft 합의)"]
+      k_b1["Broker 1"]
+      k_b2["Broker 2"]
+      k_b3["Broker 3"]
       k_b1 --> cq
       k_b2 --> cq
       k_b3 --> cq
     end
   end
-
-  classDef broker fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef zk fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  classDef ctrl fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
-  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
-  class zk_b1,zk_b2,zk_b3,k_b1,k_b2,k_b3,cq icon
-  class z zk
-  style zkmode fill:#ffffff,stroke:#C98A2B,stroke-width:1px
-  style kraftmode fill:#ffffff,stroke:#3F8E55,stroke-width:1px
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class z,zk_b2,zk_b3,k_b1,k_b2,k_b3 app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  class zk_b1,cq policy
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 - **① ZooKeeper 모드(레거시)**: 메타데이터·컨트롤러 선출·구성 관리를 **별도 ZooKeeper 앙상블**이 담당. broker 중 1대가 **Active Controller**로 선출됨. → 클러스터 2개(Kafka+ZK) 운영.
@@ -282,3 +232,7 @@ flowchart LR
 ### Kafka Streams — 순서 + 상태 + 윈도우 처리
 
 파티션별 상태 store(RocksDB)로 같은 key의 이벤트가 순차 처리되어 상태 일관성이 보장된다. `groupByKey`, `windowedBy`, `aggregate`로 시간 윈도우 집계를 선언적으로 처리할 수 있다. Spring Kafka 수동 consume에서 직접 구현하기 번거로운 부분을 엔진 차원에서 지원.
+
+## 참고
+
+- [Apache Kafka — Design](https://kafka.apache.org/41/design/design/) — consumer group별 독립 소비와 파티션 순서, producer 멱등성의 범위를 반영했다.

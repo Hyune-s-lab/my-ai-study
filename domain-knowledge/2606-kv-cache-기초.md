@@ -4,25 +4,83 @@
 
 ### 1.0 가장 쉽게 (먼저 이것만 봐도 80%)
 
-> LLM은 글을 **한 글자(토큰)씩** 쓴다. 새 글자를 정하려면 지금까지 쓴 글을 다 봐야 하는데, **매번 처음부터 다시 읽으면 느리다.** 그래서 한 번 읽은 글자는 **메모로 남겨두고 새 글자만 추가**한다. 이 메모 묶음이 **KV 캐시**다.
+> LLM은 글을 **토큰씩** 쓴다. 새 토큰를 정하려면 지금까지 쓴 글을 다 봐야 하는데, **매번 처음부터 다시 읽으면 느리다.** 그래서 한 번 처리한 토큰은 **메모로 남겨두고 새 토큰만 추가**한다. 이 메모 묶음이 **KV 캐시**다.
 
-![캐시가 왜 필요한가 — 캐시 없음(매번 재계산) vs 있음(메모 재사용)](./assets/kv-cache-1-why.svg)
+```mermaid
+flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
+  subgraph canvas[" "]
+    direction LR
+    subgraph without["캐시 없음: 매 decode 스텝"]
+      full["전체 prefix 입력"] --> recompute["과거 K·V까지 재계산"]
+    end
+    subgraph withCache["KV 캐시 사용: 매 decode 스텝"]
+      token["현재 토큰 입력"] --> compute["현재 Q·K·V 계산"]
+      cache["과거 K·V 재사용"] --> attention["현재 Q로 attention"]
+      compute --> attention
+    end
+  end
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class full,recompute,token,compute,cache,attention app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+```
 
-![글자 하나를 처리하면 K·V는 캐시에 저장되고 Q는 버려진다](./assets/kv-cache-2-qkv.svg)
+```mermaid
+flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
+  subgraph canvas[" "]
+    direction LR
+    input["현재 토큰의 레이어 입력"] --> q["현재 Q"]
+    input --> kv["현재 K·V"]
+    kv --> cache["레이어별 KV 캐시에 추가"]
+    q --> attention["현재 위치의 attention 계산"]
+    cache --> attention
+    attention --> output["다음 레이어 입력"]
+  end
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class input,q,kv,attention,output app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  class cache db
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+```
 
-![글이 길수록 메모가 쌓여 GPU 메모리(VRAM)를 차지한다](./assets/kv-cache-3-memory.svg)
+```mermaid
+flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
+  subgraph canvas[" "]
+    direction LR
+    length["저장 토큰 수 증가"] --> entries["레이어별 K·V 저장량 증가"]
+    requests["동시 시퀀스 수 증가"] --> entries
+    entries --> memory["KV 캐시의 GPU 메모리 사용 증가"]
+  end
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class length,entries,requests app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  class memory db
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+```
 
 **세 줄 요약:**
 - **K**=꼬리표(색인), **V**=내용, **Q**=질문 → Q는 쓰고 버리고 **K·V만 메모로 쌓인다** (그래서 'QKV'가 아니라 **'KV' 캐시**)
-- 한 번 계산한 메모를 재사용하니 **새 글자만 계산** → 빠르다
-- 메모가 글자 수만큼 쌓이니 **글이 길수록 VRAM을 많이 먹는다** → 서빙의 핵심 고민
+- 한 번 계산한 메모를 재사용하니 **새 토큰만 계산** → 빠르다
+- 메모가 저장 토큰 수만큼 쌓이니 **글이 길수록 VRAM을 많이 먹는다** → 서빙의 핵심 고민
 
 > 여기까지가 핵심이다. 아래 2~4장은 "실제로 서버를 돌릴 때" 필요한 디테일이니, 처음 읽는다면 1.0만으로 충분하다.
 
 ### 1.1 TL;DR (운영 키워드만)
 
 - 과거 K·V를 재사용해 재계산을 피한다 → 토큰 생성 복잡도 `O(n²) → O(n)`.
-- 비용은 **VRAM**. 동시 처리량의 진짜 병목은 보통 연산이 아니라 **KV 캐시 메모리**이고, 서빙 OOM은 대부분 이 초과다.
+- 비용은 **VRAM**. 동시 처리량의 진짜 병목은 보통 연산이 아니라 **KV 캐시 메모리**이고, OOM 원인은 모델 가중치·활성값·workspace·KV 캐시를 나눠 확인한다.
 - vLLM의 `PagedAttention`·`continuous batching`·`prefix caching`이 이를 효율화한다.
 - API의 `prompt caching`(Anthropic/OpenAI)은 prefix 단위 KV 재사용을 상품화한 것이다.
 
@@ -38,14 +96,17 @@
 
 > 직관은 위 **§1.0 그림**이면 충분하다. 여기는 용어를 한 번 더 정리하는 정도.
 
-> 📎 attention 자체가 처음이라면 [Attention (기초편)](./260603-attention-기초.md)을 먼저 보면 이 장이 훨씬 쉽다. ("왜 K·V만 캐싱하는가"의 답이 거기 있다.)
+> 📎 attention 자체가 처음이라면 [Attention (기초편)](./2606-attention-기초.md)을 먼저 보면 이 장이 훨씬 쉽다. ("왜 K·V만 캐싱하는가"의 답이 거기 있다.)
 
 LLM은 토큰을 하나씩 생성하고(autoregressive), 새 토큰을 만들 때 attention이 **앞의 모든 토큰**을 본다. 캐시가 없으면 매 토큰마다 전체를 다시 계산해 `O(n²)`로 낭비된다. KV 캐시로 과거 K·V를 재사용하면 새 토큰분만 계산해 `O(n)`이 된다.
 
 - **Q**(질문)는 매번 현재 토큰 것만 쓰고 버린다 → 캐시 안 함
 - **K·V**는 과거 전부가 매 스텝 다시 필요하다 → 캐시함 → 그래서 'KV' 캐시
 
-> ⚠️ **KV 캐시는 무손실이다.** K·V는 토큰에 고정 가중치를 곱한 **결정론적 값**이라, 캐시를 쓰든 매번 재계산하든 출력은 동일하다. 손실이 생기는 건 캐시가 아니라 [§3.1의 메모리 절감 기법](#31-메모리를-줄이는-기법)(양자화·eviction)을 쓸 때뿐이다.
+같은 모델·prefix·위치·마스크를 사용하는 causal attention에서는 과거 K·V를 재사용할 수 있다.  
+KV 캐시 자체는 수학적으로 재계산과 같지만, 연산 커널·부동소수점 순서에 따라 bit 단위 출력까지 같다고 보장하지는 않는다.  
+캐시 양자화나 원래 attention 범위 밖의 임의 eviction은 별도로 품질 영향을 검토한다.
+
 
 ### 2.1 두 단계: prefill vs decode
 
@@ -61,8 +122,11 @@ LLM은 토큰을 하나씩 생성하고(autoregressive), 새 토큰을 만들 �
 연산은 아꼈지만 VRAM을 잡아먹는다. 대략적인 크기 공식:
 
 ```
-KV 캐시 크기 ≈ 2(K,V) × num_layers × seq_len × hidden_dim × batch_size × dtype_bytes
+KV 캐시 크기 ≈ 2(K,V) × num_layers × seq_len × num_kv_heads × head_dim × batch_size × dtype_bytes
 ```
+
+`num_kv_heads × head_dim`은 KV 한쪽의 폭이다. MHA에서는 보통 `hidden_dim`과 같지만,  
+GQA/MQA에서는 KV head 수가 더 적다. 위 식은 길이가 같은 dense KV 저장의 근사이며 페이지 낭비 등은 별도다.
 
 - `seq_len`(컨텍스트 길이)에 **선형 비례** -> 긴 RAG 프롬프트 = 큰 캐시
 - `batch_size`에 **선형 비례** -> 동시 요청 많을수록 큰 캐시
@@ -100,7 +164,7 @@ LLM 서빙/운영 관심사와 직결되는 부분이다.
 | `--kv-cache-dtype` | 캐시 저장 자료형 (`fp8` 등) | 캐시 양자화로 메모리 절감 |
 | `--enable-prefix-caching` | prefix 캐시 재사용 활성화 | 공통 프롬프트 KV 재사용 |
 
-> 💡 **OOM 트러블슈팅**: 서빙 중 "CUDA out of memory" -> 대부분 KV 캐시 초과다. 대응 순서:
+> 💡 **OOM 트러블슈팅**: 서빙 중 "CUDA out of memory"가 나면 메모리 사용 항목과 실패 단계를 먼저 확인한다. KV 캐시가 원인일 때의 대응 순서:
 > 1. `--max-model-len` 낮추기 (요청당 캐시 상한 축소)
 > 2. `--max-num-seqs` 낮추기 (동시성 축소)
 > 3. `--kv-cache-dtype fp8` (캐시 양자화)
@@ -192,3 +256,5 @@ KV 캐시 풀 [10,000칸]
 - [vLLM: PagedAttention 논문](https://arxiv.org/abs/2309.06180)
 - [vLLM 공식 문서 — Engine Arguments](https://docs.vllm.ai/)
 - [Anthropic — Prompt caching](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching)
+
+- [Hugging Face — Caching](https://huggingface.co/docs/transformers/cache_explanation) — 레이어별 현재 Q·K·V와 과거 KV 재사용, 캐시 텐서 차원을 반영했다.

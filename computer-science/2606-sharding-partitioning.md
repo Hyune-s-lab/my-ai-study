@@ -3,60 +3,46 @@
 헷갈리는 이유: **샤딩은 파티셔닝의 한 종류**다. "여러 노드에 걸친 수평 파티셔닝"이 샤딩.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    direction TB
-
+    direction LR
+  
     subgraph h["① 수평 파티셔닝 (행 분할 · 단일 DB)"]
       direction TB
-      h_pg@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "PostgreSQL", pos: "b", h: 48, constraint: "on" }
+      h_pg["PostgreSQL"]
       h_p1["rows · 2023"]
       h_p2["rows · 2024"]
       h_p3["rows · 2025"]
     end
-
+  
     subgraph v["② 수직 파티셔닝 (컬럼 분할 · 단일 DB)"]
       direction TB
-      v_pg@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "PostgreSQL", pos: "b", h: 48, constraint: "on" }
-      v_t1["orders\n(id, status, …) ← hot"]
-      v_t2["order_details\n(id, payload) ← cold"]
+      v_pg["PostgreSQL"]
+      v_t1["orders<br/>(id, status, …) ← hot"]
+      v_t2["order_details<br/>(id, payload) ← cold"]
       v_t1 ---|"같은 PK"| v_t2
     end
-
+  
     subgraph s["③ 샤딩 (행 분할 · 여러 노드)"]
       direction TB
-      s_router["샤드 라우터\n(shard key)"]
-      s_n1@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "Node 1 / Shard 1", pos: "b", h: 48, constraint: "on" }
-      s_n2@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "Node 2 / Shard 2", pos: "b", h: 48, constraint: "on" }
-      s_n3@{ img: "https://icons.terrastruct.com/dev/postgresql.svg", label: "Node 3 / Shard 3", pos: "b", h: 48, constraint: "on" }
+      s_router["샤드 라우터<br/>(shard key)"]
+      s_n1["Node 1 / Shard 1"]
+      s_n2["Node 2 / Shard 2"]
+      s_n3["Node 3 / Shard 3"]
       s_router --> s_n1
       s_router --> s_n2
       s_router --> s_n3
     end
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  classDef icon fill:transparent,stroke:transparent,stroke-width:0px,color:#111827
-  class h_p1,h_p2,h_p3,v_t1,v_t2 app
-  class s_router ctrl
-  class h_pg,v_pg,s_n1,s_n2,s_n3 icon
-  style h fill:#ffffff,stroke:#3B5BA5,stroke-width:1px
-  style v fill:#ffffff,stroke:#3B5BA5,stroke-width:1px
-  style s fill:#ffffff,stroke:#3F8E55,stroke-width:1px
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class h_p1,h_p2,h_p3,v_t1,v_t2,s_router,s_n1,s_n2,s_n3 app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  class h_pg,v_pg db
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 ## 한눈 비교 — 수평 파티셔닝 · 수직 파티셔닝 · 샤딩
@@ -135,5 +121,5 @@ public class ShardingDataSource extends AbstractRoutingDataSource {
 - **대안 우선**: 읽기 복제본, 캐시, 파티셔닝, 컬럼 압축으로 먼저 해결. 샤딩은 정말 최후.
 
 ## 다른 맥락의 "partition" (용어 혼동 주의)
-- **Kafka partition**: 토픽을 쪼갠 단위(브로커 분산) — 사실상 토픽의 샤딩·파티셔닝. (→ [Kafka 구조](./260617-kafka-구조.md))
+- **Kafka partition**: 토픽을 쪼갠 단위(브로커 분산) — 사실상 토픽의 샤딩·파티셔닝. (→ [Kafka 구조](./2606-kafka-구조.md))
 - **CAP의 partition tolerance**: 네트워크 **분단** 내성 — 위 분할과 전혀 다른 의미.

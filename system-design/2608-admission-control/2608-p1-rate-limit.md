@@ -9,35 +9,30 @@ Phase 1의 범위는 `default` group 하나다.
 ## 1. Tier가 요청 속도를 정한다
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
-    client["Client"]:::app
-    auth["API Key auth<br/>Team 식별"]:::app
-    tier["Team Tier<br/>분당 요청 · 토큰 · 버스트"]:::ctrl
-    rate["Rate Limit<br/>Redis Lua · GCRA"]:::ctrl
-    provider["Model Provider"]:::app
-    denied["429<br/>rate limit exceeded"]:::ctrl
-
-    client --> auth --> tier --> rate --> provider
-    rate --> denied
+    client["Client"]
+    auth["API Key auth<br/>Team 식별"]
+    tier["Team Tier<br/>분당 요청 · 토큰 · 버스트"]
+    rate["Rate Limit<br/>Redis Lua · GCRA"]
+    provider["Model Provider"]
+    denied["429<br/>rate limit exceeded"]
+  
+    client --> auth --> tier --> rate
+    rate -->|"허용"| provider
+    rate -->|"한도 초과"| denied
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class client,auth,provider,denied app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  class rate db
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  class tier policy
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 | 구성 | 책임 |
@@ -51,42 +46,41 @@ Tier는 고정 상품 catalog이고, 현재 Team Tier는 Team row에 둔다.
 Gateway는 인증 결과의 `teamId`·`rateLimitTierId`로 프로세스 로컬 Tier catalog에서 한도를 찾는다.
 Redis에는 Tier policy를 넣지 않고, Team별 GCRA TAT만 둔다.
 
+관계선의 `1 : 0..N`은 일대다, `1 : 0..1`은 선택적 일대일 관계다.
+
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
-erDiagram
-  direction LR
-  RATE_LIMIT_TIER {
-    uuid id PK "UUID v7"
-    varchar name UK "free, tier_1 등"
-    integer requests_per_minute
-    integer request_burst
-    bigint tokens_per_minute
-    bigint token_burst
-    timestamptz created_at
-    varchar created_by
-  }
-
-  TEAM {
-    uuid id PK "UUID v7"
-    uuid rate_limit_tier_id FK "현재 Tier"
-    timestamptz created_at
-    varchar created_by
-    timestamptz updated_at
-    varchar updated_by
-  }
-
-  RATE_LIMIT_TIER ||--o{ TEAM : assigned_to
+flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
+  subgraph canvas[" "]
+    direction LR
+    RATE_LIMIT_TIER["RATE_LIMIT_TIER"] -->|"1 : 0..N 할당"| TEAM["TEAM"]
+  end
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class RATE_LIMIT_TIER,TEAM app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
+
+| 엔티티 | 필드 | 타입 | 제약 · 설명 |
+|---|---|---|---|
+| RATE_LIMIT_TIER | `id` | `uuid` | PK UUID v7 |
+| RATE_LIMIT_TIER | `name` | `varchar` | UK free, tier_1 등 |
+| RATE_LIMIT_TIER | `requests_per_minute` | `integer` | — |
+| RATE_LIMIT_TIER | `request_burst` | `integer` | — |
+| RATE_LIMIT_TIER | `tokens_per_minute` | `bigint` | — |
+| RATE_LIMIT_TIER | `token_burst` | `bigint` | — |
+| RATE_LIMIT_TIER | `created_at` | `timestamptz` | — |
+| RATE_LIMIT_TIER | `created_by` | `varchar` | — |
+| TEAM | `id` | `uuid` | PK UUID v7 |
+| TEAM | `rate_limit_tier_id` | `uuid` | FK 현재 Tier |
+| TEAM | `created_at` | `timestamptz` | — |
+| TEAM | `created_by` | `varchar` | — |
+| TEAM | `updated_at` | `timestamptz` | — |
+| TEAM | `updated_by` | `varchar` | — |
+
 
 - `rate_limit_tier`에는 `tier_1`부터 `tier_5`까지 다섯 고정 row를 둔다. 분당 요청·토큰 값은 제품 정책이다.
 - Team은 현재 Tier 하나만 가지므로 별도 assignment table이 필요 없다. 업그레이드는 `team.rate_limit_tier_id`를 바꾸는 작업이다.
@@ -203,11 +197,17 @@ Provider 호출 실패도 이미 허용된 request 시도로 남기며 TAT를 �
 
 | 상태 | 키 패턴 | 값 | 만료 |
 | --- | --- | --- | --- |
-| request TAT | `quota:rate:gcra:v2:{teamId}:group:default:requests` | 정수 microsecond TAT | TAT가 현재가 될 때까지 |
-| token TAT | `quota:rate:gcra:v2:{teamId}:group:default:tokens` | 정수 microsecond TAT | TAT가 현재가 될 때까지 |
+| request TAT | `quota:{teamId}:rate:request_tat` | 정수 microsecond TAT | TAT가 현재가 될 때까지 |
+| token TAT | `quota:{teamId}:rate:token_tat` | 정수 microsecond TAT | TAT가 현재가 될 때까지 |
 
 TAT의 `PEXPIREAT`은 burst tolerance가 아니라 **TAT 자신**을 기준으로 잡는다.
 이전 TAT가 남긴 debt가 사라지기 전 state를 지우면 burst를 반복해서 재생성할 수 있기 때문이다.
+
+key는 `quota → Team → 정책 → 상태` 순서로 읽는다.
+
+TAT 값은 Redis `TIME`으로 만든 epoch microseconds timestamp다.
+현재가 `2026-09-03T12:00:00Z`이고 60 RPM이면 요청 간격은 1초이므로,
+첫 요청 뒤 request TAT에는 `1788436801000000`, 즉 `2026-09-03T12:00:01Z`가 저장된다.
 
 ## 5. 로컬 Tier catalog과 Team Tier 변경
 
@@ -238,29 +238,14 @@ Redis Lua timeout·오류는 direct PostgreSQL fallback 없이 503으로 끝낸�
 ## 7. 요청 흐름
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
-    actorBkg: "#EFF6FF"
-    actorBorder: "#3B5BA5"
-    actorTextColor: "#16213E"
-    noteBkgColor: "#FFF7ED"
-    noteBorderColor: "#C98A2B"
----
 sequenceDiagram
-  participant G as Gateway
-  participant T as Local TierCatalog
-  participant R as Redis Lua
-  participant P as Model Provider
-
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
+  box rgb(255, 255, 255)
+    participant G as Gateway
+    participant T as Local TierCatalog
+    participant R as Redis Lua
+    participant P as Model Provider
+  end
   rect rgb(255, 255, 255)
     G->>T: rateLimitTierId로 limit 조회
     T-->>G: 분당 요청 · token · burst

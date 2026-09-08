@@ -1,6 +1,6 @@
 # Attention · 기초편
 
-> 이 문서는 [KV 캐시 (기초편)](./260601-kv-cache-기초.md)의 **선행 개념**이다. "왜 K와 V만 캐싱하는가"는 결국 어텐션이 무엇인지에서 나온다.
+> 이 문서는 [KV 캐시 (기초편)](./2606-kv-cache-기초.md)의 **선행 개념**이다. "왜 K와 V만 캐싱하는가"는 결국 어텐션이 무엇인지에서 나온다.
 
 ## 1. 요약
 
@@ -18,14 +18,31 @@
 → 이 가중치로 단어들의 의미를 섞어 "그것"의 문맥을 결정
 ```
 
-![어텐션이란 — "어디를 얼마나 볼지" 가중치를 매겨 정보를 섞는다](./assets/attention-1-idea.svg)
+```mermaid
+flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
+  subgraph canvas[" "]
+    direction LR
+    query["현재 토큰: 그것"] --> weights["문맥에 따른 가중치 계산"]
+    context["참고 토큰: 개발자 · 버그 · 고쳤다"] --> weights
+    weights --> mix["각 토큰의 정보를 가중합"]
+    mix --> output["그것의 문맥 표현"]
+  end
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class query,weights,context,mix,output app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+```
 
 **세 줄 요약:**
 - 각 토큰을 **Q**(질문)·**K**(꼬리표)·**V**(내용) 세 벡터로 바꾼다
 - **Q**를 앞 토큰들의 **K**와 비교해 "어디를 볼지" 가중치를 만들고, 그 가중치로 **V**를 섞는다
 - 토큰끼리 **N×N로 전부 비교** → 비용이 길이의 **제곱(O(N²))** → 긴 컨텍스트가 비싼 근본 이유
 
-> 연결고리: **K·V는 한 번 계산하면 안 바뀐다.** 그래서 다음 토큰 생성 때 재사용하려고 저장해두는 게 [KV 캐시](./260601-kv-cache-기초.md)다. 어텐션을 알면 KV 캐시는 "그 K·V를 메모해두는 것"으로 자연히 이해된다.
+> 연결고리: **K·V는 한 번 계산하면 안 바뀐다.** 그래서 다음 토큰 생성 때 재사용하려고 저장해두는 게 [KV 캐시](./2606-kv-cache-기초.md)다. 어텐션을 알면 KV 캐시는 "그 K·V를 메모해두는 것"으로 자연히 이해된다.
 
 ### 1.1 TL;DR
 
@@ -33,7 +50,7 @@
 - **self-attention**: 같은 시퀀스 안의 토큰들끼리 서로 본다 (Transformer의 기본)
 - **causal mask**: 디코더(생성 모델)는 미래 토큰을 못 본다 → 항상 **왼쪽(과거)만** attend
 - **multi-head**: 여러 "관점"으로 병렬 attend 후 합친다
-- 비용 `O(N²)` → **FlashAttention**(연산·메모리 최적화), **GQA/MQA**(K/V를 head끼리 공유)로 완화. 후자는 곧 KV 캐시 크기를 줄이는 기법이다.
+- dense attention의 연산은 길이에 대해 `O(N²)`다. **FlashAttention**은 메모리 접근과 중간 저장을 줄이고, **GQA/MQA**는 KV head 공유로 캐시 크기를 줄인다.
 
 ### 1.2 한 줄 정의
 
@@ -69,18 +86,39 @@
 
 핵심은 **key-value 스토어에 쿼리를 날리는 것**과 구조가 같다는 점이다. Q로 K들을 조회해 매칭 점수를 얻고, 점수만큼 V를 꺼내 섞는다. 다만 "정확히 일치하는 키 하나"가 아니라 **모든 키에 부드럽게(soft) 가중치를 주는 조회**라는 점이 다르다.
 
-![Q로 K를 조회해 점수를 내고, softmax로 가중치를 만들어 V를 가중합한다](./assets/attention-2-qkv.svg)
+```mermaid
+flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
+  subgraph canvas[" "]
+    direction LR
+    q["현재 토큰 Q"] --> score["Q와 K의 내적 · 스케일 조정"]
+    k["참고 토큰 K"] --> score
+    score --> mask["causal mask"]
+    mask --> softmax["softmax: 가중치"]
+    softmax --> sum["V의 가중합"]
+    v["참고 토큰 V"] --> sum
+    sum --> output["attention 출력"]
+  end
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class q,score,k,mask,softmax,sum,v,output app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+```
 
 ### 3.2 작은 예시로 한 스텝 따라가기
 
-토큰 3개 `["그", "버그", "그것"]`이 있고, 지금 **"그것"의 Q**로 어텐션을 한 번 돈다고 하자.
+토큰 3개 `["그", "버그", "그것"]`에 대해 **"그것"의 Q**로 한 스텝을 계산한다.  
+아래는 `d=1`로 단순화한 수치 예시이며, 실제 모델에서 측정한 attention 값이 아니다.
 
 ```
 "그것"의 Q  ·  각 토큰의 K   →   raw score   → /√d, softmax →  weight
 ─────────────────────────────────────────────────────────────────
-  Q · K(그)     =   1.2                        →   0.10
-  Q · K(버그)   =   4.8                        →   0.75   ← 가장 관련 높음
-  Q · K(그것)   =   2.5                        →   0.15
+  Q · K(그)     =   0.0000                     →   0.10
+  Q · K(버그)   =   2.0149                     →   0.75   ← 가장 관련 높음
+  Q · K(그것)   =   0.4055                     →   0.15
                                                    ─────
                                                    합 1.00
 
@@ -133,7 +171,24 @@
   └ 항상 왼쪽(과거)만 본다 = decode가 한 방향으로 진행되는 이유
 ```
 
-![causal mask — 항상 왼쪽(과거)만 보므로 과거 K·V가 안 바뀐다 → KV 캐시로 이어진다](./assets/attention-3-causal.svg)
+```mermaid
+flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
+  subgraph canvas[" "]
+    direction LR
+    current["위치 t의 Q"] --> past["위치 1~t의 K와 비교"]
+    past --> weights["softmax 가중치"]
+    weights --> values["위치 1~t의 V 가중합"]
+    future["위치 t 이후의 score"] --> blocked["마스크 처리: 가중치 0"]
+  end
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class current,past,weights,values,future,blocked app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+```
 
 > 이 "과거만 본다" 성질이 KV 캐시를 가능하게 한다. 과거 토큰의 K·V는 새 토큰이 추가돼도 **재계산할 필요가 없다** → 그래서 캐싱이 무손실로 성립한다.
 
@@ -145,7 +200,7 @@
         (문법)  (지시)      (어순)        여러 관점을 한데 모음
 ```
 
-> KV 캐시 관점: head가 많을수록 저장할 K·V도 많아진다. **GQA/MQA**는 여러 head가 K·V를 **공유**해 head 수만큼 캐시가 불어나는 걸 막는 기법 → [KV 캐시 §3.1](./260601-kv-cache-기초.md)과 직결.
+> KV 캐시 관점: head가 많을수록 저장할 K·V도 많아진다. **GQA/MQA**는 여러 head가 K·V를 **공유**해 head 수만큼 캐시가 불어나는 걸 막는 기법 → [KV 캐시 §3.1](./2606-kv-cache-기초.md)과 직결.
 
 ## 5. 비용과 실무 연결
 
@@ -159,7 +214,7 @@ self-attention은 토큰 N개에 대해 **모든 쌍(N×N)**의 score를 계산�
 
 | 기술 | 어텐션과의 관계 |
 |---|---|
-| **KV 캐시** | 과거 토큰의 K·V를 저장해 decode 때 재계산을 없앤다. 토큰당 생성 복잡도 `O(n²)→O(n)`. → [별도 문서](./260601-kv-cache-기초.md) |
+| **KV 캐시** | 과거 토큰의 K·V를 저장해 decode 때 재계산을 없앤다. 토큰당 생성 복잡도 `O(n²)→O(n)`. → [별도 문서](./2606-kv-cache-기초.md) |
 | **FlashAttention** | N×N score 행렬을 통째로 메모리에 안 올리고 블록 단위로 계산 → 메모리·속도 대폭 개선. vLLM 등이 내부적으로 사용 |
 | **GQA / MQA** | 여러 head가 K·V를 공유 → KV 캐시 메모리 축소 (Llama 등 기본 채택) |
 | **컨텍스트 길이 한계** | `O(N²)` 때문에 무한정 못 늘린다. sliding window·sparse attention 등으로 우회 |
@@ -178,7 +233,7 @@ self-attention은 토큰 N개에 대해 **모든 쌍(N×N)**의 score를 계산�
 ∴ K·V만 저장 = 'KV' 캐시
 ```
 
-"왜 Q는 안 캐싱하고 K·V만?"의 답이 바로 이것이다. 자세한 메모리·서빙 이야기는 [KV 캐시 (기초편)](./260601-kv-cache-기초.md)에서 이어진다.
+"왜 Q는 안 캐싱하고 K·V만?"의 답이 바로 이것이다. 자세한 메모리·서빙 이야기는 [KV 캐시 (기초편)](./2606-kv-cache-기초.md)에서 이어진다.
 
 ## 7. 다음 문서 (예정)
 
@@ -194,4 +249,4 @@ self-attention은 토큰 N개에 대해 **모든 쌍(N×N)**의 score를 계산�
 - [Attention Is All You Need (Transformer 원논문)](https://arxiv.org/abs/1706.03762)
 - [The Illustrated Transformer (Jay Alammar)](https://jalammar.github.io/illustrated-transformer/)
 - [FlashAttention 논문](https://arxiv.org/abs/2205.14135)
-- [KV 캐시 (기초편)](./260601-kv-cache-기초.md) — 이 문서의 후속
+- [KV 캐시 (기초편)](./2606-kv-cache-기초.md) — 이 문서의 후속

@@ -25,47 +25,35 @@ API 게이트웨이에서 가장 많이 하는 일 중 하나가 "요청을 적�
 ### Token Bucket vs Leaky Bucket
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
     subgraph token["Token Bucket (버스트 허용)"]
       direction TB
-      t1["토큰이 가득 차 있으면\n한 번에 100개 요청 허용"]
-      t2["토큰이 refillRate로 채워짐\n(10/sec)"]
+      t1["토큰이 가득 차 있으면<br/>한 번에 100개 요청 허용"]
+      t2["토큰이 refillRate로 채워짐<br/>(10/sec)"]
       t3["출력: 불규칙 (버스트)"]
       t1 --> t2 --> t3
     end
-
+  
     subgraph leaky["Leaky Bucket (출력 일정)"]
       direction TB
-      l1["요청이 버킷에 들어옴\n(버스트 흡수)"]
-      l2["leakRate로 일정하게 처리\n(10/sec)"]
+      l1["요청이 버킷에 들어옴<br/>(버스트 흡수)"]
+      l2["leakRate로 일정하게 처리<br/>(10/sec)"]
       l3["출력: 일정 (균일)"]
       l1 --> l2 --> l3
     end
-
-    token ~~~ leaky
+  
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  class t1,l1 app
-  class t2,l2,t3,l3 ctrl
-  style token fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style leaky fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class t2,t3,l1,l2,l3 app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  class t1 policy
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 ## 3. 백프레셔 vs 레이트 리밋
@@ -73,47 +61,24 @@ flowchart LR
 둘은 목적이 다르다.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
-    client["클라이언트\n(들어오는 요청)"]
-    gateway["게이트웨이"]
-    downstream["OpenAI\n(나가는 요청)"]
-
-    client --> gateway
-    gateway --> downstream
-
-    subgraph rl["Rate Limiting (인바운드)"]
-      rl1["분당 100회만 허용\n초과 시 429"]
-    end
-
-    subgraph bp["Backpressure (아웃바운드)"]
-      bp1["OpenAI 처리 속도에 맞춰\n전송 속도 조절"]
-    end
-
-    rl ~~~ client
-    bp ~~~ downstream
+    client["클라이언트"] --> rl{"인바운드 한도 이내?"}
+    rl -->|"아니요"| reject["429 반환"]
+    rl -->|"예"| gateway["게이트웨이"]
+    gateway --> bp["Backpressure<br/>하류 수용량에 맞춰 전송"]
+    bp --> downstream["Model Provider"]
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  class client,gateway,downstream app
-  class rl1,bp1 ctrl
-  style rl fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style bp fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class client,reject,gateway,bp,downstream app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  class rl policy
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 | | Rate Limiting | Backpressure |

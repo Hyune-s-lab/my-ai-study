@@ -19,75 +19,30 @@ DB 제약으로 강제하는 불변량 메커니즘으로 쓰는 것이다.
 ## 아키텍처 전체
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  look: classic
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
-flowchart LR
+flowchart TD
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    direction LR
-
-    subgraph sync["동기 구간 — TX1 (로컬만 커밋)"]
-      direction TB
-      cli["결제·충전 클라이언트"]:::app
-      api["PaymentController\n(MVC + virtual thread)"]:::app
-      paysvc["PaymentService\n상태: PENDING"]:::app
-    end
-
-    subgraph store["PostgreSQL — 신뢰의 원천"]
-      direction TB
-      paydb[("payment\n상태머신")]:::db
-      outbox[("outbox\nidempotency key")]:::db
-      ledger[("journal_entry / journal_line\nΣ차변 = Σ대변 강제\nappend-only")]:::db
-    end
-
-    subgraph async["비동기 구간 — TX 밖 외부 호출"]
-      direction TB
-      relay["Outbox Relay\n(@Scheduled + vt executor)"]:::ctrl
-      pg["PG사 승인·조회·환불 API"]:::ctrl
-      issuer["충전사업자 발급·조회 API"]:::ctrl
-      confirm["결과 확정 TX2\n상태 전이 + ledger post"]:::app
-    end
-
-    subgraph batch["일 배치"]
-      direction TB
-      recon["대사 배치\nPG 정산파일 vs 원장"]:::ctrl
-      trial["시산표 검증\n전계정 차변합 = 대변합"]:::ctrl
-    end
-
-    cli --> api
-    api --> paysvc
-    paysvc --> paydb
-    paysvc --> outbox
-    outbox --> relay
-    relay --> pg
-    relay --> issuer
-    pg --> confirm
-    issuer --> confirm
-    confirm --> paydb
-    confirm --> ledger
-    recon --> ledger
-    recon --> paydb
-    trial --> ledger
+    direction TD
+    client["결제·충전 요청"] --> tx1["TX1: Payment + Outbox 저장"]
+    tx1 --> db["PostgreSQL: 업무 상태 · Outbox · 원장"]
+    db -->|"lease claim"| relay["Outbox Relay"]
+    relay -->|"TX 밖 외부 호출"| external["PG · 충전사업자 API"]
+    external --> result{"결과 확정?"}
+    result -->|"예"| tx2["TX2: 상태 전이 · 필요한 분개"]
+    result -->|"아니요"| unknown["UNKNOWN 저장 · 결과 조회"]
+    tx2 --> db
+    unknown --> db
+    recon["대사 배치 · 시산표 검증"] --> db
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
-  style sync fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style store fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style async fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style batch fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  class client,tx1,external,result,tx2,unknown,recon app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  class db db
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  class relay worker
 ```
 
 ## 1. 핵심 도메인 모델 — 계정과목 차트(CoA)와 분개
@@ -239,55 +194,26 @@ fun post(type: EntryType, sourceRef: String, lines: List<Line>): Long {
 ### 트랜잭션 경계 — TX1 / 외부 / TX2
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  look: classic
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
-flowchart LR
-  subgraph canvas[" "]
-    direction LR
-
-    subgraph tx1["TX1 — 로컬만, 빠른 커밋"]
-      direction TB
-      p1["payment 생성\n상태 PENDING"]:::app
-      o1["outbox row 삽입\n(idempotency key)"]:::db
-      p1 --> o1
-    end
-
-    subgraph ext["외부 호출 (TX 밖, 블로킹)"]
-      direction TB
-      poll["Outbox Relay\nvirtual thread"]:::ctrl
-      apiCall["PG/충전사업자 API\nIdempotency-Key 헤더"]:::ctrl
-      poll --> apiCall
-    end
-
-    subgraph tx2["TX2 — 결과 확정"]
-      direction TB
-      p2["상태 전이\n(APPROVED / DECLINED)"]:::app
-      l2["ledger post\n(성공 시에만)"]:::db
-      p2 --> l2
-    end
-
-    o1 --> poll
-    apiCall --> p2
+sequenceDiagram
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
+  box rgb(255, 255, 255)
+    participant A as Payment API
+    participant D as PostgreSQL
+    participant R as Outbox Relay
+    participant P as 외부 사업자
   end
-
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
-  style tx1 fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style ext fill:#FEF2F2,stroke:#FCA5A5,stroke-width:1px,color:#991B1B
-  style tx2 fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  rect rgb(255, 255, 255)
+    A->>D: TX1: Payment PENDING + Outbox 커밋
+    R->>D: 짧은 TX: lease와 claim token 저장
+    D-->>R: claim한 작업
+    R->>P: TX 밖 승인·발급 요청
+    alt 결과 확정
+      P-->>R: 승인 또는 거절
+      R->>D: TX2: 상태 + 성공 분개 + Outbox 완료
+    else 타임아웃·응답 유실
+      R->>D: UNKNOWN 저장·조회 작업 예약
+    end
+  end
 ```
 
 - **TX1 (로컬만)**: `payment` row 생성(상태 `PENDING`) + `outbox` row 삽입. 외부 호출 없음 → 빠른 커밋.
@@ -367,8 +293,10 @@ AMOUNT_MISMATCH — 금액 불일치 → 원인 확정 후 조정 분개 (자동
 - `spring.threads.virtual.enabled=true` — 요청 스레드·`@Scheduled` 모두 virtual thread.  
   PG 호출은 `RestClient`(블로킹)로 그냥 쓴다. WebFlux 불필요: 블로킹 HTTP 대기가  
   platform thread를 점유하지 않는다.
-- Outbox relay는 `@Scheduled` 폴러가 `FOR UPDATE SKIP LOCKED`로 배치를 집어  
-  virtual thread executor에 건별 제출. 다중 인스턴스에서도 안전.
+- Outbox relay는 짧은 트랜잭션에서 `FOR UPDATE SKIP LOCKED`로 배치를 고르고,  
+  `PROCESSING`·lease 만료 시각·claim token을 저장한 뒤 커밋한다. 외부 호출은 커밋 이후에 수행한다.
+- 행 잠금만 잡고 executor에 넘기면 커밋 직후 다른 인스턴스가 같은 행을 가져갈 수 있다.  
+  만료 lease 회수와 claim token을 확인하는 완료 갱신이 함께 필요하다.
 - 시그니처는 전부 `fun` + 블로킹 반환. `suspend`/`Flow` 사용 안 함.
 - 공급자별 semaphore/bulkhead, connect/read timeout, 제한된 재시도,  
   circuit breaker를 둔다. virtual thread는 동시성 비용을 낮출 뿐  
@@ -377,7 +305,7 @@ AMOUNT_MISMATCH — 금액 불일치 → 원인 확정 후 조정 분개 (자동
 ```kotlin
 @Scheduled(fixedDelay = 1000)
 fun relayOutbox() {
-    val batch = outboxRepository.pollUnsent(limit = 100)  // FOR UPDATE SKIP LOCKED
+    val batch = outboxClaimService.claimBatch(limit = 100)  // 별도 Bean의 짧은 TX: 상태·lease·token 저장
     batch.forEach { msg -> vtExecutor.submit { processOne(msg) } }
 }
 
@@ -387,7 +315,7 @@ fun processOne(msg: OutboxMessage) {
     } catch (e: SocketTimeoutException) {
         paymentService.markUnknown(msg.paymentId); return  // 조회 배치가 후속 처리
     }
-    paymentService.confirm(msg.paymentId, res)  // TX2: 상태 전이 + ledger post
+    paymentService.confirm(msg.paymentId, res, msg.claimToken)  // TX2: token 검증 + 상태·원장·Outbox 완료
 }
 ```
 
@@ -410,4 +338,3 @@ UNKNOWN 상태 건의 조회 API가 외부 시스템에 없거나 신뢰 불가�
 대사 배치 전까지 최대 1일 미확정 구간이 생긴다.  
 따라서 충전사업자 연동 프로토콜 확정 시  
 **"결과 조회 API 존재 여부"** 를 최우선 확인 항목으로 둔다.
-```

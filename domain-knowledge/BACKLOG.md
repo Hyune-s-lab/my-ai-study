@@ -3,12 +3,12 @@
 - **추론(inference)이 되는 전체 과정**
   - 요청 한 건이 들어와서 토큰이 나오기까지 end-to-end: 토크나이즈 → 임베딩 → forward pass(prefill→decode) → 샘플링 → 디토크나이즈
   - 지금까지 배운 조각들(어텐션·KV 캐시·prefill/decode·샘플링 파라미터)이 한 흐름으로 어떻게 연결되는지 통합
-  - "모델이 다음 토큰을 고른다"의 실제 계산 경로 → 관련: [Attention](./260603-attention-기초.md), [KV 캐시](./260601-kv-cache-기초.md), [dictionary 샘플링](./dictionary.md)
+  - "모델이 다음 토큰을 고른다"의 실제 계산 경로 → 관련: [Attention](./2606-attention-기초.md), [KV 캐시](./2606-kv-cache-기초.md), [dictionary 샘플링](./dictionary.md)
 
 - **그래픽카드별로 서빙되는 수준**
   - GPU 등급(RTX 4090 / L40S / A100 80G / H100 / H200 / B200 / B300)별로 "어떤 모델 크기·컨텍스트 길이·동시 요청"이 현실적으로 가능한가
   - VRAM 예산 = 모델 가중치 + KV 캐시. 양자화(FP16/FP8/AWQ4bit)에 따라 어디까지 올라가나
-  - "이 카드면 이 모델"의 실무 매칭표 만들기 → 관련: [모델 종류 §7 VRAM](./260603-llm-모델-종류.md), [KV 캐시 §3](./260601-kv-cache-기초.md)
+  - "이 카드면 이 모델"의 실무 매칭표 만들기 → 관련: [모델 종류 §7 VRAM](./2606-llm-모델-종류.md), [KV 캐시 §3](./2606-kv-cache-기초.md)
 
 - **서빙 관측(observability) — 어느 축이 병목인지 측정**
   - GPU 3축(용량·대역폭·연산)을 실서빙에서 보는 법: DCGM(`FB_USED`·`DRAM_ACTIVE`·`SM_ACTIVE`·`PIPE_TENSOR_ACTIVE`)+Prometheus/Grafana, nvidia-smi/nvtop

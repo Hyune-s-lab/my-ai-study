@@ -14,61 +14,23 @@
 OSI는 **이론적 기준**, TCP/IP는 **실제 인터넷이 쓰는 모델**이다.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  look: classic
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
-flowchart LR
+flowchart TD
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    direction LR
-
-    subgraph app["응용 (Application)"]
-      direction TB
-      app7["7. 응용 — HTTP, DNS, SMTP"]
-      app6["6. 표현 — TLS, JPEG"]
-      app5["5. 세션 — 연결 관리"]
-    end
-
-    subgraph trans["전송 (Transport)"]
-      direction TB
-      trans4["4. 전송 — TCP, UDP · 포트 번호"]
-    end
-
-    subgraph net["인터넷 (Internet)"]
-      direction TB
-      net3["3. 네트워크 — IP, ICMP · 라우팅"]
-    end
-
-    subgraph access["네트워크 액세스 (Network Access)"]
-      direction TB
-      access2["2. 데이터링크 — Ethernet, MAC"]
-      access1["1. 물리 — 케이블, 광섬유"]
-    end
-
-    app --> trans --> net --> access
+    direction TD
+    app["응용 계층: OSI 7·6·5<br/>HTTP · DNS · 표현 · 세션"]
+    transport["전송 계층: OSI 4<br/>TCP · UDP · 포트"]
+    internet["인터넷 계층: OSI 3<br/>IP · 라우팅"]
+    access["네트워크 액세스: OSI 2·1<br/>Ethernet · MAC · 물리 매체"]
+    app --> transport --> internet --> access
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  class app7,app6,app5 app
-  class trans4 db
-  class net3 ctrl
-  class access2,access1 ctrl
-  style app fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style trans fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style net fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style access fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class app,transport,internet,access app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 > OSI 5·6·7층이 TCP/IP에서는 **응용층 하나**로 합쳐진다.  
@@ -99,26 +61,13 @@ flowchart LR
 ## 4. TCP 3-way handshake — 연결 맺기
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryTextColor: "#111827"
-    lineColor: "#334155"
-    actorBkg: "#EFF6FF"
-    actorBorder: "#3B5BA5"
-    actorTextColor: "#16213E"
-    noteBkgColor: "#FFF7ED"
-    noteBorderColor: "#C98A2B"
-    noteTextColor: "#7A4E0A"
-    edgeLabelBackground: "#ffffff"
----
 sequenceDiagram
-  rect rgb(255, 255, 255)
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
+  box rgb(255, 255, 255)
     participant C as 클라이언트
     participant S as 서버
+  end
+  rect rgb(255, 255, 255)
     C->>S: SYN (seq=x)
     Note right of S: SYN_RCVD
     S->>C: SYN + ACK (seq=y, ack=x+1)
@@ -143,26 +92,13 @@ sequenceDiagram
 ## 5. TCP 4-way handshake — 연결 끊기
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryTextColor: "#111827"
-    lineColor: "#334155"
-    actorBkg: "#EFF6FF"
-    actorBorder: "#3B5BA5"
-    actorTextColor: "#16213E"
-    noteBkgColor: "#FFF7ED"
-    noteBorderColor: "#C98A2B"
-    noteTextColor: "#7A4E0A"
-    edgeLabelBackground: "#ffffff"
----
 sequenceDiagram
-  rect rgb(255, 255, 255)
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
+  box rgb(255, 255, 255)
     participant C as 클라이언트
     participant S as 서버
+  end
+  rect rgb(255, 255, 255)
     C->>S: FIN (seq=u)
     Note left of C: FIN_WAIT_1
     S->>C: ACK (ack=u+1)
@@ -221,64 +157,42 @@ TCP 3-way handshake (1 RTT)
 ### TLS 1.2 (2 RTT)
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryTextColor: "#111827"
-    lineColor: "#334155"
-    actorBkg: "#EFF6FF"
-    actorBorder: "#3B5BA5"
-    actorTextColor: "#16213E"
-    noteBkgColor: "#FFF7ED"
-    noteBorderColor: "#C98A2B"
-    noteTextColor: "#7A4E0A"
-    edgeLabelBackground: "#ffffff"
----
 sequenceDiagram
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
+  box rgb(255, 255, 255)
+    participant C as Client
+    participant S as Server
+  end
   rect rgb(255, 255, 255)
-    participant C as 클라이언트
-    participant S as 서버
-    C->>S: ClientHello (지원 암호화 목록)
-    S->>C: ServerHello + 인증서 (선택된 암호화)
-    Note left of C: 인증서 검증 (CA 서명 확인)
-    C->>S: 키 교환 (대칭키 암호화용)
-    S->>C: Finished
+    C->>S: ClientHello + key_share
+    S->>C: ServerHello + key_share
+    Note over C,S: 양쪽이 공유 비밀로 handshake key 도출
+    S->>C: 암호화된 EncryptedExtensions · Certificate · CertificateVerify · Finished
+    C->>C: 인증서 체인·서명·Finished 검증
     C->>S: Finished
-    Note over C,S: 이후 대칭키로 암호화 통신
+    Note over C,S: application traffic key로 데이터 암호화
   end
 ```
 
-### 공개키의 두 가지 용도
+### 인증과 키 합의는 다른 역할이다
 
-공개키 암호화의 핵심 — **공개키로 잠그면, 개인키로만 연다**:
+위 그림은 인증서 기반 TLS 1.3의 일반적인 full handshake를 단순화한 것이다.  
+PSK 재개, HelloRetryRequest, 클라이언트 인증은 생략했다.
 
-| 용도 | 누가 잠근가 | 누가 여는가 | 목적 |
-|---|---|---|---|
-| 기밀성 | 공개키 (누구나) | 개인키 (서버만) | 서버만 읽을 수 있음 |
-| 인증(서명) | 개인키 (서버만) | 공개키 (누구나) | 서버가 만들었다는 증명 |
+| 역할 | 동작 |
+|---|---|
+| 인증서 검증 | CA 서명, 호스트 이름, 유효기간 등으로 서버 공개키의 신뢰 확인 |
+| 서버 인증 | `CertificateVerify` 서명으로 서버의 개인키 보유 확인 |
+| 키 합의 | 임시 (EC)DHE 공개값을 교환하고 양쪽에서 공유 비밀 도출 |
+| 데이터 보호 | 공유 비밀에서 도출한 대칭키로 암호화·무결성 검증 |
 
-TLS는 두 용도를 다 쓴다:
-- 인증서 검증 = 서명 검증 (서버가 개인키로 서명, 클라이언트가 공개키로 검증)
-- 대칭키 교환 = 기밀성 (클라이언트가 공개키로 대칭키를 암호화, 서버만 개인키로 복호화)
+TLS 1.3은 클라이언트가 대칭키를 RSA 공개키로 암호화해 보내는 방식을 사용하지 않는다.  
+서명도 단순히 “개인키로 암호화”한다고 설명하기보다, 메시지의 진위 검증 연산으로 구분한다.
 
-### 비대칭키 → 대칭키 전환
+### TLS 1.3과 재연결
 
-공개키 암호화는 느리다.  
-핸드셰이크 때만 공개키로 **대칭키를 안전하게 교환**하고,  
-이후 데이터는 빠른 **대칭키**로 암호화한다.
-
-| 암호화 방식 | 특징 | 용도 |
-|---|---|---|
-| 비대칭키 (공개키) | 느림, 키 교환 안전 | 핸드셰이크 때 대칭키 교환 |
-| 대칭키 | 빠름, 키 공유 필요 | 이후 데이터 암호화 |
-
-### TLS 1.3 (1 RTT)
-
-핸드셰이크 메시지를 줄이고, 키 교환을 첫 패킷에 포함시켰다.  
-0-RTT 모드(재연결 시 첫 패킷부터 데이터 전송)도 지원한다.
+일반적인 full handshake는 1 RTT다. 재개 시 0-RTT early data를 사용할 수 있지만,  
+재전송 공격에 대한 제약이 있으므로 부작용 있는 요청에 무조건 적용하지 않는다.
 
 ## 8. HTTP 버전 — 1.0 → 1.1 → 2 → 3
 
@@ -301,31 +215,19 @@ HTTP/3 해결: TCP를 버리고 UDP 기반 QUIC을 쓴다.
 스트림마다 독립적이라, 한 스트림에서 패킷 손실이 있어도 다른 스트림은 멈추지 않는다.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  look: classic
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
-
-    subgraph h1["HTTP/1.1"]
+  
+    subgraph h1["HTTP/1.1: 한 연결의 응답 순서"]
       direction TB
       h1a["요청 A"]
       h1b["요청 B (A 완료까지 대기)"]
       h1c["요청 C (B 완료까지 대기)"]
       h1a --> h1b --> h1c
     end
-
+  
     subgraph h2["HTTP/2"]
       direction TB
       h2a["요청 A"]
@@ -333,25 +235,21 @@ flowchart LR
       h2c["요청 C"]
       h2note["TCP 패킷 손실 시 전체 멈춤"]
     end
-
+  
     subgraph h3["HTTP/3"]
       direction TB
       h3a["요청 A (독립 스트림)"]
       h3b["요청 B (독립 스트림)"]
       h3c["요청 C (독립 스트림)"]
     end
-
-    h1 --> h2 --> h3
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  class h1a,h1b,h1c,h2a,h2b,h2c,h3a,h3b,h3c app
-  class h2note ctrl
-  style h1 fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style h2 fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style h3 fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class h1a,h1b,h1c,h2a,h2b,h2c,h2note,h3a,h3b,h3c app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 > HTTP/2의 multiplexing은 **같은 TCP 연결**에서 여러 요청을 동시에 보내는 것이다.  
@@ -361,19 +259,8 @@ flowchart LR
 ## 9. 전체 흐름 — URL을 치면
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryColor: "#ffffff"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
     DNS["DNS 조회<br/>도메인 → IP<br/>(UDP)"]
@@ -383,12 +270,13 @@ flowchart LR
     RENDER["브라우저 렌더링"]
     DNS --> TCP --> TLS --> HTTP --> RENDER
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  class DNS,TCP,TLS,HTTP app
-  class RENDER ctrl
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class DNS,TCP,TLS,HTTP,RENDER app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 | 단계 | 내용 | 비용 |
@@ -406,3 +294,7 @@ HTTPS 첫 연결 (TLS 1.3): DNS + TCP(1 RTT) + TLS(1 RTT) + HTTP(1 RTT) = 약 3 
 
 > 매 요청마다 DNS + TCP + TLS를 반복하면 3~4 RTT를 낭비한다.  
 > 커넥션 풀(keep-alive)로 연결을 재사용하면 TCP + TLS 비용이 0이 되고 HTTP(1 RTT)만 남는다.
+
+## 참고
+
+- [RFC 8446 §2](https://datatracker.ietf.org/doc/html/rfc8446#section-2) — TLS 1.3 인증서 기반 full handshake와 키 합의 설명을 반영했다. PSK·클라이언트 인증은 그림에서 생략했다.

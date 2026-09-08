@@ -1,7 +1,7 @@
 # My AI Study
 
-> 이 레포의 문서들은 Mermaid 11.x 최신 문법(아이콘 노드 등)을 사용하여, GitHub 등 브라우저에서 일부 다이어그램이 렌더링되지 않을 수 있습니다.  
-> JetBrains 제품(IntelliJ 등)을 사용 중이라면 [MarkdownNeat](https://plugins.jetbrains.com/plugin/32856-markdownneat) 플러그인 사용을 권장하며, 브라우저에서도 정상 렌더링되도록 Chrome 확장 프로그램 개발을 로드맵에 두고 있습니다.
+문서는 GitHub와 Zed의 Markdown 미리보기에서 읽을 수 있도록 작성합니다.  
+다이어그램은 외부 아이콘이나 전용 플러그인에 의존하지 않는 Mermaid를 사용하며, 배경은 흰색으로 지정합니다.
 
 ## Practice
 
@@ -42,6 +42,7 @@
 | [2607-hash.md](./computer-science/2607-hash.md) | 해시 (해시 함수·충돌·equals/hashCode 계약·불변 키·JPA 엔티티 equals/hashCode·캐싱·중복 제거) |
 | [2607-network-fundamentals.md](./computer-science/2607-network-fundamentals.md) | 네트워크 기초 (OSI/TCP-IP·TCP vs UDP·3/4-way handshake·HTTP vs HTTPS·TLS) |
 | [2608-java-concurrency.md](./computer-science/article-series/2608-java-concurrency.md) | Java Concurrency (JMM/volatile·happens-before·monitor·ReentrantLock/Condition·CAS/LongAdder·ThreadPoolExecutor·CompletableFuture·concurrent collection 계약) |
+| [2608-payment-ledger-design.md](./computer-science/2608-payment-ledger-design.md) | 결제·충전 원장 설계 — Outbox·멱등성·분개·정산·대사 |
 
 ## [system-design](./system-design)
 
@@ -52,3 +53,9 @@
 | [2607-spring-멀티모듈-헥사고날-패키징.md](./system-design/2607-spring-멀티모듈-헥사고날-패키징.md) | Spring 멀티모듈 헥사고날 패키징 — Layer Map·포트·어댑터·Spring Modulith·Gradle 멀티모듈·테스트 전략 |
 | [2608-admission-control/](./system-design/2608-admission-control/) | Model API Admission Control — Rate Limit과 Billing의 Team Balance 요청 경계 |
 | [BACKLOG.md](./system-design/BACKLOG.md) | 시스템 디자인 아이디어 백로그 |
+
+## [spring](./spring)
+
+| 문서 | 주제 |
+|---|---|
+| [2608-spring-batch.md](./spring/2608-spring-batch.md) | Spring Batch — Job·Step·chunk·재시작·병렬 처리 |

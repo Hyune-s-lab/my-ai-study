@@ -278,7 +278,8 @@ fun findUser(id: Long): User {
 
 - HikariCP `leakDetectionThreshold`를 설정하면, 커넥션이 N초 이상 반납되지 않을 때 로그를 남긴다.
 - Spring `@Transactional`은 트랜잭션 종료 시 커넥션을 자동 반납한다.
-- **가장 흔한 누수 원인**: `@Transactional` 안에서 외부 API를 호출하면, API 대기 시간만큼 DB 커넥션을 점유 → 풀 고갈. 외부 호출은 트랜잭션 밖으로 빼야 한다.
+- **장기 점유와 누수는 구분한다**: DB 작업 이후 `@Transactional` 안에서 외부 API를 기다리면 커넥션을 오래 점유해 풀이 고갈될 수 있다.  
+  종료 후 반납되는 장기 점유도 장애를 만들므로, 외부 호출은 트랜잭션 밖으로 분리한다.
 
 ## 7. JDBC 예외 처리와 재시도
 
@@ -288,64 +289,43 @@ fun findUser(id: Long): User {
 ### 예외 분류 — 3단계
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
-flowchart TB
+flowchart TD
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    direction TB
-    REQ["요청 도착"]
-    POOL{"풀에서 커넥션 획득"}
-    ACQ_FAIL["SQLTransientException<br/>(풀 고갈·타임아웃)<br/>→ 재시도 의미 있음"]
-    CONN["커넥션 획득 성공"]
-    EXEC{"쿼리 실행"}
-    TRANSIENT["일시적 오류<br/>(데드락·타임아웃·연결 끊김)<br/>→ 재시도"]
-    PERMANENT["영구적 오류<br/>(제약 위반·문법 오류)<br/>→ 재시도 금지"]
-    RES["응답 반환"]
-
-    REQ --> POOL
-    POOL --> ACQ_FAIL
-    POOL --> CONN
-    ACQ_FAIL --> RES
-    CONN --> EXEC
-    EXEC --> TRANSIENT
-    EXEC --> PERMANENT
-    TRANSIENT --> RES
-    PERMANENT --> RES
+    direction TD
+    req["요청"] --> pool{"커넥션 획득?"}
+    pool -->|"실패"| budget["남은 deadline과 풀 부하 확인"]
+    budget --> reject["빠른 실패 또는 제한된 backoff 재시도"]
+    pool -->|"성공"| query{"쿼리·커밋 결과"}
+    query -->|"성공"| done["응답 반환"]
+    query -->|"데드락 등 롤백 확인"| retry["새 트랜잭션으로 제한 재시도"]
+    query -->|"문법·제약 오류"| fail["원인 수정 또는 업무 오류 반환"]
+    query -->|"커밋 결과 불명"| unknown["멱등키·결과 조회로 확인"]
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  classDef warn fill:#FEF2F2,stroke:#FCA5A5,stroke-width:1px,color:#991B1B
-  class REQ,CONN,RES app
-  class POOL,EXEC ctrl
-  class ACQ_FAIL,TRANSIENT,PERMANENT warn
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class req,pool,budget,query,done,fail,unknown app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  class reject,retry worker
 ```
 
 ### 예외 유형별 대응
 
 | 예외 | SQLState / 클래스 | 재시도 | 대응 |
 |---|---|---|---|
-| 풀 고갈 (timeout) | `SQLTransientException` | O (짧게) | `connectionTimeout` 확인, 풀 크기 점검 |
+| 풀 고갈 (timeout) | `SQLTransientConnectionException` 등 | 조건부 | deadline·부하를 확인하고 짧은 backoff 또는 빠른 실패 |
 | 데드락 | MySQL `1213`, PG `40P01` | O | `@Retryable`, 잠금 순서 정렬 |
 | 락 타임아웃 | PG `55P03` | O | `lock_timeout` 설정, 재시도 |
-| 연결 끊김 | `SQLRecoverableException` | O | 커넥션 무효화, 새 커넥션으로 재시도 |
+| 연결 끊김 | SQLState `08xxx` 등, 드라이버별 예외 | 조건부 | 연결 폐기. 커밋 결과 불명이면 먼저 결과 조회·멱등성 확인 |
 | 제약 위반 | `SQLIntegrityConstraintViolationException` | X | 데이터 수정, 재시도 무의미 |
 | 문법 오류 | `SQLSyntaxErrorException` | X | 쿼리 수정 |
 | 데이터 오류 | `SQLDataException` | X | 데이터 수정 |
 
-> 핵심: **일시적(transient) 오류만 재시도**한다.  
-> 영구적 오류를 재시도하면 같은 에러가 계속 반복된다.
+> 예외 클래스만으로 재시도를 결정하지 않는다. 롤백 여부, 업무 멱등성, 남은 deadline을 함께 확인한다.  
+> 연결을 복구해도 이전 커밋 결과는 불명일 수 있다. 재시도한다면 새 트랜잭션으로 전체 작업을 수행한다.
 
 ### Spring의 예외 계층
 
@@ -471,3 +451,7 @@ spring:
 | `@Transactional` 안 외부 호출 | 금지. DB 커넥션 점유 |
 | 가상 스레드 | 스레드는 무제한이지만 풀은 제한 → 풀 대기 주의 |
 | 모니터링 | 풀 사용률, 대기 시간, 활성 커넥션 수 메트릭 수집 |
+
+## 참고
+
+- [Java SQLRecoverableException](https://docs.oracle.com/en/java/javase/21/docs/api/java.sql/java/sql/SQLRecoverableException.html) — 연결 복구와 전체 트랜잭션 재시도의 경계를 반영했다.

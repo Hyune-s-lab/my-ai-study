@@ -32,60 +32,30 @@ DB 락·Redis 분산 락·요청량 제어·멱등성은 이미 별도 문서가
 ### 정의
 
 Java Memory Model(JSR-133)은 **한 스레드가 쓴 값이 다른 스레드에 언제 보이는지**를 규정하는 명세다.  
-"언제"가 명세로 필요한 이유는 하드웨어다.  
-L1 캐시 접근은 ~1ns, RAM은 ~100ns — 100배 차이라 CPU는 코어별 로컬 사본으로 일한다.
+컴파일러와 CPU는 프로그램을 최적화하므로, 스레드 간 관찰 순서를 별도로 정의해야 한다.  
+JMM은 허용되는 관찰 결과를 규정하며, 매번 RAM에 쓰거나 캐시를 비우는 구현을 강제하지 않는다.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    primaryColor: "#EFF6FF"
-    primaryTextColor: "#111827"
-    lineColor: "#334155"
-    textColor: "#111827"
-    edgeLabelBackground: "#ffffff"
----
-flowchart TB
-  subgraph canvas[" "]
-    subgraph vol["volatile 필드 — happens-before 성립"]
-      direction LR
-      va["Thread A\nvolatile balance = 900"]:::app
-      vbar["store barrier\nRAM 반영 + 캐시 무효화"]:::ctrl
-      vram["RAM\nbalance = 900"]:::db
-      vload["load barrier\nRAM에서 재적재"]:::ctrl
-      vb["Thread B\n900 읽음"]:::app
-    end
-    subgraph plain["일반 필드 — 가시성 보장 없음"]
-      direction LR
-      pa["Thread A\nbalance = 900 쓰기"]:::app
-      pl1["Core 1 L1\nbalance = 900"]:::db
-      pram["RAM\nbalance = 1000\n(flush 미정)"]:::db
-      pl2["Core 2 L1\nbalance = 1000\n(낡은 값)"]:::db
-      pb["Thread B\n1000 읽음"]:::app
-    end
+sequenceDiagram
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
+  box rgb(255, 255, 255)
+    participant A as Thread A
+    participant F as volatile ready
+    participant B as Thread B
   end
-  pa --> pl1
-  pl1 --> pram
-  pram --> pl2
-  pl2 --> pb
-  va --> vbar
-  vbar --> vram
-  vram --> vload
-  vload --> vb
-
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
-  style plain fill:#FEF2F2,stroke:#FCA5A5,stroke-width:1px,color:#991B1B
-  style vol fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
+  rect rgb(255, 255, 255)
+    A->>A: 일반 필드 data = 900
+    A->>F: ready = true 쓰기
+    B->>F: ready 읽기
+    F-->>B: true 관찰
+    B->>B: 앞서 게시된 data = 900 읽기
+    Note over A,B: 추가 쓰기가 없다는 전제에서 happens-before로 가시성 보장
+  end
 ```
 
 동시성 버그는 세 갈래로 갈린다.  
 **가시성**(쓴 값이 안 보임), **재정렬**(컴파일러·CPU가 순서를 바꿈), **원자성**(중간에 끼어듦).  
-volatile은 앞의 둘을 해결하고, 세 번째는 해결하지 못한다.
+volatile은 해당 필드를 통한 게시·관찰에 가시성과 순서를 제공하지만, 복합 연산의 원자성은 보장하지 않는다.
 
 ### happens-before — 순서를 보장하는 규칙
 
@@ -130,7 +100,7 @@ class ShutdownFlag {
 }
 ```
 
-`@Volatile`을 빼면 JIT가 루프 밖으로 필드 읽기를 끌어내(hoisting) 무한 루프가 된다.  
+다른 동기화도 없다면 JIT가 필드 읽기를 재사용해 종료 플래그 변경을 관찰하지 못할 수 있다.  
 "운영에서 shutdown이 안 걸린다"는 버그의 전형이다.
 
 ---
@@ -354,47 +324,37 @@ fun snapshot(): Long = processed.sum()
 이유를 보려면 작업이 풀에 들어가는 순서를 알아야 한다.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    primaryColor: "#EFF6FF"
-    primaryTextColor: "#111827"
-    lineColor: "#334155"
-    textColor: "#111827"
-    edgeLabelBackground: "#ffffff"
----
-flowchart TB
+flowchart TD
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
-    submit["execute(task)"]:::app
-    subgraph flow["투입 순서"]
-      direction LR
-      s1["① 스레드 수 < corePoolSize\n새 스레드 생성해 즉시 실행"]:::ctrl
-      s2["② core 가득\nworkQueue에 적재"]:::db
-      s3["③ 큐도 가득\nmax까지 스레드 추가"]:::ctrl
-      s4["④ 큐·스레드 모두 한계\nRejectedExecutionHandler"]:::ctrl
-    end
-    subgraph risk["팩토리 메서드의 함정"]
-      direction LR
-      t1["newFixedThreadPool\n무한 LinkedBlockingQueue\n②에서 영원히 쌓임\n③④는 죽은 코드"]:::app
-      t2["newCachedThreadPool\ncore 0 + max MAX_VALUE\nSynchronousQueue\n③이 무제한 → 스레드 폭발"]:::app
-    end
+    direction TD
+    task["execute(task)"] --> core{"스레드 수가 corePoolSize 미만?"}
+    core -->|"예: 생성 성공"| start["새 worker가 task 실행"]
+    core -->|"아니요 또는 생성 실패"| queue{"큐에 적재 가능?"}
+    queue -->|"예"| queued["대기 후 worker가 실행"]
+    queue -->|"아니요"| max{"maximumPoolSize 내 worker 생성 가능?"}
+    max -->|"예"| start
+    max -->|"아니요"| rejected["RejectedExecutionHandler"]
   end
-  submit --> s1
-  s1 --> s2
-  s2 --> s3
-  s3 --> s4
-  s2 --> t1
-  s3 --> t2
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#14532D
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
-  style flow fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#111827
-  style risk fill:#FEF2F2,stroke:#FCA5A5,stroke-width:1px,color:#991B1B
+  class task,core,queue,rejected app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  class start,queued,max worker
 ```
+
+위 그림은 executor가 실행 중인 일반 흐름이다.  
+큐 적재 뒤 shutdown 여부와 worker 존재를 다시 검사하므로, 종료와 경합하면 적재 후에도 거부될 수 있다.
+
+| 팩토리 | 용량 경계 |
+|---|---|
+| `newFixedThreadPool` | 대기 큐가 사실상 무한이어서 과부하 시 메모리와 지연이 증가 |
+| `newCachedThreadPool` | `SynchronousQueue`로 직접 전달하며, worker 수 상한이 매우 커서 스레드가 과도하게 증가 가능 |
+
+
 
 핵심은 **큐가 스레드보다 먼저 찬다**는 점이다.  
 큐가 무한하면 ③단계에 도달할 수 없어 `maximumPoolSize`가 장식이 된다.  
@@ -617,3 +577,6 @@ map.merge(k, 1L, Long::sum)
 - [Java / Kotlin 자료구조 실전](../2607-java-collections.md) — concurrent collection 구현체 선택표
 - [커넥션 풀](../2607-connection-pool.md) — Tomcat 요청 스레드·HikariCP·virtual thread
 - [Rate Limiting](../2607-rate-limiting.md) — 요청량 제어 알고리즘
+
+- [JLS 21 §17.4](https://docs.oracle.com/javase/specs/jls/se21/html/jls-17.html#jls-17.4) — JMM을 하드웨어 RAM 갱신 절차와 구분한 게시 예시를 반영했다.
+- [ThreadPoolExecutor API](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html) — worker 생성, 큐 적재, 추가 생성, 거부 분기를 반영했다.

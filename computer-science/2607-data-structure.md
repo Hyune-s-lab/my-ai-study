@@ -91,42 +91,27 @@ poll   → 1 나옴 → [2, 3]
 ```
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  look: classic
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
----
 flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
   subgraph canvas[" "]
     direction LR
-    K1["key: name"]:::app
-    K2["key: age"]:::app
-    HF["해시 함수<br/>hash(key)"]:::ctrl
-    MOD["modulo<br/>hash % 버킷수"]:::ctrl
-    B1["bucket[15]<br/>name → dan"]:::app
-    B2["bucket[7]<br/>age → 30"]:::app
-    B3["bucket[2]<br/>(empty)"]:::ctrl
-
-    K1 --> HF
-    K2 --> HF
-    HF --> MOD
-    MOD --> B1
-    MOD --> B2
-    MOD --> B3
-    B1 ~~~ B2 ~~~ B3
+    name["key: name"] --> hn["hash와 버킷 인덱스 계산"]
+    age["key: age"] --> ha["hash와 버킷 인덱스 계산"]
+    subgraph buckets["해시 테이블: 예시 배치"]
+      b15["bucket 15: name = dan"]
+      b7["bucket 7: age = 30"]
+      b2["bucket 2: 비어 있음"]
+    end
+    hn --> b15
+    ha --> b7
   end
-
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
   classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  classDef ctrl fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#7A4E0A
-  style canvas fill:#ffffff,stroke:#ffffff,stroke-width:0px,color:#111827
+  class name,hn,age,ha,b15,b7,b2 app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
 ```
 
 ### 해시 충돌 (Collision)

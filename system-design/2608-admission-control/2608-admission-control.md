@@ -36,12 +36,55 @@ Admission Control은 인증된 Team·API Key를 기준으로 Provider 요청을 
 | Control Plane | Gateway 역할, API Key 인증, Tier Rate Limit, Balance Control, Admin API, Usage Query, Usage Ingest |
 | Data Plane | Model Provider inference, 성공 뒤 rough debit과 inference record 전달 |
 
-![Admission Control 2-tier — Control Plane이 Gateway 역할을 겸하는 구조](./assets/2608-admission-control-2-tier.svg)
+```mermaid
+flowchart TD
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
+  subgraph canvas[" "]
+    direction TD
+    team["Customer Team"] --> admission
+    admin["Admin Console"] --> management
+    subgraph cp["Control Plane: Gateway 겸용"]
+      admission["API Key 인증<br/>Rate Limit · Balance Control"]
+      management["Admin API · Usage Query"]
+      ingest["Record ingest"]
+      worker["Settlement worker"]
+    end
+    subgraph dp["Data Plane"]
+      inference["Provider inference 호출"]
+      postflight["성공 후 rough debit · record 전달"]
+    end
+    redis["Redis<br/>Rate Limit · Account Balance Cache"]
+    mq["Durable MQ: Inference Record"]
+    db["PostgreSQL<br/>Account · Record · Charge · Ledger"]
+    provider["Model Provider"]
+    admission -->|"판정 상태 조회·갱신"| redis
+    admission -->|"허용"| inference
+    inference --> provider
+    provider -->|"성공 결과"| postflight
+    postflight -->|"rough debit"| redis
+    postflight -.->|"record 발행"| mq
+    mq -.-> ingest
+    ingest -->|"PENDING 저장"| db
+    worker -->|"정산 transaction"| db
+    worker -->|"정산 후 cache 교체"| redis
+    management --> db
+  end
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class team,admin,management,ingest,inference,postflight,mq,provider app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  class redis,db db
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  class admission policy
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  class worker worker
+```
 
 | 흐름 | 의미 |
 | --- | --- |
-| 파란 화살표 | API Key auth → Rate Limit → Balance Control → inference |
-| 주황 화살표 | rough debit → record 전달 → 정산 → Redis 보정 |
+| 요청 경로 | API Key auth → Rate Limit → Balance Control → inference |
+| 사후 처리 | rough debit → record 전달 → 정산 → Account Balance Cache 교체 |
 | Data Plane | 성공 inference 뒤 Redis rough debit 후 durable MQ로 record 전달 |
 | Worker | `PENDING` Record 주기 정산과 Redis exact balance reconcile |
 
@@ -54,7 +97,73 @@ Admission Control은 인증된 Team·API Key를 기준으로 Provider 요청을 
 | Control Plane | Admin API, Rate Limit Policy, Usage Query, Record ingest, Account 상태 |
 | Admin Console | Gateway가 아닌 Control Plane 직접 호출 |
 
-![Admission Control 3-tier — Gateway, Data Plane, Control Plane 분리](./assets/2608-admission-control-3-tier.svg)
+```mermaid
+flowchart TD
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
+  subgraph canvas[" "]
+    direction TD
+    team["Customer Team"] --> gateway["Gateway: 인증 · Rate Limit · Balance Control"]
+    gateway -->|"허용"| dp["Data Plane: inference · postflight"]
+    dp --> provider["Model Provider"]
+    provider -->|"성공 결과"| dp
+    redis["Redis: GCRA · Account Balance Cache"]
+    gateway -->|"admission 상태"| redis
+    dp -->|"rough debit"| redis
+    dp -.->|"Inference Record"| mq["Durable MQ"]
+    admin["Admin Console"] --> api
+    subgraph cp["Control Plane"]
+      api["Admin API · Policy · Usage Query"]
+      ingest["Record ingest"]
+      worker["Settlement worker"]
+    end
+    db["PostgreSQL: 정책 · Account · Record · Ledger"]
+    mq -.-> ingest
+    ingest -->|"PENDING 저장"| db
+    worker -->|"exact settlement"| db
+    worker -->|"정산 후 cache 교체"| redis
+    api --> db
+  end
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class team,dp,provider,mq,admin,ingest app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  class redis,db db
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  class gateway,api policy
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  class worker worker
+```
+
+분석 저장소는 아래의 확장 경로로 분리한다. 각 소비 경로는 독립적인 구독을 사용한다.
+
+```mermaid
+flowchart LR
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
+  subgraph canvas[" "]
+    direction LR
+    mq["Durable MQ: Inference Record"]
+    writer["Analytics Writer"]
+    archive["Archive Writer"]
+    olap["OLAP: ClickHouse 후보"]
+    s3["S3: Parquet 원본 보관"]
+    query["Control Plane: Usage Query"]
+    mq -.-> writer
+    mq -.-> archive
+    writer --> olap
+    archive --> s3
+    query --> olap
+  end
+  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
+  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
+  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
+  class mq,writer,archive app
+  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
+  class olap,s3 db
+  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
+  class query policy
+  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+```
 
 | 저장소·처리 | 장기 역할 |
 | --- | --- |
@@ -62,8 +171,8 @@ Admission Control은 인증된 Team·API Key를 기준으로 Provider 요청을 
 | OLAP (ClickHouse 후보) | 고유량 inference·usage와 Team·Model·기간별 분석 조회 |
 | S3 Parquet | 원본 event 장기 보관·재처리 |
 | PostgreSQL | Team Tier Policy와 Account Balance·Account Ledger의 권위 |
-| Redis | request/token GCRA state와 성공 inference rough debit이 반영된 balance projection |
-| Worker | Charge·`DEBIT · USAGE`·Account 차감을 PostgreSQL transaction으로 확정하고 Redis를 짧은 주기로 보정 |
+| Redis | request/token GCRA state와 성공 inference rough debit이 반영된 Account Balance Cache |
+| Worker | Charge를 Account debit으로 정산하고, DB commit 뒤 Account Balance Cache를 정산된 Account Balance로 교체 |
 
 ## 4. Admission Control 안의 정책
 
@@ -73,10 +182,10 @@ Admission Control은 인증된 Team·API Key를 기준으로 Provider 요청을 
 | 정책 | 상태 출처 | 상태 |
 |---|---|---|
 | Phase 1 — Tier Rate Limit | 로컬 Tier catalog · Redis request/token GCRA TAT | [문서](./2608-p1-rate-limit.md) |
-| Phase 2 — Balance Control | Redis projection · PostgreSQL Account | [문서](./2608-p2-balance-control.md) |
+| Phase 2 — Balance Control | Redis Account Balance Cache · PostgreSQL Account | [문서](./2608-p2-balance-control.md) |
 | Concurrency Control | Redis in-flight counter | 추후 |
 
-Billing은 결제·충전·원장·Account를 다루는 상위 도메인이다. Balance Control은 Admission Control 안에서 Redis의 rough debit이 반영된 Account Balance projection을 읽는 하위 정책이다.
+Billing은 결제·충전·원장·Account를 다루는 상위 도메인이다. Balance Control은 Admission Control 안에서 Redis의 rough debit이 반영된 Account Balance Cache를 읽는 하위 정책이다.
 
 모든 하위 정책은 공통 오류 형식을 쓴다. Rate Limit은 `rate_limit_error` · `requests_per_minute_exceeded`, admission 상태를 신뢰할 수 없을 때는 `service_unavailable` · `admission_state_unavailable`을 쓴다.
 

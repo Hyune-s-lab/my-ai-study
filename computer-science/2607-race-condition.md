@@ -6,35 +6,20 @@
 아래는 "재고 1개 남았는데 주문 2건 동시 진입" 시나리오로, 아키텍처가 커지는 순서대로 해법을 밟는다.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
-    noteBkgColor: "#FFF7ED"
-    noteTextColor: "#7A4E0A"
-    noteBorderColor: "#C98A2B"
-    actorBkg: "#EFF6FF"
-    actorBorder: "#3B5BA5"
-    actorTextColor: "#16213E"
----
 sequenceDiagram
-    rect rgb(255, 255, 255)
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
+  box rgb(255, 255, 255)
     participant A as 스레드 A
     participant B as 스레드 B
     participant S as stock = 1
+  end
+  rect rgb(255, 255, 255)
     A->>S: read → 1
     B->>S: read → 1
     A->>S: write 1-1 = 0
     B->>S: write 1-1 = 0
     Note over S: 2건 주문됐는데 재고는 1만 감소 (lost update)
-    end
+  end
 ```
 
 ## 0단계 — 단일 인스턴스: JVM 락
@@ -95,7 +80,7 @@ suspend fun decrease(id: Long, qty: Long) = mutex.withLock {
 
 > `SKIP LOCKED`는 배타락의 변형이다 — `FOR UPDATE`로 잠그되, 이미 다른 트랜잭션이 잡고 있는 행은 기다리지 않고 skip.  
 > Postgres as Queue 패턴의 핵심 메커니즘이다.  
-> 자세한 구현(visibility timeout, sweeper, partial index)은 [메시지 큐(MQ) — Postgres as Queue](./2607-message-queue.md#postgresql-as-queue--for-update-skip-locked) 섹션에서.
+> 자세한 구현(visibility timeout, sweeper, partial index)은 [메시지 큐(MQ) — Postgres as Queue](./2607-message-queue.md#postgres-as-queue--for-update-skip-locked) 섹션에서.
 
 락 모드(배타/공유)가 "어떻게 잠그느냐"라면, 락 범위는 "어디까지 잠그느냐"다. 범위가 잘못되면 로우락이 테이블락으로 확장된다.
 
@@ -176,35 +161,20 @@ transaction {
 **방법 2 — pub/sub (Redisson)**: 락 해제 시 채널로 알림을 쏘고, 대기자는 **구독하고 잠들어 있다가** 알림에 깨어나 재시도. 스핀이 없어 Redis 부하가 낮다. Spring 진영의 **사실상 표준(de facto)** — 기본 클라이언트 Lettuce엔 락 구현이 없어 직접 짜야 하는 반면, Redisson은 완성된 `RLock`(+분산 Semaphore·CountDownLatch 등)을 제공하기 때문.
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
-    actorBkg: "#EFF6FF"
-    actorBorder: "#3B5BA5"
-    actorTextColor: "#16213E"
-    noteBkgColor: "#F0FDF4"
-    noteTextColor: "#14532D"
-    noteBorderColor: "#3F8E55"
----
 sequenceDiagram
-    rect rgb(255, 255, 255)
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
+  box rgb(255, 255, 255)
     participant A as 인스턴스 A
     participant R as Redis
     participant B as 인스턴스 B
+  end
+  rect rgb(255, 255, 255)
     A->>R: lock 획득 (SETNX)
     B->>R: 획득 실패 → 채널 subscribe 후 대기
     A->>R: unlock + 채널 publish
     R->>B: 락 풀림 알림
     B->>R: 재시도 → 획득
-    end
+  end
 ```
 
 ```java
@@ -253,36 +223,21 @@ try {
 가장 흔한 패턴 — 두 트랜잭션이 **서로 다른 순서로** 행을 잠글 때:
 
 ```mermaid
----
-config:
-  theme: base
-  darkMode: false
-  themeVariables:
-    background: "#ffffff"
-    primaryColor: "#ffffff"
-    primaryTextColor: "#111827"
-    primaryBorderColor: "#475569"
-    lineColor: "#334155"
-    edgeLabelBackground: "#ffffff"
-    actorBkg: "#EFF6FF"
-    actorBorder: "#3B5BA5"
-    actorTextColor: "#16213E"
-    noteBkgColor: "#FEF2F2"
-    noteTextColor: "#991B1B"
-    noteBorderColor: "#FCA5A5"
----
 sequenceDiagram
-    rect rgb(255, 255, 255)
+%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
+  box rgb(255, 255, 255)
     participant T1
     participant T2
     participant R1 as 행1 (id=1)
     participant R2 as 행2 (id=2)
+  end
+  rect rgb(255, 255, 255)
     T1->>R1: FOR UPDATE — X락 획득
     T2->>R2: FOR UPDATE — X락 획득
     T1->>R2: FOR UPDATE — 대기 (T2가 잡음)
     T2->>R1: FOR UPDATE — 대기 (T1이 잡음)
     Note over T1,R2: 순환 대기 → 데드락
-    end
+  end
 ```
 
 Spring 코드로:
@@ -533,7 +488,7 @@ transaction {
 
 - **직렬화**: 같은 키의 요청을 Kafka **파티션 키**로 몰아 한 컨슈머가 순서대로 처리 → 경합 소멸, 대신 응답은 비동기.
 - **결과적 일관성(eventual consistency)**: 지금 당장 정확하지 않아도 **언젠가 수렴**하면 OK로 설계. 실패 시 보상 트랜잭션(saga)으로 되돌림.
-- 즉, 최종 단계의 답은 "더 좋은 락"이 아니라 **락이 필요 없는 설계**. [→ Kafka 구조](./260617-kafka-구조.md)
+- 즉, 최종 단계의 답은 "더 좋은 락"이 아니라 **락이 필요 없는 설계**. [→ Kafka 구조](./2606-kafka-구조.md)
 
 ## 선택 가이드
 
