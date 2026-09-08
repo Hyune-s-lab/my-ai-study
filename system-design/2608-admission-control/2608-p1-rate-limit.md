@@ -10,29 +10,18 @@ Phase 1의 범위는 `default` group 하나다.
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    client["Client"]
-    auth["API Key auth<br/>Team 식별"]
-    tier["Team Tier<br/>분당 요청 · 토큰 · 버스트"]
-    rate["Rate Limit<br/>Redis Lua · GCRA"]
-    provider["Model Provider"]
-    denied["429<br/>rate limit exceeded"]
-  
-    client --> auth --> tier --> rate
-    rate -->|"허용"| provider
-    rate -->|"한도 초과"| denied
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class client,auth,provider,denied app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class rate db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  class tier policy
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_client["Client"]
+  n_auth["API Key auth<br/>Team 식별"]
+  n_tier["Team Tier<br/>분당 요청 · 토큰 · 버스트"]
+  n_rate["Rate Limit<br/>Redis Lua · GCRA"]
+  n_provider["Model Provider"]
+  n_denied["429<br/>rate limit exceeded"]
+  n_client --> n_auth
+  n_auth --> n_tier
+  n_tier --> n_rate
+  n_rate -->|"허용"| n_provider
+  n_rate -->|"한도 초과"| n_denied
 ```
 
 | 구성 | 책임 |
@@ -50,18 +39,10 @@ Redis에는 Tier policy를 넣지 않고, Team별 GCRA TAT만 둔다.
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    RATE_LIMIT_TIER["RATE_LIMIT_TIER"] -->|"1 : 0..N 할당"| TEAM["TEAM"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class RATE_LIMIT_TIER,TEAM app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_RATE_LIMIT_TIER["RATE_LIMIT_TIER"]
+  n_TEAM["TEAM"]
+  n_RATE_LIMIT_TIER -->|"1 : 0..N 할당"| n_TEAM
 ```
 
 | 엔티티 | 필드 | 타입 | 제약 · 설명 |
@@ -239,30 +220,25 @@ Redis Lua timeout·오류는 direct PostgreSQL fallback 없이 503으로 끝낸�
 
 ```mermaid
 sequenceDiagram
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
-  box rgb(255, 255, 255)
-    participant G as Gateway
-    participant T as Local TierCatalog
-    participant R as Redis Lua
-    participant P as Model Provider
-  end
-  rect rgb(255, 255, 255)
-    G->>T: rateLimitTierId로 limit 조회
-    T-->>G: 분당 요청 · token · burst
-    G->>R: request TAT advance · token TAT check
-    alt 분당 요청 또는 토큰 초과
-      R-->>G: 429 · Retry-After
-    else Redis unavailable
-      R-->>G: 503
-    else 허용
-      R-->>G: admitted
-      G->>P: inference
-      alt Provider 실패
-        P-->>G: failure
-      else 성공
-        P-->>G: response · actual token usage
-        G->>R: token TAT advance
-      end
+  participant G as Gateway
+  participant T as Local TierCatalog
+  participant R as Redis Lua
+  participant P as Model Provider
+  G->>T: rateLimitTierId로 limit 조회
+  T-->>G: 분당 요청 · token · burst
+  G->>R: request TAT advance · token TAT check
+  alt 분당 요청 또는 토큰 초과
+    R-->>G: 429 · Retry-After
+  else Redis unavailable
+    R-->>G: 503
+  else 허용
+    R-->>G: admitted
+    G->>P: inference
+    alt Provider 실패
+      P-->>G: failure
+    else 성공
+      P-->>G: response · actual token usage
+      G->>R: token TAT advance
     end
   end
 ```

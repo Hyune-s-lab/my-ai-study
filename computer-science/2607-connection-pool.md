@@ -288,29 +288,7 @@ fun findUser(id: Long): User {
 
 ### 예외 분류 — 3단계
 
-```mermaid
-flowchart TD
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction TD
-    req["요청"] --> pool{"커넥션 획득?"}
-    pool -->|"실패"| budget["남은 deadline과 풀 부하 확인"]
-    budget --> reject["빠른 실패 또는 제한된 backoff 재시도"]
-    pool -->|"성공"| query{"쿼리·커밋 결과"}
-    query -->|"성공"| done["응답 반환"]
-    query -->|"데드락 등 롤백 확인"| retry["새 트랜잭션으로 제한 재시도"]
-    query -->|"문법·제약 오류"| fail["원인 수정 또는 업무 오류 반환"]
-    query -->|"커밋 결과 불명"| unknown["멱등키·결과 조회로 확인"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class req,pool,budget,query,done,fail,unknown app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class reject,retry worker
-```
+![커넥션 획득과 쿼리·커밋 실패 처리](assets/2607-connection-pool-failure-handling.svg)
 
 ### 예외 유형별 대응
 

@@ -8,66 +8,52 @@
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  subgraph g_without["캐시 없음: 매 decode 스텝"]
     direction LR
-    subgraph without["캐시 없음: 매 decode 스텝"]
-      full["전체 prefix 입력"] --> recompute["과거 K·V까지 재계산"]
-    end
-    subgraph withCache["KV 캐시 사용: 매 decode 스텝"]
-      token["현재 토큰 입력"] --> compute["현재 Q·K·V 계산"]
-      cache["과거 K·V 재사용"] --> attention["현재 Q로 attention"]
-      compute --> attention
-    end
+    n_full["전체 prefix 입력"]
+    n_recompute["과거 K·V까지 재계산"]
   end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class full,recompute,token,compute,cache,attention app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  subgraph g_withCache["KV 캐시 사용: 매 decode 스텝"]
+    direction LR
+    n_token["현재 토큰 입력"]
+    n_compute["현재 Q·K·V 계산"]
+    n_cache["과거 K·V 재사용"]
+    n_attention["현재 Q로 attention"]
+  end
+  n_full --> n_recompute
+  n_token --> n_compute
+  n_cache --> n_attention
+  n_compute --> n_attention
 ```
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    input["현재 토큰의 레이어 입력"] --> q["현재 Q"]
-    input --> kv["현재 K·V"]
-    kv --> cache["레이어별 KV 캐시에 추가"]
-    q --> attention["현재 위치의 attention 계산"]
-    cache --> attention
-    attention --> output["다음 레이어 입력"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class input,q,kv,attention,output app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class cache db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400, "rankSpacing": 30}}}%%
+  n_input["현재 토큰의<br/>레이어 입력"]
+  n_q["현재 Q"]
+  n_kv["현재 K·V"]
+  n_cache["레이어별 KV 캐시에<br/>추가"]
+  n_attention["현재 위치의<br/>attention 계산"]
+  n_output["다음 레이어 입력"]
+  n_input --> n_q
+  n_input --> n_kv
+  n_kv --> n_cache
+  n_q --> n_attention
+  n_cache --> n_attention
+  n_attention --> n_output
 ```
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    length["저장 토큰 수 증가"] --> entries["레이어별 K·V 저장량 증가"]
-    requests["동시 시퀀스 수 증가"] --> entries
-    entries --> memory["KV 캐시의 GPU 메모리 사용 증가"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class length,entries,requests app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class memory db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_length["저장 토큰 수 증가"]
+  n_entries["레이어별 K·V 저장량 증가"]
+  n_requests["동시 시퀀스 수 증가"]
+  n_memory["KV 캐시의 GPU 메모리<br/>사용 증가"]
+  n_length --> n_entries
+  n_requests --> n_entries
+  n_entries --> n_memory
 ```
 
 **세 줄 요약:**

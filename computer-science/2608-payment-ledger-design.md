@@ -18,32 +18,7 @@ DB 제약으로 강제하는 불변량 메커니즘으로 쓰는 것이다.
 
 ## 아키텍처 전체
 
-```mermaid
-flowchart TD
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction TD
-    client["결제·충전 요청"] --> tx1["TX1: Payment + Outbox 저장"]
-    tx1 --> db["PostgreSQL: 업무 상태 · Outbox · 원장"]
-    db -->|"lease claim"| relay["Outbox Relay"]
-    relay -->|"TX 밖 외부 호출"| external["PG · 충전사업자 API"]
-    external --> result{"결과 확정?"}
-    result -->|"예"| tx2["TX2: 상태 전이 · 필요한 분개"]
-    result -->|"아니요"| unknown["UNKNOWN 저장 · 결과 조회"]
-    tx2 --> db
-    unknown --> db
-    recon["대사 배치 · 시산표 검증"] --> db
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class client,tx1,external,result,tx2,unknown,recon app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class db db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class relay worker
-```
+![결제 Outbox·외부 호출·결과 확인과 원장](assets/2608-payment-ledger-design-payment-flow.svg)
 
 ## 1. 핵심 도메인 모델 — 계정과목 차트(CoA)와 분개
 
@@ -195,24 +170,19 @@ fun post(type: EntryType, sourceRef: String, lines: List<Line>): Long {
 
 ```mermaid
 sequenceDiagram
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
-  box rgb(255, 255, 255)
-    participant A as Payment API
-    participant D as PostgreSQL
-    participant R as Outbox Relay
-    participant P as 외부 사업자
-  end
-  rect rgb(255, 255, 255)
-    A->>D: TX1: Payment PENDING + Outbox 커밋
-    R->>D: 짧은 TX: lease와 claim token 저장
-    D-->>R: claim한 작업
-    R->>P: TX 밖 승인·발급 요청
-    alt 결과 확정
-      P-->>R: 승인 또는 거절
-      R->>D: TX2: 상태 + 성공 분개 + Outbox 완료
-    else 타임아웃·응답 유실
-      R->>D: UNKNOWN 저장·조회 작업 예약
-    end
+  participant A as Payment API
+  participant D as PostgreSQL
+  participant R as Outbox Relay
+  participant P as 외부 사업자
+  A->>D: TX1: Payment PENDING + Outbox 커밋
+  R->>D: 짧은 TX: lease와 claim token 저장
+  D-->>R: claim한 작업
+  R->>P: TX 밖 승인·발급 요청
+  alt 결과 확정
+    P-->>R: 승인 또는 거절
+    R->>D: TX2: 상태 + 성공 분개 + Outbox 완료
+  else 타임아웃·응답 유실
+    R->>D: UNKNOWN 저장·조회 작업 예약
   end
 ```
 

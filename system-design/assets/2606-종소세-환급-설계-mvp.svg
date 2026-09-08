@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340.0" height="738.0" viewBox="0.00 0.00 340.00 738.00" role="img" aria-labelledby="title description">
+  <title id="title">종소세 환급 MVP의 잡 처리 흐름</title>
+  <desc id="description">종소세 환급 MVP의 잡 처리 흐름。사용자 앱; API Gateway · Job API; PostgreSQL: 잡 상태 · 결과; Outbox Relay; Kafka: 수집 잡; 수집·계산 Worker; 국세청 외부 연동</desc>
+  <rect width="340.0" height="738.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 717.94)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-717.94 320.16,-717.94 320.16,20.16 -20.16,20.16" />
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M150.99,-647.21C150.99,-647.21 150.99,-600.15 150.99,-600.15" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="153.62,-600.15 150.99,-592.65 148.37,-600.15 153.62,-600.15" />
+      <text xml:space="preserve" text-anchor="middle" x="211.62" y="-610.71" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">잡 생성·상태 조회</text>
+    </g>
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M150.99,-539.24C150.99,-539.24 150.99,-492.18 150.99,-492.18" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="153.62,-492.18 150.99,-484.68 148.37,-492.18 153.62,-492.18" />
+      <text xml:space="preserve" text-anchor="middle" x="213.29" y="-502.74" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">잡과 Outbox 저장</text>
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M89.99,-431.27C89.99,-431.27 89.99,-384.21 89.99,-384.21" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="92.62,-384.21 89.99,-376.71 87.37,-384.21 92.62,-384.21" />
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M89.99,-323.3C89.99,-323.3 89.99,-276.24 89.99,-276.24" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="92.62,-276.24 89.99,-268.74 87.37,-276.24 92.62,-276.24" />
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M114.23,-215.33C114.23,-215.33 114.23,-168.28 114.23,-168.28" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="116.86,-168.28 114.23,-160.78 111.61,-168.28 116.86,-168.28" />
+    </g>
+    <g id="edge8" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M214.74,-158.37C214.74,-158.37 214.74,-421.64 214.74,-421.64" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="212.12,-421.64 214.74,-429.14 217.37,-421.64 212.12,-421.64" />
+      <text xml:space="preserve" text-anchor="middle" x="266.91" y="-289.87" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">상태·결과 저장</text>
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M120.66,-107.37C120.66,-107.37 120.66,-60.31 120.66,-60.31" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="123.28,-60.31 120.66,-52.81 118.03,-60.31 123.28,-60.31" />
+    </g>
+    <g id="edge7" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M181.33,-50.57C181.33,-50.57 181.33,-97.63 181.33,-97.63" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="178.7,-97.63 181.33,-105.13 183.95,-97.63 178.7,-97.63" />
+      <text xml:space="preserve" text-anchor="middle" x="224.74" y="-70.07" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">원천 데이터</text>
+    </g>
+    <g id="node1" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M199.98,-697.78C199.98,-697.78 102.01,-697.78 102.01,-697.78 96.01,-697.78 90.01,-691.78 90.01,-685.78 90.01,-685.78 90.01,-659.81 90.01,-659.81 90.01,-653.81 96.01,-647.81 102.01,-647.81 102.01,-647.81 199.98,-647.81 199.98,-647.81 205.98,-647.81 211.98,-653.81 211.98,-659.81 211.98,-659.81 211.98,-685.78 211.98,-685.78 211.98,-691.78 205.98,-697.78 199.98,-697.78" />
+      <text xml:space="preserve" text-anchor="middle" x="150.99499893188477" y="-667.94" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">사용자 앱</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M274.5,-589.81C274.5,-589.81 27.49,-589.81 27.49,-589.81 21.49,-589.81 15.49,-583.81 15.49,-577.81 15.49,-577.81 15.49,-551.84 15.49,-551.84 15.49,-545.84 21.49,-539.84 27.49,-539.84 27.49,-539.84 274.5,-539.84 274.5,-539.84 280.5,-539.84 286.5,-545.84 286.5,-551.84 286.5,-551.84 286.5,-577.81 286.5,-577.81 286.5,-583.81 280.5,-589.81 274.5,-589.81" />
+      <text xml:space="preserve" text-anchor="middle" x="150.99500465393066" y="-559.97" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">API Gateway · Job API</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M288,-481.84C288,-481.84 13.99,-481.84 13.99,-481.84 7.99,-481.84 1.99,-475.84 1.99,-469.84 1.99,-469.84 1.99,-443.87 1.99,-443.87 1.99,-437.87 7.99,-431.87 13.99,-431.87 13.99,-431.87 288,-431.87 288,-431.87 294,-431.87 300,-437.87 300,-443.87 300,-443.87 300,-469.84 300,-469.84 300,-475.84 294,-481.84 288,-481.84" />
+      <text xml:space="preserve" text-anchor="middle" x="150.99500489234924" y="-452.01" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">PostgreSQL: 잡 상태 · 결과</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#FFF7ED" stroke="#C98A2B" stroke-width="1.4" d="M165.51,-373.87C165.51,-373.87 14.48,-373.87 14.48,-373.87 8.48,-373.87 2.48,-367.87 2.48,-361.87 2.48,-361.87 2.48,-335.9 2.48,-335.9 2.48,-329.9 8.48,-323.9 14.48,-323.9 14.48,-323.9 165.51,-323.9 165.51,-323.9 171.51,-323.9 177.51,-329.9 177.51,-335.9 177.51,-335.9 177.51,-361.87 177.51,-361.87 177.51,-367.87 171.51,-373.87 165.51,-373.87" />
+      <text xml:space="preserve" text-anchor="middle" x="89.99499940872192" y="-344.04" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Outbox Relay</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M165.98,-265.9C165.98,-265.9 12,-265.9 12,-265.9 6,-265.9 0,-259.9 0,-253.9 0,-253.9 0,-227.94 0,-227.94 0,-221.94 6,-215.94 12,-215.94 12,-215.94 165.98,-215.94 165.98,-215.94 171.98,-215.94 177.98,-221.94 177.98,-227.94 177.98,-227.94 177.98,-253.9 177.98,-253.9 177.98,-259.9 171.98,-265.9 165.98,-265.9" />
+      <text xml:space="preserve" text-anchor="middle" x="88.98999786376953" y="-236.07" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Kafka: 수집 잡</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#FFF7ED" stroke="#C98A2B" stroke-width="1.4" d="M239.5,-157.94C239.5,-157.94 62.48,-157.94 62.48,-157.94 56.48,-157.94 50.48,-151.94 50.48,-145.94 50.48,-145.94 50.48,-119.97 50.48,-119.97 50.48,-113.97 56.48,-107.97 62.48,-107.97 62.48,-107.97 239.5,-107.97 239.5,-107.97 245.5,-107.97 251.5,-113.97 251.5,-119.97 251.5,-119.97 251.5,-145.94 251.5,-145.94 251.5,-151.94 245.5,-157.94 239.5,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="150.9900016784668" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">수집·계산 Worker</text>
+    </g>
+    <g id="node7" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M230,-49.97C230,-49.97 71.98,-49.97 71.98,-49.97 65.98,-49.97 59.98,-43.97 59.98,-37.97 59.98,-37.97 59.98,-12 59.98,-12 59.98,-6 65.98,0 71.98,0 71.98,0 230,0 230,0 236,0 242,-6 242,-12 242,-12 242,-37.97 242,-37.97 242,-43.97 236,-49.97 230,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="150.9900016784668" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">국세청 외부 연동</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1124.0" height="414.0" viewBox="0.00 0.00 1124.00 414.00" role="img" aria-labelledby="title description">
+  <title id="title">연결 종료 이후 작업 취소와 소켓 정리</title>
+  <desc id="description">연결 종료 이후 작업 취소와 소켓 정리。클라이언트 연결 종료; 서버가 취소를 감지·전파?; 서버·다운스트림 작업 계속; 버려질 결과에 자원·비용 소모; 협력적 작업 취소·자원 정리; outbound 호출 종료 요청; 로컬 소켓 close 누락?; CLOSE_WAIT 장기 누적 가능; 소켓 자원 정리</desc>
+  <rect width="1124.0" height="414.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 394.03)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-394.03 1103.67,-394.03 1103.67,20.16 -20.16,20.16" />
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M526.49,-323.3C526.49,-323.3 526.49,-276.24 526.49,-276.24" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="529.12,-276.24 526.49,-268.74 523.87,-276.24 529.12,-276.24" />
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M666,-323.3C666,-323.3 666,-276.24 666,-276.24" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="668.63,-276.24 666,-268.74 663.38,-276.24 668.63,-276.24" />
+    </g>
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M310.14,-241C231.65,-241 146.5,-241 146.5,-241 146.5,-241 146.5,-168.48 146.5,-168.48" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="149.13,-168.48 146.5,-160.98 143.88,-168.48 149.13,-168.48" />
+      <text xml:space="preserve" text-anchor="middle" x="278.14" y="-220.00" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">아니요</text>
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M439.5,-215.33C439.5,-215.33 439.5,-168.28 439.5,-168.28" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="442.13,-168.28 439.5,-160.78 436.88,-168.28 442.13,-168.28" />
+      <text xml:space="preserve" text-anchor="middle" x="454.99" y="-178.83" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">예</text>
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M146.5,-107.37C146.5,-107.37 146.5,-60.31 146.5,-60.31" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="149.13,-60.31 146.5,-52.81 143.88,-60.31 149.13,-60.31" />
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M440.5,-107.37C440.5,-107.37 440.5,-60.31 440.5,-60.31" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="443.13,-60.31 440.5,-52.81 437.88,-60.31 443.13,-60.31" />
+    </g>
+    <g id="edge7" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M747.5,-215.33C747.5,-215.33 747.5,-168.28 747.5,-168.28" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="750.13,-168.28 747.5,-160.78 744.88,-168.28 750.13,-168.28" />
+      <text xml:space="preserve" text-anchor="middle" x="762.99" y="-178.83" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">예</text>
+    </g>
+    <g id="edge8" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M865.95,-241C932.17,-241 1001.5,-241 1001.5,-241 1001.5,-241 1001.5,-168.48 1001.5,-168.48" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="1004.13,-168.48 1001.5,-160.98 998.88,-168.48 1004.13,-168.48" />
+      <text xml:space="preserve" text-anchor="middle" x="1029.97" y="-180.05" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">아니요</text>
+    </g>
+    <g id="node1" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M690.51,-373.87C690.51,-373.87 496.5,-373.87 496.5,-373.87 490.5,-373.87 484.5,-367.87 484.5,-361.87 484.5,-361.87 484.5,-335.9 484.5,-335.9 484.5,-329.9 490.5,-323.9 496.5,-323.9 496.5,-323.9 690.51,-323.9 690.51,-323.9 696.51,-323.9 702.51,-329.9 702.51,-335.9 702.51,-335.9 702.51,-361.87 702.51,-361.87 702.51,-367.87 696.51,-373.87 690.51,-373.87" />
+      <text xml:space="preserve" text-anchor="middle" x="593.5050048828125" y="-344.04" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">클라이언트 연결 종료</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#fbf5ff" stroke="#8b3dff" stroke-width="1.4" d="M556.49,-265.9C556.49,-265.9 322.52,-265.9 322.52,-265.9 316.52,-265.9 310.52,-259.9 310.52,-253.9 310.52,-253.9 310.52,-227.94 310.52,-227.94 310.52,-221.94 316.52,-215.94 322.52,-215.94 322.52,-215.94 556.49,-215.94 556.49,-215.94 562.49,-215.94 568.49,-221.94 568.49,-227.94 568.49,-227.94 568.49,-253.9 568.49,-253.9 568.49,-259.9 562.49,-265.9 556.49,-265.9" />
+      <text xml:space="preserve" text-anchor="middle" x="439.50498962402344" y="-236.07" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">서버가 취소를 감지·전파?</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M267.02,-157.94C267.02,-157.94 25.99,-157.94 25.99,-157.94 19.99,-157.94 13.99,-151.94 13.99,-145.94 13.99,-145.94 13.99,-119.97 13.99,-119.97 13.99,-113.97 19.99,-107.97 25.99,-107.97 25.99,-107.97 267.02,-107.97 267.02,-107.97 273.02,-107.97 279.02,-113.97 279.02,-119.97 279.02,-119.97 279.02,-145.94 279.02,-145.94 279.02,-151.94 273.02,-157.94 267.02,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="146.5049991607666" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">서버·다운스트림 작업 계속</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M277.01,-49.97C277.01,-49.97 12,-49.97 12,-49.97 6,-49.97 0,-43.97 0,-37.97 0,-37.97 0,-12 0,-12 0,-6 6,0 12,0 12,0 277.01,0 277.01,0 283.01,0 289.01,-6 289.01,-12 289.01,-12 289.01,-37.97 289.01,-37.97 289.01,-43.97 283.01,-49.97 277.01,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="144.5050048828125" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">버려질 결과에 자원·비용 소모</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M563.01,-157.94C563.01,-157.94 316,-157.94 316,-157.94 310,-157.94 304,-151.94 304,-145.94 304,-145.94 304,-119.97 304,-119.97 304,-113.97 310,-107.97 316,-107.97 316,-107.97 563.01,-107.97 563.01,-107.97 569.01,-107.97 575.01,-113.97 575.01,-119.97 575.01,-119.97 575.01,-145.94 575.01,-145.94 575.01,-151.94 569.01,-157.94 563.01,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="439.5050048828125" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">협력적 작업 취소·자원 정리</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M557.49,-49.97C557.49,-49.97 323.52,-49.97 323.52,-49.97 317.52,-49.97 311.52,-43.97 311.52,-37.97 311.52,-37.97 311.52,-12 311.52,-12 311.52,-6 317.52,0 323.52,0 323.52,0 557.49,0 557.49,0 563.49,0 569.49,-6 569.49,-12 569.49,-12 569.49,-37.97 569.49,-37.97 569.49,-43.97 563.49,-49.97 557.49,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="440.50498962402344" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">outbound 호출 종료 요청</text>
+    </g>
+    <g id="node7" class="node">
+      <path fill="#fbf5ff" stroke="#8b3dff" stroke-width="1.4" d="M853.51,-265.9C853.51,-265.9 641.5,-265.9 641.5,-265.9 635.5,-265.9 629.5,-259.9 629.5,-253.9 629.5,-253.9 629.5,-227.94 629.5,-227.94 629.5,-221.94 635.5,-215.94 641.5,-215.94 641.5,-215.94 853.51,-215.94 853.51,-215.94 859.51,-215.94 865.51,-221.94 865.51,-227.94 865.51,-227.94 865.51,-253.9 865.51,-253.9 865.51,-259.9 859.51,-265.9 853.51,-265.9" />
+      <text xml:space="preserve" text-anchor="middle" x="747.5050048828125" y="-236.07" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">로컬 소켓 close 누락?</text>
+    </g>
+    <g id="node8" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M884.51,-157.94C884.51,-157.94 610.5,-157.94 610.5,-157.94 604.5,-157.94 598.5,-151.94 598.5,-145.94 598.5,-145.94 598.5,-119.97 598.5,-119.97 598.5,-113.97 604.5,-107.97 610.5,-107.97 610.5,-107.97 884.51,-107.97 884.51,-107.97 890.51,-107.97 896.51,-113.97 896.51,-119.97 896.51,-119.97 896.51,-145.94 896.51,-145.94 896.51,-151.94 890.51,-157.94 884.51,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="747.5050048828125" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">CLOSE_WAIT 장기 누적 가능</text>
+    </g>
+    <g id="node9" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M1071.51,-157.94C1071.51,-157.94 931.5,-157.94 931.5,-157.94 925.5,-157.94 919.5,-151.94 919.5,-145.94 919.5,-145.94 919.5,-119.97 919.5,-119.97 919.5,-113.97 925.5,-107.97 931.5,-107.97 931.5,-107.97 1071.51,-107.97 1071.51,-107.97 1077.51,-107.97 1083.51,-113.97 1083.51,-119.97 1083.51,-119.97 1083.51,-145.94 1083.51,-145.94 1083.51,-151.94 1077.51,-157.94 1071.51,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="1001.5050048828125" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">소켓 자원 정리</text>
+    </g>
+  </g>
+</svg>

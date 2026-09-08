@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="500" viewBox="0 0 1080 500" role="img" aria-labelledby="title description">
+  <title id="title">수평·수직 파티셔닝과 샤딩 비교</title>
+  <desc id="description">수평·수직 파티셔닝과 샤딩 비교。색은 처리와 저장소의 역할을 구분하며, 선은 명시된 관계만 나타낸다.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 4 L0 8Z" fill="#3B5BA5" />
+    </marker>
+  </defs>
+  <rect width="1080" height="500" fill="#FFFFFF" />
+  <rect x="24" y="24" width="324" height="452" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2" />
+  <text x="44" y="56" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#16213E" text-anchor="start">① 수평 파티셔닝</text>
+  <rect x="378" y="24" width="324" height="452" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2" />
+  <text x="398" y="56" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#16213E" text-anchor="start">② 수직 파티셔닝</text>
+  <rect x="732" y="24" width="324" height="452" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2" />
+  <text x="752" y="56" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#16213E" text-anchor="start">③ 샤딩</text>
+  <text x="186" y="86" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#31559F" text-anchor="middle">행 분할 · 단일 DB</text>
+  <text x="540" y="86" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#31559F" text-anchor="middle">컬럼 분할 · 단일 DB</text>
+  <text x="894" y="86" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#31559F" text-anchor="middle">행 분할 · 여러 노드</text>
+  <g class="node">
+    <rect x="46" y="114" width="280" height="62" rx="7" fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" />
+    <text x="186" y="151.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">PostgreSQL</text>
+  </g>
+  <g class="node">
+    <rect x="46" y="214" width="280" height="56" rx="7" fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" />
+    <text x="186" y="248.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">rows · 2023</text>
+  </g>
+  <g class="node">
+    <rect x="46" y="294" width="280" height="56" rx="7" fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" />
+    <text x="186" y="328.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">rows · 2024</text>
+  </g>
+  <g class="node">
+    <rect x="46" y="374" width="280" height="56" rx="7" fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" />
+    <text x="186" y="408.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">rows · 2025</text>
+  </g>
+  <g class="node">
+    <rect x="400" y="114" width="280" height="62" rx="7" fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" />
+    <text x="540" y="151.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">PostgreSQL</text>
+  </g>
+  <g class="node">
+    <rect x="400" y="214" width="280" height="74" rx="7" fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" />
+    <text x="540" y="245.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">orders</text>
+    <text x="540" y="269.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#166534" text-anchor="middle">(id, status, …) ← hot</text>
+  </g>
+  <g class="node">
+    <rect x="400" y="366" width="280" height="74" rx="7" fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" />
+    <text x="540" y="397.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">order_details</text>
+    <text x="540" y="421.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#166534" text-anchor="middle">(id, payload) ← cold</text>
+  </g>
+  <path d="M540 288 V366" fill="none" stroke="#3B5BA5" stroke-width="1.6" stroke-linejoin="round" />
+  <text x="584" y="333" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#31559F" text-anchor="middle">같은 PK</text>
+  <g class="node">
+    <rect x="754" y="114" width="280" height="70" rx="7" fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" />
+    <text x="894" y="143.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">샤드 라우터</text>
+    <text x="894" y="167.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#6B21A8" text-anchor="middle">shard key</text>
+  </g>
+  <g class="node">
+    <rect x="794" y="234" width="240" height="58" rx="7" fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" />
+    <text x="914" y="269.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">Node 1 / Shard 1</text>
+  </g>
+  <g class="node">
+    <rect x="794" y="314" width="240" height="58" rx="7" fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" />
+    <text x="914" y="349.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">Node 2 / Shard 2</text>
+  </g>
+  <g class="node">
+    <rect x="794" y="394" width="240" height="58" rx="7" fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" />
+    <text x="914" y="429.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">Node 3 / Shard 3</text>
+  </g>
+  <path d="M894 184 V204 H772 V423 H794" fill="none" stroke="#3B5BA5" stroke-width="1.6" stroke-linejoin="round" marker-end="url(#arrow)" />
+  <path d="M772 263 H794" fill="none" stroke="#3B5BA5" stroke-width="1.6" stroke-linejoin="round" marker-end="url(#arrow)" />
+  <path d="M772 343 H794" fill="none" stroke="#3B5BA5" stroke-width="1.6" stroke-linejoin="round" marker-end="url(#arrow)" />
+</svg>

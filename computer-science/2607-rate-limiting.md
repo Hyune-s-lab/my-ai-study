@@ -26,34 +26,23 @@ API 게이트웨이에서 가장 많이 하는 일 중 하나가 "요청을 적�
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  subgraph g_token["Token Bucket (버스트 허용)"]
     direction LR
-    subgraph token["Token Bucket (버스트 허용)"]
-      direction TB
-      t1["토큰이 가득 차 있으면<br/>한 번에 100개 요청 허용"]
-      t2["토큰이 refillRate로 채워짐<br/>(10/sec)"]
-      t3["출력: 불규칙 (버스트)"]
-      t1 --> t2 --> t3
-    end
-  
-    subgraph leaky["Leaky Bucket (출력 일정)"]
-      direction TB
-      l1["요청이 버킷에 들어옴<br/>(버스트 흡수)"]
-      l2["leakRate로 일정하게 처리<br/>(10/sec)"]
-      l3["출력: 일정 (균일)"]
-      l1 --> l2 --> l3
-    end
-  
+    n_t1["토큰이 가득 차 있으면<br/>한 번에 100개 요청 허용"]
+    n_t2["토큰이 refillRate로 채워짐<br/>(10/sec)"]
+    n_t3["출력: 불규칙 (버스트)"]
   end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class t2,t3,l1,l2,l3 app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  class t1 policy
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  subgraph g_leaky["Leaky Bucket (출력 일정)"]
+    direction LR
+    n_l1["요청이 버킷에 들어옴<br/>(버스트 흡수)"]
+    n_l2["leakRate로 일정하게 처리<br/>(10/sec)"]
+    n_l3["출력: 일정 (균일)"]
+  end
+  n_t1 --> n_t2
+  n_t2 --> n_t3
+  n_l1 --> n_l2
+  n_l2 --> n_l3
 ```
 
 ## 3. 백프레셔 vs 레이트 리밋
@@ -62,23 +51,18 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    client["클라이언트"] --> rl{"인바운드 한도 이내?"}
-    rl -->|"아니요"| reject["429 반환"]
-    rl -->|"예"| gateway["게이트웨이"]
-    gateway --> bp["Backpressure<br/>하류 수용량에 맞춰 전송"]
-    bp --> downstream["Model Provider"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class client,reject,gateway,bp,downstream app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  class rl policy
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_client["클라이언트"]
+  n_rl{"인바운드 한도 이내?"}
+  n_reject["429 반환"]
+  n_gateway["게이트웨이"]
+  n_bp["Backpressure<br/>하류 수용량에 맞춰 전송"]
+  n_downstream["Model Provider"]
+  n_client --> n_rl
+  n_rl -->|"아니요"| n_reject
+  n_rl -->|"예"| n_gateway
+  n_gateway --> n_bp
+  n_bp --> n_downstream
 ```
 
 | | Rate Limiting | Backpressure |

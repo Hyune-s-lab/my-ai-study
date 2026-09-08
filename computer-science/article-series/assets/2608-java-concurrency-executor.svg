@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="767.0" height="574.0" viewBox="0.00 0.00 767.00 574.00" role="img" aria-labelledby="title description">
+  <title id="title">ThreadPoolExecutor의 작업 수용 판단</title>
+  <desc id="description">ThreadPoolExecutor의 작업 수용 판단。execute(task); 스레드 수가 corePoolSize 미만?; 새 worker가 task 실행; 큐에 적재 가능?; 대기 후 worker가 실행; maximumPoolSize 내 worker 생성 가능?; RejectedExecutionHandler</desc>
+  <rect width="767.0" height="574.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 554.13)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-554.13 747.17,-554.13 747.17,20.16 -20.16,20.16" />
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M141.01,-483.32C141.01,-483.32 141.01,-436.41 141.01,-436.41" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="143.64,-436.41 141.01,-428.91 138.39,-436.41 143.64,-436.41" />
+    </g>
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M114.51,-349.48C114.51,-349.48 114.51,-60.42 114.51,-60.42" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="117.13,-60.42 114.51,-52.92 111.88,-60.42 117.13,-60.42" />
+      <text xml:space="preserve" text-anchor="middle" x="158.89" y="-207.75" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">예: 생성 성공</text>
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M234.26,-349.37C234.26,-349.37 234.26,-302.57 234.26,-302.57" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="236.89,-302.57 234.26,-295.07 231.64,-302.57 236.89,-302.57" />
+      <text xml:space="preserve" text-anchor="middle" x="307.57" y="-312.87" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">아니요 또는 생성 실패</text>
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M244.84,-241.32C244.84,-241.32 244.84,-181.53 244.84,-181.53" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="247.47,-181.53 244.84,-174.03 242.22,-181.53 247.47,-181.53" />
+      <text xml:space="preserve" text-anchor="middle" x="260.33" y="-204.82" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">예</text>
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M303.18,-241.44C303.18,-214.84 303.18,-177 303.18,-177 303.18,-177 405.26,-177 405.26,-177" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="405.26,-179.63 412.76,-177 405.26,-174.38 405.26,-179.63" />
+      <text xml:space="preserve" text-anchor="middle" x="382.74" y="-189.00" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">아니요</text>
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M414.98,-114C327.89,-114 236.51,-114 236.51,-114 236.51,-114 236.51,-60.18 236.51,-60.18" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="239.14,-60.18 236.51,-52.68 233.89,-60.18 239.14,-60.18" />
+      <text xml:space="preserve" text-anchor="middle" x="398.98" y="-93.00" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">예</text>
+    </g>
+    <g id="edge7" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M570.01,-107.37C570.01,-107.37 570.01,-60.57 570.01,-60.57" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="572.64,-60.57 570.01,-53.07 567.39,-60.57 572.64,-60.57" />
+      <text xml:space="preserve" text-anchor="middle" x="598.48" y="-70.87" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">아니요</text>
+    </g>
+    <g id="node1" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M222.5,-533.97C222.5,-533.97 59.52,-533.97 59.52,-533.97 53.52,-533.97 47.52,-527.97 47.52,-521.97 47.52,-521.97 47.52,-496 47.52,-496 47.52,-490 53.52,-484 59.52,-484 59.52,-484 222.5,-484 222.5,-484 228.5,-484 234.5,-490 234.5,-496 234.5,-496 234.5,-521.97 234.5,-521.97 234.5,-527.97 228.5,-533.97 222.5,-533.97" />
+      <text xml:space="preserve" text-anchor="middle" x="141.0099983215332" y="-504.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">execute(task)</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M270.02,-426C270.02,-426 12,-426 12,-426 6,-426 0,-420 0,-414 0,-414 0,-361.97 0,-361.97 0,-355.97 6,-349.97 12,-349.97 12,-349.97 270.02,-349.97 270.02,-349.97 276.02,-349.97 282.02,-355.97 282.02,-361.97 282.02,-361.97 282.02,-414 282.02,-414 282.02,-420 276.02,-426 270.02,-426" />
+      <text xml:space="preserve" text-anchor="middle" x="141.00999450683594" y="-395.26" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">스레드 수가 corePoolSize</text>
+      <text xml:space="preserve" text-anchor="middle" x="141.00999450683594" y="-369.86" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#6B21A8">미만?</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#FFF7ED" stroke="#C98A2B" stroke-width="1.4" d="M305.02,-49.97C305.02,-49.97 85.01,-49.97 85.01,-49.97 79.01,-49.97 73.01,-43.97 73.01,-37.97 73.01,-37.97 73.01,-12 73.01,-12 73.01,-6 79.01,0 85.01,0 85.01,0 305.02,0 305.02,0 311.02,0 317.02,-6 317.02,-12 317.02,-12 317.02,-37.97 317.02,-37.97 317.02,-43.97 311.02,-49.97 305.02,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="195.0149917602539" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">새 worker가 task 실행</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M349.53,-291.97C349.53,-291.97 198.5,-291.97 198.5,-291.97 192.5,-291.97 186.5,-285.97 186.5,-279.97 186.5,-279.97 186.5,-254 186.5,-254 186.5,-248 192.5,-242 198.5,-242 198.5,-242 349.53,-242 349.53,-242 355.53,-242 361.53,-248 361.53,-254 361.53,-254 361.53,-279.97 361.53,-279.97 361.53,-285.97 355.53,-291.97 349.53,-291.97" />
+      <text xml:space="preserve" text-anchor="middle" x="274.01499938964844" y="-262.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">큐에 적재 가능?</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#FFF7ED" stroke="#C98A2B" stroke-width="1.4" d="M380.02,-170.97C380.02,-170.97 168,-170.97 168,-170.97 162,-170.97 156,-164.97 156,-158.97 156,-158.97 156,-133 156,-133 156,-127 162,-121 168,-121 168,-121 380.02,-121 380.02,-121 386.02,-121 392.02,-127 392.02,-133 392.02,-133 392.02,-158.97 392.02,-158.97 392.02,-164.97 386.02,-170.97 380.02,-170.97" />
+      <text xml:space="preserve" text-anchor="middle" x="274.00999450683594" y="-141.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">대기 후 worker가 실행</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M712.52,-184C712.52,-184 427.5,-184 427.5,-184 421.5,-184 415.5,-178 415.5,-172 415.5,-172 415.5,-119.97 415.5,-119.97 415.5,-113.97 421.5,-107.97 427.5,-107.97 427.5,-107.97 712.52,-107.97 712.52,-107.97 718.52,-107.97 724.52,-113.97 724.52,-119.97 724.52,-119.97 724.52,-172 724.52,-172 724.52,-178 718.52,-184 712.52,-184" />
+      <text xml:space="preserve" text-anchor="middle" x="570.010009765625" y="-153.26" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">maximumPoolSize 내 worker</text>
+      <text xml:space="preserve" text-anchor="middle" x="570.010009765625" y="-127.86" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#6B21A8">생성 가능?</text>
+    </g>
+    <g id="node7" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M715.01,-49.97C715.01,-49.97 425.02,-49.97 425.02,-49.97 419.02,-49.97 413.02,-43.97 413.02,-37.97 413.02,-37.97 413.02,-12 413.02,-12 413.02,-6 419.02,0 425.02,0 425.02,0 715.01,0 715.01,0 721.01,0 727.01,-6 727.01,-12 727.01,-12 727.01,-37.97 727.01,-37.97 727.01,-43.97 721.01,-49.97 715.01,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="570.0149993896484" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">RejectedExecutionHandler</text>
+    </g>
+  </g>
+</svg>

@@ -22,93 +22,67 @@ PostgreSQL은 행을 claim하고, RabbitMQ·SQS는 큐의 메시지를 경쟁 �
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    p["Producer"] --> table["PostgreSQL queue_table"]
-    table --> claim["원자적 claim: SKIP LOCKED"]
-    claim --> a["Consumer A"]
-    claim --> b["Consumer B"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class p,claim,a,b app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class table db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_p["Producer"]
+  n_table["PostgreSQL queue_table"]
+  n_claim["원자적 claim: SKIP LOCKED"]
+  n_a["Consumer A"]
+  n_b["Consumer B"]
+  n_p --> n_table
+  n_table --> n_claim
+  n_claim --> n_a
+  n_claim --> n_b
 ```
 
 RabbitMQ에서는 exchange가 queue로 라우팅한다.
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    p["Producer"] --> exchange["RabbitMQ Exchange"]
-    exchange --> q["Queue"]
-    q --> a["Consumer A"]
-    q --> b["Consumer B"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class p,a,b app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class exchange,q db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_p["Producer"]
+  n_exchange["RabbitMQ Exchange"]
+  n_q["Queue"]
+  n_a["Consumer A"]
+  n_b["Consumer B"]
+  n_p --> n_exchange
+  n_exchange --> n_q
+  n_q --> n_a
+  n_q --> n_b
 ```
 
 SNS가 여러 SQS 큐로 발행하면 fan-out이고, 같은 SQS 큐의 소비자끼리는 경쟁한다.
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    p["Producer"] --> sns["SNS Topic"]
-    sns --> q["SQS Queue"]
-    q --> a["Consumer A"]
-    q --> b["Consumer B"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class p,a,b app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class sns,q db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_p["Producer"]
+  n_sns["SNS Topic"]
+  n_q["SQS Queue"]
+  n_a["Consumer A"]
+  n_b["Consumer B"]
+  n_p --> n_sns
+  n_sns --> n_q
+  n_q --> n_a
+  n_q --> n_b
 ```
 
 Kafka는 consumer group 안에서 파티션을 나눠 맡는다.
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    p["Producer: key로 라우팅"] --> p0["Partition 0"]
-    p --> p1["Partition 1"]
-    subgraph group["같은 Consumer Group"]
-      a["Consumer A"]
-      b["Consumer B"]
-      c["Consumer C: 미배정"]
-    end
-    p0 --> a
-    p1 --> b
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_p["Producer: key로 라우팅"]
+  n_p0["Partition 0"]
+  n_p1["Partition 1"]
+  subgraph g_group["같은 Consumer Group"]
+    n_a["Consumer A"]
+    n_b["Consumer B"]
+    n_c["Consumer C: 미배정"]
   end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class p,a,b,c app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class p0,p1 db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  n_p --> n_p0
+  n_p --> n_p1
+  n_p0 --> n_a
+  n_p1 --> n_b
 ```
 
 ## 메시징 발전 단계 — 인메모리 → Postgres → 외부 MQ
@@ -132,23 +106,10 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    mem["1. 인메모리<br/>ApplicationEventPublisher<br/>영속성 ✗ · 원자성 ✗"]
-    pg["2. Postgres as Queue<br/>FOR UPDATE SKIP LOCKED<br/>영속성 ✓ · 원자성 ✓ · ~수백 TPS"]
-    mq["3. 외부 MQ<br/>RabbitMQ · Kafka<br/>영속성 ✓ · 수만~수십만 TPS"]
-  
-    mem --> pg --> mq
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class mem app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class pg,mq db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_mem["1. 인메모리<br/>ApplicationEventPublisher<br/>영속성 ✗ · 원자성 ✗"]
+  n_pg["2. Postgres as Queue<br/>FOR UPDATE SKIP LOCKED<br/>영속성 ✓ · 원자성 ✓<br/>~수백 TPS"]
+  n_mq["3. 외부 MQ<br/>RabbitMQ · Kafka<br/>영속성 ✓<br/>수만~수십만 TPS"]
 ```
 
 ### 인메모리 — Spring ApplicationEventPublisher
@@ -192,21 +153,16 @@ LIMIT 10;
 
 ```mermaid
 sequenceDiagram
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
-  box rgb(255, 255, 255)
-    participant A as Consumer A
-    participant Q as PostgreSQL queue_table
-    participant B as Consumer B
-  end
-  rect rgb(255, 255, 255)
-    A->>Q: TX에서 pending 행 잠금 · processing과 lease 저장
-    Q-->>A: row 1 claim 커밋
-    B->>Q: TX에서 다음 처리 가능한 행 claim
-    Q-->>B: row 3 claim 커밋
-    Note over A,B: 외부 작업은 claim 트랜잭션 밖에서 수행
-    A->>Q: claim token 확인 후 row 1 완료 기록
-    Note over A,Q: 장애 시 만료 lease 회수<br/>이전 worker 완료 쓰기는 token으로 차단
-  end
+  participant A as Consumer A
+  participant Q as PostgreSQL queue_table
+  participant B as Consumer B
+  A->>Q: TX에서 pending 행 잠금 · processing과 lease 저장
+  Q-->>A: row 1 claim 커밋
+  B->>Q: TX에서 다음 처리 가능한 행 claim
+  Q-->>B: row 3 claim 커밋
+  Note over A,B: 외부 작업은 claim 트랜잭션 밖에서 수행
+  A->>Q: claim token 확인 후 row 1 완료 기록
+  Note over A,Q: 장애 시 만료 lease 회수<br/>이전 worker 완료 쓰기는 token으로 차단
 ```
 
 #### partial index — 없으면 풀 스캔 + lock 경합
@@ -421,36 +377,22 @@ DB 커밋과 MQ 발행은 분리된 두 작업이다. 둘 중 하나만 성공�
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    subgraph tx["DB 트랜잭션 (원자성 보장)"]
-      app["애플리케이션"]
-      pg["Postgres"]
-      bizTable["비즈니스 테이블<br/>(orders 등)"]
-      outboxTable["outbox 테이블<br/>(event, status=pending)"]
-      app --> pg
-      pg --> bizTable
-      pg --> outboxTable
-    end
-  
-    poller["Poller / CDC<br/>(별도 프로세스, 발행 성공 시 published)"]
-    broker["MQ / Kafka"]
-    downstream["Consumer<br/>(downstream 서비스)"]
-  
-    outboxTable --> poller
-    poller --> broker
-    broker --> downstream
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400, "rankSpacing": 30}}}%%
+  n_poller["Poller / CDC<br/>(별도 프로세스,<br/>발행 성공 시<br/>published)"]
+  n_broker["MQ / Kafka"]
+  n_downstream["Consumer<br/>(downstream<br/>서비스)"]
+  subgraph g_tx["DB 트랜잭션 (원자성 보장)"]
+    n_app["애플리케이션"]
+    n_pg["Postgres"]
+    n_bizTable["비즈니스 테이블<br/>(orders 등)"]
+    n_outboxTable["outbox 테이블<br/>(event, status=pending)"]
   end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class app,downstream app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class pg,bizTable,outboxTable,broker db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class poller worker
+  n_app --> n_pg
+  n_pg --> n_bizTable
+  n_pg --> n_outboxTable
+  n_outboxTable --> n_poller
+  n_poller --> n_broker
+  n_broker --> n_downstream
 ```
 
 > outbox를 안 쓰면 "DB 커밋 후 send"가 되는데, 이때 send 실패는 애플리케이션에서 catch해서 재시도하거나 보상해야 한다. 완벽하지 않으므로 중요한 도메인은 outbox가 정석.
@@ -469,22 +411,17 @@ flowchart LR
 
 ```mermaid
 sequenceDiagram
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
-  box rgb(255, 255, 255)
-    participant B as Broker
-    participant C as Consumer
-    participant D as 업무 DB
-  end
-  rect rgb(255, 255, 255)
-    B->>C: 메시지 전달
-    C->>D: 업무 변경 + event_id 처리 기록
-    D-->>C: 같은 트랜잭션으로 커밋
-    Note over B,C: ACK 또는 offset commit 전에 Consumer 크래시
-    B->>C: 복구 후 동일 메시지 재전달
-    C->>D: event_id 중복 확인
-    D-->>C: 이미 처리됨
-    C-->>B: 업무 변경을 반복하지 않고 ACK
-  end
+  participant B as Broker
+  participant C as Consumer
+  participant D as 업무 DB
+  B->>C: 메시지 전달
+  C->>D: 업무 변경 + event_id 처리 기록
+  D-->>C: 같은 트랜잭션으로 커밋
+  Note over B,C: ACK 또는 offset commit 전에 Consumer 크래시
+  B->>C: 복구 후 동일 메시지 재전달
+  C->>D: event_id 중복 확인
+  D-->>C: 이미 처리됨
+  C-->>B: 업무 변경을 반복하지 않고 ACK
 ```
 
 ### 구현체별 전달 보장
@@ -619,31 +556,7 @@ Kafka Streams는 파티션별 상태 기반 처리를 기본으로 한다:
   └─ 최대 재시도 초과 또는 복구 불가: DLQ로 이동
 ```
 
-```mermaid
-flowchart TD
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction TD
-    broker["Broker"] --> process["메시지 처리"]
-    process --> success{"성공?"}
-    success -->|"예"| ack["ACK 또는 offset commit"]
-    success -->|"아니요"| limit{"재시도 한도 초과?"}
-    limit -->|"아니요"| retry["backoff + jitter"]
-    retry --> process
-    limit -->|"예"| dead["DLQ / Kafka DLT에 보관"]
-    dead -->|"보관 성공"| ack
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class broker,process,success,ack app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class dead db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  class limit policy
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class retry worker
-```
+![메시지 재시도와 DLQ·DLT 보관](assets/2607-message-queue-retry-dlt.svg)
 
 ### 구현체별 DLQ
 
@@ -762,51 +675,7 @@ Producer → [Broker] → Consumer A (알림)
                     → Consumer C (audit)
 ```
 
-```mermaid
-flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    producer["Producer"]
-  
-    subgraph rabbitFan["RabbitMQ (fanout exchange)"]
-      rEx["Exchange<br/>(fanout)"]
-      rQ1["Queue: 알림"]
-      rQ2["Queue: 분석"]
-      rQ3["Queue: audit"]
-      rC1["Consumer A"]
-      rC2["Consumer B"]
-      rC3["Consumer C"]
-      rEx --> rQ1
-      rEx --> rQ2
-      rEx --> rQ3
-      rQ1 --> rC1
-      rQ2 --> rC2
-      rQ3 --> rC3
-    end
-  
-    subgraph kafkaFan["Kafka (consumer group)"]
-      kTopic["Topic"]
-      kG1["group A<br/>(offset 독립)"]
-      kG2["group B<br/>(offset 독립)"]
-      kG3["group C<br/>(offset 독립)"]
-      kTopic --> kG1
-      kTopic --> kG2
-      kTopic --> kG3
-    end
-  
-    producer --> rEx
-    producer --> kTopic
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class producer,rEx,rC1,rC2,rC3,kG1,kG2,kG3 app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class rQ1,rQ2,rQ3,kTopic db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-```
+![RabbitMQ와 Kafka의 fanout 구조](assets/2607-message-queue-fanout.svg)
 
 ### 구현체별 fan-out
 

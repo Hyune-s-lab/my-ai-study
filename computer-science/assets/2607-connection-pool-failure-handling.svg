@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1141.0" height="408.0" viewBox="0.00 0.00 1141.00 408.00" role="img" aria-labelledby="title description">
+  <title id="title">커넥션 획득과 쿼리·커밋 실패 처리</title>
+  <desc id="description">커넥션 획득과 쿼리·커밋 실패 처리。요청; 커넥션 획득?; 남은 deadline과 풀 부하 확인; 빠른 실패 또는 제한된 backoff 재시도; 쿼리·커밋 결과; 응답 반환; 새 트랜잭션으로 제한 재시도; 원인 수정 또는 업무 오류 반환; 멱등키·결과 조회로 확인</desc>
+  <rect width="1141.0" height="408.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 388.16)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-388.16 1120.67,-388.16 1120.67,20.16 -20.16,20.16" />
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M80.59,-206.98C80.59,-206.98 113.17,-206.98 113.17,-206.98" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="113.17,-209.61 120.67,-206.98 113.17,-204.36 113.17,-209.61" />
+    </g>
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M275.23,-227.65C321.79,-227.65 372.51,-227.65 372.51,-227.65 372.51,-227.65 372.51,-251.55 372.51,-251.55" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="369.88,-251.55 372.51,-259.05 375.13,-251.55 369.88,-251.55" />
+      <text xml:space="preserve" text-anchor="middle" x="307.48" y="-240.73" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">실패</text>
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M275.31,-188.98C275.31,-188.98 395.19,-188.98 395.19,-188.98" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="395.19,-191.61 402.69,-188.98 395.19,-186.36 395.19,-191.61" />
+      <text xml:space="preserve" text-anchor="middle" x="307.31" y="-200.98" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">성공</text>
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M640.75,-301.97C640.75,-301.97 783.09,-301.97 783.09,-301.97" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="783.09,-304.59 790.59,-301.97 783.09,-299.34 783.09,-304.59" />
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M490.51,-196.54C490.51,-209.83 490.51,-223.32 490.51,-223.32 490.51,-223.32 875.52,-223.32 875.52,-223.32" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="875.52,-225.95 883.02,-223.32 875.52,-220.7 875.52,-225.95" />
+      <text xml:space="preserve" text-anchor="middle" x="719.73" y="-235.32" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">성공</text>
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M575.35,-170.98C575.35,-170.98 797.67,-170.98 797.67,-170.98" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="797.67,-173.61 805.17,-170.98 797.67,-168.36 797.67,-173.61" />
+      <text xml:space="preserve" text-anchor="middle" x="719.35" y="-182.98" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">데드락 등 롤백 확인</text>
+    </g>
+    <g id="edge7" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M518.51,-145.45C518.51,-124.4 518.51,-97.98 518.51,-97.98 518.51,-97.98 791.42,-97.98 791.42,-97.98" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="791.42,-100.61 798.92,-97.98 791.42,-95.36 791.42,-100.61" />
+      <text xml:space="preserve" text-anchor="middle" x="719.04" y="-109.98" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">문법·제약 오류</text>
+    </g>
+    <g id="edge8" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M462.51,-145.55C462.51,-103.72 462.51,-24.98 462.51,-24.98 462.51,-24.98 812.94,-24.98 812.94,-24.98" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="812.94,-27.61 820.44,-24.98 812.94,-22.36 812.94,-27.61" />
+      <text xml:space="preserve" text-anchor="middle" x="717.94" y="-36.98" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">커밋 결과 불명</text>
+    </g>
+    <g id="node1" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M67.99,-231.97C67.99,-231.97 12,-231.97 12,-231.97 6,-231.97 0,-225.97 0,-219.97 0,-219.97 0,-194 0,-194 0,-188 6,-182 12,-182 12,-182 67.99,-182 67.99,-182 73.99,-182 79.99,-188 79.99,-194 79.99,-194 79.99,-219.97 79.99,-219.97 79.99,-225.97 73.99,-231.97 67.99,-231.97" />
+      <text xml:space="preserve" text-anchor="middle" x="39.994998931884766" y="-202.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">요청</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#fbf5ff" stroke="#8b3dff" stroke-width="1.4" d="M262.73,-231.97C262.73,-231.97 135.74,-231.97 135.74,-231.97 129.74,-231.97 123.74,-225.97 123.74,-219.97 123.74,-219.97 123.74,-194 123.74,-194 123.74,-188 129.74,-182 135.74,-182 135.74,-182 262.73,-182 262.73,-182 268.73,-182 274.73,-188 274.73,-194 274.73,-194 274.73,-219.97 274.73,-219.97 274.73,-225.97 268.73,-231.97 262.73,-231.97" />
+      <text xml:space="preserve" text-anchor="middle" x="199.2350082397461" y="-202.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">커넥션 획득?</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M628.25,-311.97C628.25,-311.97 352.23,-311.97 352.23,-311.97 346.23,-311.97 340.23,-305.97 340.23,-299.97 340.23,-299.97 340.23,-274 340.23,-274 340.23,-268 346.23,-262 352.23,-262 352.23,-262 628.25,-262 628.25,-262 634.25,-262 640.25,-268 640.25,-274 640.25,-274 640.25,-299.97 640.25,-299.97 640.25,-305.97 634.25,-311.97 628.25,-311.97" />
+      <text xml:space="preserve" text-anchor="middle" x="490.24000549316406" y="-282.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">남은 deadline과 풀 부하 확인</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#fff7ed" stroke="#c98a2b" stroke-width="1.4" d="M1088.51,-368C1088.51,-368 805.5,-368 805.5,-368 799.5,-368 793.5,-362 793.5,-356 793.5,-356 793.5,-303.97 793.5,-303.97 793.5,-297.97 799.5,-291.97 805.5,-291.97 805.5,-291.97 1088.51,-291.97 1088.51,-291.97 1094.51,-291.97 1100.51,-297.97 1100.51,-303.97 1100.51,-303.97 1100.51,-356 1100.51,-356 1100.51,-362 1094.51,-368 1088.51,-368" />
+      <text xml:space="preserve" text-anchor="middle" x="947.0050048828125" y="-337.26" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">빠른 실패 또는 제한된 backoff</text>
+      <text xml:space="preserve" text-anchor="middle" x="947.0050048828125" y="-311.86" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#9a620a">재시도</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#fbf5ff" stroke="#8b3dff" stroke-width="1.4" d="M562.73,-195.97C562.73,-195.97 417.75,-195.97 417.75,-195.97 411.75,-195.97 405.75,-189.97 405.75,-183.97 405.75,-183.97 405.75,-158 405.75,-158 405.75,-152 411.75,-146 417.75,-146 417.75,-146 562.73,-146 562.73,-146 568.73,-146 574.73,-152 574.73,-158 574.73,-158 574.73,-183.97 574.73,-183.97 574.73,-189.97 568.73,-195.97 562.73,-195.97" />
+      <text xml:space="preserve" text-anchor="middle" x="490.239990234375" y="-166.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">쿼리·커밋 결과</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M995.99,-268.97C995.99,-268.97 898.02,-268.97 898.02,-268.97 892.02,-268.97 886.02,-262.97 886.02,-256.97 886.02,-256.97 886.02,-231 886.02,-231 886.02,-225 892.02,-219 898.02,-219 898.02,-219 995.99,-219 995.99,-219 1001.99,-219 1007.99,-225 1007.99,-231 1007.99,-231 1007.99,-256.97 1007.99,-256.97 1007.99,-262.97 1001.99,-268.97 995.99,-268.97" />
+      <text xml:space="preserve" text-anchor="middle" x="947.0050048828125" y="-239.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">응답 반환</text>
+    </g>
+    <g id="node7" class="node">
+      <path fill="#fff7ed" stroke="#c98a2b" stroke-width="1.4" d="M1074,-195.97C1074,-195.97 820.01,-195.97 820.01,-195.97 814.01,-195.97 808.01,-189.97 808.01,-183.97 808.01,-183.97 808.01,-158 808.01,-158 808.01,-152 814.01,-146 820.01,-146 820.01,-146 1074,-146 1074,-146 1080,-146 1086,-152 1086,-158 1086,-158 1086,-183.97 1086,-183.97 1086,-189.97 1080,-195.97 1074,-195.97" />
+      <text xml:space="preserve" text-anchor="middle" x="947.0050048828125" y="-166.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">새 트랜잭션으로 제한 재시도</text>
+    </g>
+    <g id="node8" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M1080.01,-122.97C1080.01,-122.97 814,-122.97 814,-122.97 808,-122.97 802,-116.97 802,-110.97 802,-110.97 802,-85 802,-85 802,-79 808,-73 814,-73 814,-73 1080.01,-73 1080.01,-73 1086.01,-73 1092.01,-79 1092.01,-85 1092.01,-85 1092.01,-110.97 1092.01,-110.97 1092.01,-116.97 1086.01,-122.97 1080.01,-122.97" />
+      <text xml:space="preserve" text-anchor="middle" x="947.0050048828125" y="-93.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">원인 수정 또는 업무 오류 반환</text>
+    </g>
+    <g id="node9" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M1058.52,-49.97C1058.52,-49.97 835.49,-49.97 835.49,-49.97 829.49,-49.97 823.49,-43.97 823.49,-37.97 823.49,-37.97 823.49,-12 823.49,-12 823.49,-6 829.49,0 835.49,0 835.49,0 1058.52,0 1058.52,0 1064.52,0 1070.52,-6 1070.52,-12 1070.52,-12 1070.52,-37.97 1070.52,-37.97 1070.52,-43.97 1064.52,-49.97 1058.52,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="947.0050048828125" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">멱등키·결과 조회로 확인</text>
+    </g>
+  </g>
+</svg>

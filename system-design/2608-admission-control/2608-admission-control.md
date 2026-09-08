@@ -36,50 +36,7 @@ Admission Control은 인증된 Team·API Key를 기준으로 Provider 요청을 
 | Control Plane | Gateway 역할, API Key 인증, Tier Rate Limit, Balance Control, Admin API, Usage Query, Usage Ingest |
 | Data Plane | Model Provider inference, 성공 뒤 rough debit과 inference record 전달 |
 
-```mermaid
-flowchart TD
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction TD
-    team["Customer Team"] --> admission
-    admin["Admin Console"] --> management
-    subgraph cp["Control Plane: Gateway 겸용"]
-      admission["API Key 인증<br/>Rate Limit · Balance Control"]
-      management["Admin API · Usage Query"]
-      ingest["Record ingest"]
-      worker["Settlement worker"]
-    end
-    subgraph dp["Data Plane"]
-      inference["Provider inference 호출"]
-      postflight["성공 후 rough debit · record 전달"]
-    end
-    redis["Redis<br/>Rate Limit · Account Balance Cache"]
-    mq["Durable MQ: Inference Record"]
-    db["PostgreSQL<br/>Account · Record · Charge · Ledger"]
-    provider["Model Provider"]
-    admission -->|"판정 상태 조회·갱신"| redis
-    admission -->|"허용"| inference
-    inference --> provider
-    provider -->|"성공 결과"| postflight
-    postflight -->|"rough debit"| redis
-    postflight -.->|"record 발행"| mq
-    mq -.-> ingest
-    ingest -->|"PENDING 저장"| db
-    worker -->|"정산 transaction"| db
-    worker -->|"정산 후 cache 교체"| redis
-    management --> db
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class team,admin,management,ingest,inference,postflight,mq,provider app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class redis,db db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  class admission policy
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class worker worker
-```
+![Gateway를 겸하는 Control Plane과 Data Plane](assets/2608-admission-control-two-tier.svg)
 
 | 흐름 | 의미 |
 | --- | --- |
@@ -97,72 +54,24 @@ flowchart TD
 | Control Plane | Admin API, Rate Limit Policy, Usage Query, Record ingest, Account 상태 |
 | Admin Console | Gateway가 아닌 Control Plane 직접 호출 |
 
-```mermaid
-flowchart TD
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction TD
-    team["Customer Team"] --> gateway["Gateway: 인증 · Rate Limit · Balance Control"]
-    gateway -->|"허용"| dp["Data Plane: inference · postflight"]
-    dp --> provider["Model Provider"]
-    provider -->|"성공 결과"| dp
-    redis["Redis: GCRA · Account Balance Cache"]
-    gateway -->|"admission 상태"| redis
-    dp -->|"rough debit"| redis
-    dp -.->|"Inference Record"| mq["Durable MQ"]
-    admin["Admin Console"] --> api
-    subgraph cp["Control Plane"]
-      api["Admin API · Policy · Usage Query"]
-      ingest["Record ingest"]
-      worker["Settlement worker"]
-    end
-    db["PostgreSQL: 정책 · Account · Record · Ledger"]
-    mq -.-> ingest
-    ingest -->|"PENDING 저장"| db
-    worker -->|"exact settlement"| db
-    worker -->|"정산 후 cache 교체"| redis
-    api --> db
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class team,dp,provider,mq,admin,ingest app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class redis,db db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  class gateway,api policy
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class worker worker
-```
+![Gateway·Control Plane·Data Plane 분리](assets/2608-admission-control-three-tier.svg)
 
 분석 저장소는 아래의 확장 경로로 분리한다. 각 소비 경로는 독립적인 구독을 사용한다.
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    mq["Durable MQ: Inference Record"]
-    writer["Analytics Writer"]
-    archive["Archive Writer"]
-    olap["OLAP: ClickHouse 후보"]
-    s3["S3: Parquet 원본 보관"]
-    query["Control Plane: Usage Query"]
-    mq -.-> writer
-    mq -.-> archive
-    writer --> olap
-    archive --> s3
-    query --> olap
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class mq,writer,archive app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class olap,s3 db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  class query policy
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_mq["Durable MQ:<br/>Inference Record"]
+  n_writer["Analytics Writer"]
+  n_archive["Archive Writer"]
+  n_olap["OLAP: ClickHouse 후보"]
+  n_s3["S3: Parquet 원본 보관"]
+  n_query["Control Plane: Usage Query"]
+  n_mq -.-> n_writer
+  n_mq -.-> n_archive
+  n_writer --> n_olap
+  n_archive --> n_s3
+  n_query --> n_olap
 ```
 
 | 저장소·처리 | 장기 역할 |

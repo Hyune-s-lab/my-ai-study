@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="691.0" height="630.0" viewBox="0.00 0.00 691.00 630.00" role="img" aria-labelledby="title description">
+  <title id="title">메시지 재시도와 DLQ·DLT 보관</title>
+  <desc id="description">메시지 재시도와 DLQ·DLT 보관。Broker; 메시지 처리; 성공?; ACK 또는 offset commit; 재시도 한도 초과?; backoff + jitter; DLQ / Kafka DLT에 보관</desc>
+  <rect width="691.0" height="630.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 609.97)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-609.97 670.67,-609.97 670.67,20.16 -20.16,20.16" />
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M462.5,-539.24C462.5,-539.24 462.5,-492.18 462.5,-492.18" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="465.12,-492.18 462.5,-484.68 459.87,-492.18 465.12,-492.18" />
+    </g>
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M410.26,-431.3C410.26,-399.4 410.26,-349 410.26,-349 410.26,-349 387.24,-349 387.24,-349" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="387.24,-346.38 379.74,-349 387.24,-351.63 387.24,-346.38" />
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M285.3,-349C211.38,-349 74.75,-349 74.75,-349 74.75,-349 74.75,-60.33 74.75,-60.33" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="77.38,-60.33 74.75,-52.83 72.13,-60.33 77.38,-60.33" />
+      <text xml:space="preserve" text-anchor="middle" x="90.24" y="-179.05" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">예</text>
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M331.5,-323.3C331.5,-323.3 331.5,-276.24 331.5,-276.24" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="334.12,-276.24 331.5,-268.74 328.87,-276.24 334.12,-276.24" />
+      <text xml:space="preserve" text-anchor="middle" x="359.97" y="-286.80" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">아니요</text>
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M422.75,-215.34C422.75,-183.43 422.75,-133 422.75,-133 422.75,-133 429.9,-133 429.9,-133" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="429.9,-135.63 437.4,-133 429.9,-130.38 429.9,-135.63" />
+      <text xml:space="preserve" text-anchor="middle" x="451.22" y="-178.84" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">아니요</text>
+    </g>
+    <g id="edge7" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M326.23,-215.33C326.23,-215.33 326.23,-168.28 326.23,-168.28" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="328.86,-168.28 326.23,-160.78 323.61,-168.28 328.86,-168.28" />
+      <text xml:space="preserve" text-anchor="middle" x="310.74" y="-178.83" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">예</text>
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M486.48,-158.37C486.48,-158.37 486.48,-421.64 486.48,-421.64" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="483.86,-421.64 486.48,-429.14 489.11,-421.64 483.86,-421.64" />
+    </g>
+    <g id="edge8" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M209.25,-107.37C209.25,-107.37 209.25,-60.31 209.25,-60.31" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="211.87,-60.31 209.25,-52.81 206.62,-60.31 211.87,-60.31" />
+      <text xml:space="preserve" text-anchor="middle" x="245.87" y="-73.72" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">보관 성공</text>
+    </g>
+    <g id="node1" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M506.51,-589.81C506.51,-589.81 418.48,-589.81 418.48,-589.81 412.48,-589.81 406.48,-583.81 406.48,-577.81 406.48,-577.81 406.48,-551.84 406.48,-551.84 406.48,-545.84 412.48,-539.84 418.48,-539.84 418.48,-539.84 506.51,-539.84 506.51,-539.84 512.51,-539.84 518.51,-545.84 518.51,-551.84 518.51,-551.84 518.51,-577.81 518.51,-577.81 518.51,-583.81 512.51,-589.81 506.51,-589.81" />
+      <text xml:space="preserve" text-anchor="middle" x="462.49501037597656" y="-559.97" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Broker</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M520.48,-481.84C520.48,-481.84 404.51,-481.84 404.51,-481.84 398.51,-481.84 392.51,-475.84 392.51,-469.84 392.51,-469.84 392.51,-443.87 392.51,-443.87 392.51,-437.87 398.51,-431.87 404.51,-431.87 404.51,-431.87 520.48,-431.87 520.48,-431.87 526.48,-431.87 532.48,-437.87 532.48,-443.87 532.48,-443.87 532.48,-469.84 532.48,-469.84 532.48,-475.84 526.48,-481.84 520.48,-481.84" />
+      <text xml:space="preserve" text-anchor="middle" x="462.4949951171875" y="-452.01" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">메시지 처리</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M365,-373.87C365,-373.87 297.99,-373.87 297.99,-373.87 291.99,-373.87 285.99,-367.87 285.99,-361.87 285.99,-361.87 285.99,-335.9 285.99,-335.9 285.99,-329.9 291.99,-323.9 297.99,-323.9 297.99,-323.9 365,-323.9 365,-323.9 371,-323.9 377,-329.9 377,-335.9 377,-335.9 377,-361.87 377,-361.87 377,-367.87 371,-373.87 365,-373.87" />
+      <text xml:space="preserve" text-anchor="middle" x="331.4949951171875" y="-344.04" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">성공?</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M256.99,-49.97C256.99,-49.97 12,-49.97 12,-49.97 6,-49.97 0,-43.97 0,-37.97 0,-37.97 0,-12 0,-12 0,-6 6,0 12,0 12,0 256.99,0 256.99,0 262.99,0 268.99,-6 268.99,-12 268.99,-12 268.99,-37.97 268.99,-37.97 268.99,-43.97 262.99,-49.97 256.99,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="134.4949951171875" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">ACK 또는 offset commit</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M416.01,-265.9C416.01,-265.9 246.98,-265.9 246.98,-265.9 240.98,-265.9 234.98,-259.9 234.98,-253.9 234.98,-253.9 234.98,-227.94 234.98,-227.94 234.98,-221.94 240.98,-215.94 246.98,-215.94 246.98,-215.94 416.01,-215.94 416.01,-215.94 422.01,-215.94 428.01,-221.94 428.01,-227.94 428.01,-227.94 428.01,-253.9 428.01,-253.9 428.01,-259.9 422.01,-265.9 416.01,-265.9" />
+      <text xml:space="preserve" text-anchor="middle" x="331.49500274658203" y="-236.07" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">재시도 한도 초과?</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#FFF7ED" stroke="#C98A2B" stroke-width="1.4" d="M638.51,-157.94C638.51,-157.94 452.48,-157.94 452.48,-157.94 446.48,-157.94 440.48,-151.94 440.48,-145.94 440.48,-145.94 440.48,-119.97 440.48,-119.97 440.48,-113.97 446.48,-107.97 452.48,-107.97 452.48,-107.97 638.51,-107.97 638.51,-107.97 644.51,-107.97 650.51,-113.97 650.51,-119.97 650.51,-119.97 650.51,-145.94 650.51,-145.94 650.51,-151.94 644.51,-157.94 638.51,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="545.4950103759766" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">backoff + jitter</text>
+    </g>
+    <g id="node7" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M405.49,-157.94C405.49,-157.94 161.5,-157.94 161.5,-157.94 155.5,-157.94 149.5,-151.94 149.5,-145.94 149.5,-145.94 149.5,-119.97 149.5,-119.97 149.5,-113.97 155.5,-107.97 161.5,-107.97 161.5,-107.97 405.49,-107.97 405.49,-107.97 411.49,-107.97 417.49,-113.97 417.49,-119.97 417.49,-119.97 417.49,-145.94 417.49,-145.94 417.49,-151.94 411.49,-157.94 405.49,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="283.4949951171875" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">DLQ / Kafka DLT에 보관</text>
+    </g>
+  </g>
+</svg>

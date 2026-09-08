@@ -4,28 +4,18 @@
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    q["쿼리: WHERE filing_id = 35"]
-    subgraph idx["B-tree 인덱스 (정렬된 구조)"]
-      root["Root<br/>[ 40 ]"]
-      l["< 40<br/>[10 · 25 · 35]"]
-      r["≥ 40<br/>[40 · 60 · 90]"]
-      root --> l
-      root --> r
-    end
-    pg["Heap (실제 행 데이터)"]
-    q --> root
-    l --> pg
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_q["쿼리: WHERE filing_id = 35"]
+  n_pg["Heap (실제 행 데이터)"]
+  subgraph g_idx["B-tree 인덱스 (정렬된 구조)"]
+    n_root["Root<br/>[ 40 ]"]
+    n_l["&lt; 40<br/>[10 · 25 · 35]"]
+    n_r["≥ 40<br/>[40 · 60 · 90]"]
   end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class q,root,l,r,pg app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  n_root --> n_l
+  n_root --> n_r
+  n_q --> n_root
+  n_l --> n_pg
 ```
 
 ## 자료구조별 (PostgreSQL)

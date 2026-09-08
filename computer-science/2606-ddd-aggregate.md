@@ -1,38 +1,8 @@
-# DDD 애그리거트(Aggregate)
+# DDD Aggregate(애그리거트)
 
 DDD 전술 패턴의 핵심. **"함께 변경되어야 하고, 함께 일관성을 지켜야 하는 객체들의 묶음"** = 애그리거트. 그 묶음의 **일관성 경계(consistency boundary)** 이자 **트랜잭션 단위**다.
 
-```mermaid
-flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FBF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1", "titleColor": "#16213E", "nodeTextColor": "#16213E", "labelColor": "#16213E"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    subgraph ord["Order 애그리거트"]
-      ord_r["Order (root)"]
-      ord_s["shipping_address (VO)"]
-      ord_v["total_amount (VO)"]
-      ord_r --> ord_s
-      ord_r --> ord_v
-    end
-    subgraph pay["Payment 애그리거트"]
-      pay_r["Payment (root)"]
-      pay_p["payment_snapshot (VO)"]
-      pay_r --> pay_p
-    end
-    subgraph shp["Shipping 애그리거트"]
-      shp_r["Shipping (root)"]
-    end
-    pay_r -->|"order_id 참조"| ord_r
-    shp_r -->|"order_id 참조"| ord_r
-  end
-  style canvas fill:#FFFFFF,stroke:#FFFFFF,stroke-width:0px,color:#16213E
-  style ord fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#16213E
-  style pay fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#16213E
-  style shp fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1px,color:#16213E
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px,color:#16213E
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1.4px,color:#16213E
-  class ord_r,ord_s,ord_v,pay_r,pay_p,shp_r app
-```
+![Payment와 Shipping은 order_id로 Order 루트를 참조하고, 각 루트는 자기 애그리거트의 값 객체를 관리한다.](assets/2606-ddd-aggregate.svg)
 
 ## 구성 요소
 - **Entity**: **식별자(ID)** 로 구분, 수명주기 있고 가변. (예: `Order`)

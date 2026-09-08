@@ -27,35 +27,7 @@ preflight는 Redis만 읽는다. Provider 성공 뒤에는 같은 `inference_id`
 Gateway가 Redis Account Balance Cache를 rough debit한다.
 consumer는 Inference Record만 `PENDING`으로 저장하며 Kafka 재전달로 rough debit을 다시 실행하지 않는다.
 
-```mermaid
-flowchart TD
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction TD
-    client["Client"] --> rate["Phase 1: Rate Limit"]
-    rate --> balance["Phase 2: Account Balance Cache 조회"]
-    balance --> decision{"balance가 0 미만?"}
-    decision -->|"예"| denied["402: 잔액 소진"]
-    decision -->|"아니요"| provider["Model Provider inference"]
-    provider -->|"성공"| rough["Postflight: rough debit"]
-    rough --> redis["Redis: Account Balance Cache"]
-    rough -.->|"Inference Record"| mq["Durable MQ"]
-    mq -.-> ingest["Record consumer"]
-    ingest -->|"PENDING 저장"| db["PostgreSQL"]
-    worker["Settlement worker"] -->|"claim·exact settlement"| db
-    worker -->|"DB commit 후 cache 교체"| redis
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class client,balance,decision,denied,provider,rough,mq,ingest app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class redis,db db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  class rate policy
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class worker worker
-```
+![잔액 판정·rough debit·정산 흐름](assets/2608-p2-balance-control-balance-flow.svg)
 
 Provider 호출마다 PostgreSQL을 읽고 갱신하는 설계는 선택하지 않는다.
 유량이 낮아도 retry·burst·동시 요청이 Account row를 hot path로 만들기 때문이다.
@@ -92,24 +64,18 @@ Hash로 묶어도 field cardinality와 한 Team의 hot slot 문제는 남으므�
 관계선의 `1 : 0..N`은 일대다, `1 : 0..1`은 선택적 일대일 관계다.
 
 ```mermaid
-flowchart TB
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction TB
-    TEAM["TEAM"] -->|"1 : 1 소유"| ACCOUNT["ACCOUNT"]
-    TEAM -->|"1 : 0..N 호출"| INFERENCE_RECORD["INFERENCE_RECORD"]
-    ACCOUNT -->|"1 : 0..N 과금"| USAGE_CHARGE["USAGE_CHARGE"]
-    ACCOUNT -->|"1 : 0..N 잔액 변동"| ACCOUNT_LEDGER_ENTRY["ACCOUNT_LEDGER_ENTRY"]
-    INFERENCE_RECORD -->|"1 : 0..1 정산"| USAGE_CHARGE
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class TEAM,ACCOUNT app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class INFERENCE_RECORD,USAGE_CHARGE,ACCOUNT_LEDGER_ENTRY db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+flowchart LR
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_TEAM["TEAM"]
+  n_ACCOUNT["ACCOUNT"]
+  n_INFERENCE_RECORD["INFERENCE_RECORD"]
+  n_USAGE_CHARGE["USAGE_CHARGE"]
+  n_ACCOUNT_LEDGER_ENTRY["ACCOUNT_LEDGER_ENTRY"]
+  n_TEAM -->|"1 : 1 소유"| n_ACCOUNT
+  n_TEAM -->|"1 : 0..N 호출"| n_INFERENCE_RECORD
+  n_ACCOUNT -->|"1 : 0..N 과금"| n_USAGE_CHARGE
+  n_ACCOUNT -->|"1 : 0..N 잔액 변동"| n_ACCOUNT_LEDGER_ENTRY
+  n_INFERENCE_RECORD -->|"1 : 0..1 정산"| n_USAGE_CHARGE
 ```
 
 **ACCOUNT**
@@ -309,7 +275,7 @@ Usage Charge의 amount와 pricing snapshot은 재가격 계산 없이 보존한�
 
 ## 8. 검증 항목
 
-- 모든 Mermaid block을 렌더한다.
+- SVG와 Mermaid를 모두 렌더하고, 문서 폭에서 글자·분기·연결선의 가독성을 확인한다.
 - Postflight의 broker ack 전 crash, broker ack 뒤 rough debit 전 crash, rough debit 뒤 응답 전 crash를 주입한다.
 - 동일 ID·동일 hash와 동일 ID·다른 hash를 각각 재전달한다.
 - 정산 뒤 Account Balance Cache가 정산된 Account Balance 값으로 교체되는지 확인한다.

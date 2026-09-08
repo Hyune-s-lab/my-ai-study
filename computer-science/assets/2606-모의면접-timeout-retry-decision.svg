@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="614.0" height="522.0" viewBox="0.00 0.00 614.00 522.00" role="img" aria-labelledby="title description">
+  <title id="title">오류·멱등성·deadline을 확인하는 재시도 판단</title>
+  <desc id="description">오류·멱등성·deadline을 확인하는 재시도 판단。요청 시도; 결과; 응답 반환; 재시도 가능한 오류·멱등 작업?; 오류 반환 또는 결과 조회; 횟수와 deadline 여유?; backoff + jitter</desc>
+  <rect width="614.0" height="522.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 502)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-502 594.16,-502 594.16,20.16 -20.16,20.16" />
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M331.39,-457C311.04,-457 293.49,-457 293.49,-457 293.49,-457 293.49,-384.43 293.49,-384.43" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="296.12,-384.43 293.49,-376.93 290.87,-384.43 296.12,-384.43" />
+    </g>
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M254.49,-349C187.52,-349 60.98,-349 60.98,-349 60.98,-349 60.98,-276.46 60.98,-276.46" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="63.61,-276.46 60.98,-268.96 58.36,-276.46 63.61,-276.46" />
+      <text xml:space="preserve" text-anchor="middle" x="82.96" y="-290.01" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">성공</text>
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M294.98,-323.3C294.98,-323.3 294.98,-276.24 294.98,-276.24" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="297.61,-276.24 294.98,-268.74 292.36,-276.24 297.61,-276.24" />
+      <text xml:space="preserve" text-anchor="middle" x="316.96" y="-286.80" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">실패</text>
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M177.72,-215.3C177.72,-215.3 177.72,-60.49 177.72,-60.49" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="180.35,-60.49 177.72,-52.99 175.1,-60.49 180.35,-60.49" />
+      <text xml:space="preserve" text-anchor="middle" x="149.25" y="-130.80" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">아니요</text>
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M327.74,-215.33C327.74,-215.33 327.74,-168.28 327.74,-168.28" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="330.36,-168.28 327.74,-160.78 325.11,-168.28 330.36,-168.28" />
+      <text xml:space="preserve" text-anchor="middle" x="312.25" y="-178.83" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">예</text>
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M253.22,-107.37C253.22,-107.37 253.22,-60.31 253.22,-60.31" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="255.85,-60.31 253.22,-52.81 250.6,-60.31 255.85,-60.31" />
+      <text xml:space="preserve" text-anchor="middle" x="275.20" y="-70.87" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">없음</text>
+    </g>
+    <g id="edge7" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M409.73,-107.37C409.73,-107.37 409.73,-60.31 409.73,-60.31" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="412.36,-60.31 409.73,-52.81 407.11,-60.31 412.36,-60.31" />
+      <text xml:space="preserve" text-anchor="middle" x="382.73" y="-73.72" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">있음</text>
+    </g>
+    <g id="edge8" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M514.74,-50.4C514.74,-143 514.74,-457 514.74,-457 514.74,-457 464.5,-457 464.5,-457" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="464.5,-454.38 457,-457 464.5,-459.63 464.5,-454.38" />
+    </g>
+    <g id="node1" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M441.97,-481.84C441.97,-481.84 344,-481.84 344,-481.84 338,-481.84 332,-475.84 332,-469.84 332,-469.84 332,-443.87 332,-443.87 332,-437.87 338,-431.87 344,-431.87 344,-431.87 441.97,-431.87 441.97,-431.87 447.97,-431.87 453.97,-437.87 453.97,-443.87 453.97,-443.87 453.97,-469.84 453.97,-469.84 453.97,-475.84 447.97,-481.84 441.97,-481.84" />
+      <text xml:space="preserve" text-anchor="middle" x="392.98500061035156" y="-452.01" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">요청 시도</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#fbf5ff" stroke="#8b3dff" stroke-width="1.4" d="M322.98,-373.87C322.98,-373.87 266.99,-373.87 266.99,-373.87 260.99,-373.87 254.99,-367.87 254.99,-361.87 254.99,-361.87 254.99,-335.9 254.99,-335.9 254.99,-329.9 260.99,-323.9 266.99,-323.9 266.99,-323.9 322.98,-323.9 322.98,-323.9 328.98,-323.9 334.98,-329.9 334.98,-335.9 334.98,-335.9 334.98,-361.87 334.98,-361.87 334.98,-367.87 328.98,-373.87 322.98,-373.87" />
+      <text xml:space="preserve" text-anchor="middle" x="294.9850082397461" y="-344.04" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">결과</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M109.97,-265.9C109.97,-265.9 12,-265.9 12,-265.9 6,-265.9 0,-259.9 0,-253.9 0,-253.9 0,-227.94 0,-227.94 0,-221.94 6,-215.94 12,-215.94 12,-215.94 109.97,-215.94 109.97,-215.94 115.97,-215.94 121.97,-221.94 121.97,-227.94 121.97,-227.94 121.97,-253.9 121.97,-253.9 121.97,-259.9 115.97,-265.9 109.97,-265.9" />
+      <text xml:space="preserve" text-anchor="middle" x="60.98500061035156" y="-236.07" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">응답 반환</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#fbf5ff" stroke="#8b3dff" stroke-width="1.4" d="M433,-265.9C433,-265.9 156.97,-265.9 156.97,-265.9 150.97,-265.9 144.97,-259.9 144.97,-253.9 144.97,-253.9 144.97,-227.94 144.97,-227.94 144.97,-221.94 150.97,-215.94 156.97,-215.94 156.97,-215.94 433,-215.94 433,-215.94 439,-215.94 445,-221.94 445,-227.94 445,-227.94 445,-253.9 445,-253.9 445,-259.9 439,-265.9 433,-265.9" />
+      <text xml:space="preserve" text-anchor="middle" x="294.98500061035156" y="-236.07" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">재시도 가능한 오류·멱등 작업?</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M283.97,-49.97C283.97,-49.97 60,-49.97 60,-49.97 54,-49.97 48,-43.97 48,-37.97 48,-37.97 48,-12 48,-12 48,-6 54,0 60,0 60,0 283.97,0 283.97,0 289.97,0 295.97,-6 295.97,-12 295.97,-12 295.97,-37.97 295.97,-37.97 295.97,-43.97 289.97,-49.97 283.97,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="171.98500061035156" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">오류 반환 또는 결과 조회</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#fbf5ff" stroke="#8b3dff" stroke-width="1.4" d="M443.49,-157.94C443.49,-157.94 222.48,-157.94 222.48,-157.94 216.48,-157.94 210.48,-151.94 210.48,-145.94 210.48,-145.94 210.48,-119.97 210.48,-119.97 210.48,-113.97 216.48,-107.97 222.48,-107.97 222.48,-107.97 443.49,-107.97 443.49,-107.97 449.49,-107.97 455.49,-113.97 455.49,-119.97 455.49,-119.97 455.49,-145.94 455.49,-145.94 455.49,-151.94 449.49,-157.94 443.49,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="332.98499298095703" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">횟수와 deadline 여유?</text>
+    </g>
+    <g id="node7" class="node">
+      <path fill="#fff7ed" stroke="#c98a2b" stroke-width="1.4" d="M562,-49.97C562,-49.97 375.97,-49.97 375.97,-49.97 369.97,-49.97 363.97,-43.97 363.97,-37.97 363.97,-37.97 363.97,-12 363.97,-12 363.97,-6 369.97,0 375.97,0 375.97,0 562,0 562,0 568,0 574,-6 574,-12 574,-12 574,-37.97 574,-37.97 574,-43.97 568,-49.97 562,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="468.98500061035156" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">backoff + jitter</text>
+    </g>
+  </g>
+</svg>

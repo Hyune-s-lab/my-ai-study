@@ -20,41 +20,26 @@ Spring Batch는 대량 데이터를 안전하게 처리하기 위한 프레임�
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    validate["Step 1: 영업일 검증"] --> settlement["Step 2: 정산 생성"]
-    settlement --> report["Step 3: 보고서 발행"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class validate,report app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class settlement worker
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_validate["Step 1: 영업일 검증"]
+  n_settlement["Step 2: 정산 생성"]
+  n_report["Step 3: 보고서 발행"]
+  n_validate --> n_settlement
+  n_settlement --> n_report
 ```
 
 위 Job은 세 Step을 순차 실행한다. 정산 Step은 아래 chunk 경계를 반복한다.
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    reader["Reader: 항목 읽기"] --> processor["Processor: 정산 행 변환"]
-    processor --> writer["Writer: chunk 저장"]
-    writer --> commit["chunk transaction commit"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class reader,writer,commit app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class processor worker
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_reader["Reader:<br/>항목 읽기"]
+  n_processor["Processor:<br/>정산 행 변환"]
+  n_writer["Writer:<br/>chunk 저장"]
+  n_commit["chunk transaction<br/>commit"]
+  n_reader --> n_processor
+  n_processor --> n_writer
+  n_writer --> n_commit
 ```
 
 `chunkSize=500`이면 최대 500개 입력을 한 chunk로 처리한다. 필터링·skip·마지막 chunk에 따라 출력 수는 달라진다.  
@@ -62,21 +47,16 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    instance["JobInstance: Job + 식별 파라미터"] --> execution["JobExecution: 실행 시도"]
-    execution --> step["StepExecution: Step 실행"]
-    execution --> jobContext["Job ExecutionContext"]
-    step --> stepContext["Step ExecutionContext: 체크포인트"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class instance,execution,step,jobContext,stepContext app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_instance["JobInstance:<br/>Job + 식별 파라미터"]
+  n_execution["JobExecution: 실행 시도"]
+  n_step["StepExecution: Step 실행"]
+  n_jobContext["Job ExecutionContext"]
+  n_stepContext["Step ExecutionContext:<br/>체크포인트"]
+  n_instance --> n_execution
+  n_execution --> n_step
+  n_execution --> n_jobContext
+  n_step --> n_stepContext
 ```
 
 - **Job** = 실제 처리 코드가 아니라 여러 Step의 **실행 흐름**. 순차 실행이 기본이고 `ExitStatus`로 조건 분기.
@@ -286,26 +266,23 @@ where job_execution_id = :jobExecutionId;
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    mt["다중 스레드 Step: 단일 JVM"] --> threads["여러 chunk worker"]
-    threads --> shared["공유 Reader·Writer의 동시성 확인"]
-    part["Partitioning manager"] --> w1["Worker 1: id 1~50000"]
-    part --> w2["Worker 2: id 50001~100000"]
-    remote["Remote Chunking manager: read"] -.-> mq["Message Channel"]
-    mq -.-> workers["외부 worker: process·write"]
-    workers -.->|"처리 결과"| remote
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class mt,shared,remote,mq app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class part db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class threads,w1,w2,workers worker
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_mt["다중 스레드 Step: 단일 JVM"]
+  n_threads["여러 chunk worker"]
+  n_shared["공유 Reader·Writer의 동시성 확인"]
+  n_part["Partitioning manager"]
+  n_w1["Worker 1: id 1~50000"]
+  n_w2["Worker 2: id 50001~100000"]
+  n_remote["Remote Chunking manager: read"]
+  n_mq["Message Channel"]
+  n_workers["외부 worker: process·write"]
+  n_mt --> n_threads
+  n_threads --> n_shared
+  n_part --> n_w1
+  n_part --> n_w2
+  n_remote -.-> n_mq
+  n_mq -.-> n_workers
+  n_workers -.->|"처리 결과"| n_remote
 ```
 
 ### 비교표

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="470" viewBox="0 0 1080 470" role="img" aria-labelledby="title description">
+  <title id="title">HTTP 버전별 요청 처리와 스트림</title>
+  <desc id="description">HTTP 버전별 요청 처리와 스트림。색은 처리와 저장소의 역할을 구분하며, 선은 명시된 관계만 나타낸다.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 4 L0 8Z" fill="#3B5BA5" />
+    </marker>
+  </defs>
+  <rect width="1080" height="470" fill="#FFFFFF" />
+  <rect x="24" y="24" width="324" height="422" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2" />
+  <text x="44" y="56" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#16213E" text-anchor="start">HTTP/1.1</text>
+  <rect x="378" y="24" width="324" height="422" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2" />
+  <text x="398" y="56" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#16213E" text-anchor="start">HTTP/2</text>
+  <rect x="732" y="24" width="324" height="422" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2" />
+  <text x="752" y="56" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#16213E" text-anchor="start">HTTP/3</text>
+  <text x="186" y="85" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#31559F" text-anchor="middle">한 연결의 응답 순서</text>
+  <g class="node">
+    <rect x="46" y="114" width="280" height="60" rx="7" fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" />
+    <text x="186" y="150.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">요청 A</text>
+  </g>
+  <g class="node">
+    <rect x="46" y="224" width="280" height="70" rx="7" fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" />
+    <text x="186" y="253.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">요청 B</text>
+    <text x="186" y="277.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#31559F" text-anchor="middle">A 완료까지 대기</text>
+  </g>
+  <g class="node">
+    <rect x="46" y="344" width="280" height="70" rx="7" fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" />
+    <text x="186" y="373.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">요청 C</text>
+    <text x="186" y="397.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#31559F" text-anchor="middle">B 완료까지 대기</text>
+  </g>
+  <path d="M186 174 V224" fill="none" stroke="#3B5BA5" stroke-width="1.6" stroke-linejoin="round" marker-end="url(#arrow)" />
+  <path d="M186 294 V344" fill="none" stroke="#3B5BA5" stroke-width="1.6" stroke-linejoin="round" marker-end="url(#arrow)" />
+  <g class="node">
+    <rect x="400" y="114" width="280" height="60" rx="7" fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" />
+    <text x="540" y="150.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">요청 A</text>
+  </g>
+  <g class="node">
+    <rect x="400" y="196" width="280" height="60" rx="7" fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" />
+    <text x="540" y="232.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">요청 B</text>
+  </g>
+  <g class="node">
+    <rect x="400" y="278" width="280" height="60" rx="7" fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" />
+    <text x="540" y="314.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">요청 C</text>
+  </g>
+  <text x="540" y="380" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#9A620A" text-anchor="middle">TCP 패킷 손실 시</text>
+  <text x="540" y="405" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#9A620A" text-anchor="middle">전체 스트림 대기</text>
+  <g class="node">
+    <rect x="754" y="114" width="280" height="70" rx="7" fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" />
+    <text x="894" y="143.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">요청 A</text>
+    <text x="894" y="167.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#31559F" text-anchor="middle">독립 스트림</text>
+  </g>
+  <g class="node">
+    <rect x="754" y="224" width="280" height="70" rx="7" fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" />
+    <text x="894" y="253.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">요청 B</text>
+    <text x="894" y="277.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#31559F" text-anchor="middle">독립 스트림</text>
+  </g>
+  <g class="node">
+    <rect x="754" y="344" width="280" height="70" rx="7" fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" />
+    <text x="894" y="373.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">요청 C</text>
+    <text x="894" y="397.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#31559F" text-anchor="middle">독립 스트림</text>
+  </g>
+</svg>

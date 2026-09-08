@@ -93,25 +93,22 @@
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    st["Stampede: 인기 키 만료"] --> stDb["동일 키 DB 조회 폭주"]
-    stDb --> stFix["단일 재생성 · logical expiry"]
-    pt["Penetration: 없는 키 요청"] --> ptDb["DB까지 매번 MISS"]
-    ptDb --> ptFix["null 캐시 · Bloom filter"]
-    av["Avalanche: 다수 키 동시 만료"] --> avDb["여러 키 DB 조회 폭주"]
-    avDb --> avFix["TTL jitter · 부하 제한"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class st,stDb,stFix,pt,ptDb,av,avDb app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class ptFix db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class avFix worker
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_st["Stampede: 인기 키 만료"]
+  n_stDb["동일 키 DB 조회 폭주"]
+  n_stFix["단일 재생성 · logical expiry"]
+  n_pt["Penetration: 없는 키 요청"]
+  n_ptDb["DB까지 매번 MISS"]
+  n_ptFix["null 캐시 · Bloom filter"]
+  n_av["Avalanche: 다수 키 동시 만료"]
+  n_avDb["여러 키 DB 조회 폭주"]
+  n_avFix["TTL jitter · 부하 제한"]
+  n_st --> n_stDb
+  n_stDb --> n_stFix
+  n_pt --> n_ptDb
+  n_ptDb --> n_ptFix
+  n_av --> n_avDb
+  n_avDb --> n_avFix
 ```
 
 ### Q6. TTL 만료와 메모리 축출(eviction)은 어떻게 동작하나요?
@@ -164,23 +161,8 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    memory["Redis 메모리"] --> snapshot["RDB: 시점 스냅샷"]
-    snapshot --> rdb["스냅샷 파일로 복구"]
-    write["Redis 쓰기 명령"] --> log["AOF: 로그 기록·fsync"]
-    log --> aof["AOF로 상태 복원"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class snapshot,log,aof app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class memory,write db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class rdb worker
+  command["Redis 쓰기 명령"] --> aof["AOF: 로그 기록·fsync"] --> replay["AOF로 상태 복원"]
+  memory["Redis 메모리"] --> rdb["RDB: 시점 스냅샷"] --> restore["스냅샷 파일로 복구"]
 ```
 
 ### Q8. Sentinel과 Cluster의 차이는? 언제 뭘 쓰나요?
@@ -201,39 +183,7 @@ flowchart LR
 
 > **Sentinel vs Cluster 구조** — HA 장애 감지 vs 샤딩 수평 확장.
 
-```mermaid
-flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    subgraph sentinel["Sentinel: 한 데이터셋의 HA"]
-      monitor["Sentinel quorum"]
-      master["Primary: 전체 데이터"]
-      replica["Replica: 전체 데이터"]
-      monitor -->|"감시"| master
-      monitor -->|"감시·승격"| replica
-      master -.->|"복제"| replica
-    end
-    subgraph cluster["Cluster: 슬롯 분산과 HA"]
-      a["Primary A: 슬롯 일부"]
-      b["Primary B: 슬롯 일부"]
-      c["Primary C: 슬롯 일부"]
-      ar["Replica A"]
-      br["Replica B"]
-      cr["Replica C"]
-      a -.-> ar
-      b -.-> br
-      c -.-> cr
-    end
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class monitor,master,replica,a,b,c,ar,br,cr app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-```
+![Redis Sentinel과 Cluster 비교](assets/2606-모의면접-redis-sentinel-cluster.svg)
 
 ### Q9. Redis 분산락을 구현해보세요. 주의점은?
 
@@ -261,22 +211,17 @@ SET lock:order:123 {uuid} NX PX 5000
 
 ```mermaid
 sequenceDiagram
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
-  box rgb(255, 255, 255)
-    participant A as Client A
-    participant R as Redis
-    participant B as Client B
-  end
-  rect rgb(255, 255, 255)
-    A->>R: SET lock tokenA NX PX 5000
-    R-->>A: OK
-    B->>R: SET lock tokenB NX PX 5000
-    R-->>B: 획득 실패
-    A->>A: 임계구역 수행
-    A->>R: Lua에서 tokenA 비교 후 일치하면 DEL
-    R-->>A: 해제 결과
-    Note over A,B: TTL을 넘기면 락 중복 소유 가능. 저장소 fencing 등 별도 보호 필요
-  end
+  participant A as Client A
+  participant R as Redis
+  participant B as Client B
+  A->>R: SET lock tokenA NX PX 5000
+  R-->>A: OK
+  B->>R: SET lock tokenB NX PX 5000
+  R-->>B: 획득 실패
+  A->>A: 임계구역 수행
+  A->>R: Lua에서 tokenA 비교 후 일치하면 DEL
+  R-->>A: 해제 결과
+  Note over A,B: TTL을 넘기면 락 중복 소유 가능. 저장소 fencing 등 별도 보호 필요
 ```
 
 ### Q10. Redis 트랜잭션(MULTI/EXEC)은 RDB 트랜잭션과 어떻게 다른가요?

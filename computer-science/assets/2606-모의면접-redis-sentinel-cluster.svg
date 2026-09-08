@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="940.0" height="524.0" viewBox="0.00 0.00 940.00 524.00" role="img" aria-labelledby="title description">
+  <title id="title">Redis Sentinel과 Cluster 비교</title>
+  <desc id="description">Redis Sentinel과 Cluster 비교。Sentinel quorum; Primary: 전체 데이터; Replica: 전체 데이터; Primary A: 슬롯 일부; Primary B: 슬롯 일부; Primary C: 슬롯 일부; Replica A; Replica B; Replica C</desc>
+  <rect width="940.0" height="524.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 504.16)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-504.16 920.22,-504.16 920.22,20.16 -20.16,20.16" />
+    <g id="clust1" class="cluster">
+      <path fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" d="M35.52,-8C35.52,-8 880.06,-8 880.06,-8 886.06,-8 892.06,-14 892.06,-20 892.06,-20 892.06,-185 892.06,-185 892.06,-191 886.06,-197 880.06,-197 880.06,-197 35.52,-197 35.52,-197 29.52,-197 23.52,-191 23.52,-185 23.52,-185 23.52,-20 23.52,-20 23.52,-14 29.52,-8 35.52,-8" />
+      <text xml:space="preserve" text-anchor="start" x="43.52000045776367" y="-174.95" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="19.00" fill="#16213e">Sentinel: 한 데이터셋의 HA</text>
+    </g>
+    <g id="clust2" class="cluster">
+      <path fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" d="M20,-205C20,-205 531.52,-205 531.52,-205 537.52,-205 543.52,-211 543.52,-217 543.52,-217 543.52,-464 543.52,-464 543.52,-470 537.52,-476 531.52,-476 531.52,-476 20,-476 20,-476 14,-476 8,-470 8,-464 8,-464 8,-217 8,-217 8,-211 14,-205 20,-205" />
+      <text xml:space="preserve" text-anchor="start" x="28" y="-453.95" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="19.00" fill="#16213e">Cluster: 슬롯 분산과 HA</text>
+    </g>
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M251.98,-91.98C303.97,-91.98 356.06,-91.98 356.06,-91.98 356.06,-91.98 356.06,-90.2 356.06,-90.2" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="358.68,-90.2 356.06,-82.7 353.43,-90.2 358.68,-90.2" />
+      <text xml:space="preserve" text-anchor="middle" x="299.77" y="-74.75" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">감시</text>
+    </g>
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M251.92,-115.98C251.92,-115.98 623.58,-115.98 623.58,-115.98" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="623.58,-118.61 631.08,-115.98 623.58,-113.36 623.58,-118.61" />
+      <text xml:space="preserve" text-anchor="middle" x="450.53" y="-129.75" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">감시·승격</text>
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M545.06,-80.64C545.06,-92.49 545.06,-103.98 545.06,-103.98 545.06,-103.98 623.52,-103.98 623.52,-103.98" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="623.52,-106.61 631.02,-103.98 623.52,-101.36 623.52,-106.61" />
+      <text xml:space="preserve" text-anchor="middle" x="601.29" y="-74.75" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">복제</text>
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M267.44,-252C267.44,-252 369.28,-252 369.28,-252" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="369.28,-254.63 376.78,-252 369.28,-249.38 369.28,-254.63" />
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M267.44,-325C267.44,-325 369.28,-325 369.28,-325" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="369.28,-327.63 376.78,-325 369.28,-322.38 369.28,-327.63" />
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M267.44,-398C267.44,-398 369.28,-398 369.28,-398" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="369.28,-400.63 376.78,-398 369.28,-395.38 369.28,-400.63" />
+    </g>
+    <g id="node1" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M239.51,-127.98C239.51,-127.98 57.52,-127.98 57.52,-127.98 51.52,-127.98 45.52,-121.98 45.52,-115.98 45.52,-115.98 45.52,-90.02 45.52,-90.02 45.52,-84.02 51.52,-78.02 57.52,-78.02 57.52,-78.02 239.51,-78.02 239.51,-78.02 245.51,-78.02 251.51,-84.02 251.51,-90.02 251.51,-90.02 251.51,-115.98 251.51,-115.98 251.51,-121.98 245.51,-127.98 239.51,-127.98" />
+      <text xml:space="preserve" text-anchor="middle" x="148.51499557495117" y="-98.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Sentinel quorum</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M556.54,-79.98C556.54,-79.98 344.52,-79.98 344.52,-79.98 338.52,-79.98 332.52,-73.98 332.52,-67.98 332.52,-67.98 332.52,-42.02 332.52,-42.02 332.52,-36.02 338.52,-30.02 344.52,-30.02 344.52,-30.02 556.54,-30.02 556.54,-30.02 562.54,-30.02 568.54,-36.02 568.54,-42.02 568.54,-42.02 568.54,-67.98 568.54,-67.98 568.54,-73.98 562.54,-79.98 556.54,-79.98" />
+      <text xml:space="preserve" text-anchor="middle" x="450.5299835205078" y="-50.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Primary: 전체 데이터</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M858.06,-127.98C858.06,-127.98 646.04,-127.98 646.04,-127.98 640.04,-127.98 634.04,-121.98 634.04,-115.98 634.04,-115.98 634.04,-90.02 634.04,-90.02 634.04,-84.02 640.04,-78.02 646.04,-78.02 646.04,-78.02 858.06,-78.02 858.06,-78.02 864.06,-78.02 870.06,-84.02 870.06,-90.02 870.06,-90.02 870.06,-115.98 870.06,-115.98 870.06,-121.98 864.06,-127.98 858.06,-127.98" />
+      <text xml:space="preserve" text-anchor="middle" x="752.0499877929688" y="-98.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Replica: 전체 데이터</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M255.02,-276.98C255.02,-276.98 42,-276.98 42,-276.98 36,-276.98 30,-270.98 30,-264.98 30,-264.98 30,-239.02 30,-239.02 30,-233.02 36,-227.02 42,-227.02 42,-227.02 255.02,-227.02 255.02,-227.02 261.02,-227.02 267.02,-233.02 267.02,-239.02 267.02,-239.02 267.02,-264.98 267.02,-264.98 267.02,-270.98 261.02,-276.98 255.02,-276.98" />
+      <text xml:space="preserve" text-anchor="middle" x="148.50999450683594" y="-247.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Primary A: 슬롯 일부</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M255.02,-349.98C255.02,-349.98 42,-349.98 42,-349.98 36,-349.98 30,-343.98 30,-337.98 30,-337.98 30,-312.02 30,-312.02 30,-306.02 36,-300.02 42,-300.02 42,-300.02 255.02,-300.02 255.02,-300.02 261.02,-300.02 267.02,-306.02 267.02,-312.02 267.02,-312.02 267.02,-337.98 267.02,-337.98 267.02,-343.98 261.02,-349.98 255.02,-349.98" />
+      <text xml:space="preserve" text-anchor="middle" x="148.50999450683594" y="-320.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Primary B: 슬롯 일부</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M255.02,-422.98C255.02,-422.98 42,-422.98 42,-422.98 36,-422.98 30,-416.98 30,-410.98 30,-410.98 30,-385.02 30,-385.02 30,-379.02 36,-373.02 42,-373.02 42,-373.02 255.02,-373.02 255.02,-373.02 261.02,-373.02 267.02,-379.02 267.02,-385.02 267.02,-385.02 267.02,-410.98 267.02,-410.98 267.02,-416.98 261.02,-422.98 255.02,-422.98" />
+      <text xml:space="preserve" text-anchor="middle" x="148.50999450683594" y="-393.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Primary C: 슬롯 일부</text>
+    </g>
+    <g id="node7" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M509.52,-276.98C509.52,-276.98 391.54,-276.98 391.54,-276.98 385.54,-276.98 379.54,-270.98 379.54,-264.98 379.54,-264.98 379.54,-239.02 379.54,-239.02 379.54,-233.02 385.54,-227.02 391.54,-227.02 391.54,-227.02 509.52,-227.02 509.52,-227.02 515.52,-227.02 521.52,-233.02 521.52,-239.02 521.52,-239.02 521.52,-264.98 521.52,-264.98 521.52,-270.98 515.52,-276.98 509.52,-276.98" />
+      <text xml:space="preserve" text-anchor="middle" x="450.53001403808594" y="-247.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Replica A</text>
+    </g>
+    <g id="node8" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M509.52,-349.98C509.52,-349.98 391.54,-349.98 391.54,-349.98 385.54,-349.98 379.54,-343.98 379.54,-337.98 379.54,-337.98 379.54,-312.02 379.54,-312.02 379.54,-306.02 385.54,-300.02 391.54,-300.02 391.54,-300.02 509.52,-300.02 509.52,-300.02 515.52,-300.02 521.52,-306.02 521.52,-312.02 521.52,-312.02 521.52,-337.98 521.52,-337.98 521.52,-343.98 515.52,-349.98 509.52,-349.98" />
+      <text xml:space="preserve" text-anchor="middle" x="450.53001403808594" y="-320.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Replica B</text>
+    </g>
+    <g id="node9" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M509.52,-422.98C509.52,-422.98 391.54,-422.98 391.54,-422.98 385.54,-422.98 379.54,-416.98 379.54,-410.98 379.54,-410.98 379.54,-385.02 379.54,-385.02 379.54,-379.02 385.54,-373.02 391.54,-373.02 391.54,-373.02 509.52,-373.02 509.52,-373.02 515.52,-373.02 521.52,-379.02 521.52,-385.02 521.52,-385.02 521.52,-410.98 521.52,-410.98 521.52,-416.98 515.52,-422.98 509.52,-422.98" />
+      <text xml:space="preserve" text-anchor="middle" x="450.53001403808594" y="-393.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Replica C</text>
+    </g>
+  </g>
+</svg>

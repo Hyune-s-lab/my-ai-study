@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="490" viewBox="0 0 1100 490" role="img" aria-labelledby="title description">
+  <title id="title">Order, Payment, Shipping의 Aggregate 경계</title>
+  <desc id="description">각 Aggregate는 루트를 통해 내부 값 객체를 관리한다. Payment와 Shipping은 Order 내부 객체에 접근하지 않고 order_id로 Order 루트를 참조한다. 화살표는 실행 순서가 아닌 참조 관계를 나타낸다.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 4 L0 8 Z" fill="#3B5BA5"/>
+    </marker>
+  </defs>
+  <rect width="1100" height="490" fill="#FFFFFF"/>
+
+  <!-- Aggregate boundaries -->
+  <g fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2">
+    <rect x="24" y="24" width="330" height="252" rx="8"/>
+    <rect x="24" y="302" width="330" height="156" rx="8"/>
+    <rect x="530" y="24" width="546" height="434" rx="8"/>
+  </g>
+  <g font-family="Arial, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" fill="#16213E">
+    <g font-size="19" font-weight="700">
+      <text x="48" y="58">Payment Aggregate</text>
+      <text x="48" y="336">Shipping Aggregate</text>
+      <text x="554" y="58">Order Aggregate</text>
+    </g>
+    <text x="554" y="84" font-size="15" fill="#31559F">루트가 내부 값 객체의 일관성을 관리</text>
+
+    <!-- Root entities: blue; value objects: pale violet -->
+    <g fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4">
+      <rect x="48" y="86" width="282" height="68" rx="7"/>
+      <rect x="48" y="366" width="282" height="68" rx="7"/>
+      <rect x="554" y="202" width="178" height="80" rx="7"/>
+    </g>
+    <g fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.2">
+      <rect x="48" y="190" width="282" height="62" rx="7"/>
+      <rect x="800" y="126" width="252" height="76" rx="7"/>
+      <rect x="800" y="304" width="252" height="76" rx="7"/>
+    </g>
+
+    <g text-anchor="middle" font-size="21" font-weight="700">
+      <text x="189" y="114">Payment</text>
+      <text x="189" y="394">Shipping</text>
+      <text x="643" y="236">Order</text>
+    </g>
+    <g text-anchor="middle" font-size="16" fill="#31559F">
+      <text x="189" y="139">Aggregate Root</text>
+      <text x="189" y="419">Aggregate Root</text>
+      <text x="643" y="262">Aggregate Root</text>
+    </g>
+    <g text-anchor="middle" font-size="19" font-weight="700">
+      <text x="189" y="216">payment_snapshot</text>
+      <text x="926" y="157">shipping_address</text>
+      <text x="926" y="335">total_amount</text>
+    </g>
+    <g text-anchor="middle" font-size="16" fill="#6B21A8">
+      <text x="189" y="239">Value Object</text>
+      <text x="926" y="183">Value Object</text>
+      <text x="926" y="361">Value Object</text>
+    </g>
+
+    <!-- References, routed through separate lanes without crossing -->
+    <g fill="none" stroke="#3B5BA5" stroke-width="1.6" stroke-linejoin="round" marker-end="url(#arrow)">
+      <path d="M189 154 V190"/>
+      <path d="M330 120 H418 V224 H554"/>
+      <path d="M330 400 H462 V260 H554"/>
+      <path d="M732 224 H766 V164 H800"/>
+      <path d="M732 260 H766 V342 H800"/>
+    </g>
+    <g text-anchor="middle" font-size="16" fill="#31559F">
+      <text x="435" y="105">order_id 참조</text>
+      <text x="435" y="426">order_id 참조</text>
+    </g>
+  </g>
+</svg>

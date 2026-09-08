@@ -45,56 +45,7 @@ Bluetape4k의 Foundation·Data·Infrastructure·Domain Capability·Application L
 
 ## 2. 전체 아키텍처
 
-```mermaid
-flowchart TD
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction TD
-  
-    web[":adapters:web<br/>REST Controller"]
-    scheduler[":adapters:scheduling<br/>Scheduler"]
-    consumer[":adapters:kafka<br/>Kafka Consumer"]
-  
-    input[":application<br/>Inbound Port"]
-    service[":application<br/>Application Service"]
-    aggregate[":domain<br/>Aggregate · Value Object"]
-    rule[":domain<br/>Rule · Domain Event"]
-    output[":application<br/>Outbound Port"]
-  
-    persistence[":adapters:persistence<br/>Exposed Adapter"]
-    producer[":adapters:kafka<br/>Kafka Producer"]
-    client[":adapters:supplier<br/>Supplier API Client"]
-  
-    kafkaIn["Kafka inbound topic"]
-    postgres["PostgreSQL"]
-    kafkaOut["Kafka outbound topic"]
-    supplier["Supplier API"]
-  
-    kafkaIn -.-> consumer
-    web --> input
-    scheduler --> input
-    consumer --> input
-    input --> service
-    service --> aggregate --> rule
-    service --> output
-    output --> persistence
-    output --> producer
-    output --> client
-    persistence --> postgres
-    producer -.-> kafkaOut
-    client --> supplier
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class input,service,aggregate,rule,output,persistence,client,supplier app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class consumer,producer,kafkaIn,postgres,kafkaOut db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  class web policy
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class scheduler worker
-```
+![헥사고날 모듈의 호출과 외부 연동](assets/2607-spring-멀티모듈-헥사고날-패키징-hexagonal.svg)
 
 노드의 첫 줄은 Gradle module path, 둘째 줄은 그 모듈의 실행 컴포넌트다. `:adapters:kafka`는 Consumer와 Producer를 함께 가지므로 양쪽에 표시된다.
 
@@ -575,21 +526,14 @@ orchestration 모듈은 이 cycle을 한 곳으로 모은다.
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    WEB[":adapters:web<br/>REST Controller"] --> ORCH[":orchestration<br/>cross-module usecase<br/>순서 · transaction"]
-    ORCH --> ORDER[":order<br/>공개 usecase"]
-    ORCH --> INV[":inventory<br/>공개 usecase"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class ORCH,ORDER,INV app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  class WEB policy
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_WEB[":adapters:web<br/>REST Controller"]
+  n_ORCH[":orchestration<br/>cross-module usecase<br/>순서 · transaction"]
+  n_ORDER[":order<br/>공개 usecase"]
+  n_INV[":inventory<br/>공개 usecase"]
+  n_WEB --> n_ORCH
+  n_ORCH --> n_ORDER
+  n_ORCH --> n_INV
 ```
 
 orchestration 모듈은 `domain`과 `persistence`가 없다.  

@@ -40,24 +40,7 @@ System.arraycopy(oldArr, 0, newArr, 0, size);  // O(n) 복사
 
 > 대량의 데이터를 넣을 게 확실하면 `new ArrayList<>(expectedSize)`로 미리 잡는 것이 성능에 유리.
 
-```mermaid
-flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    subgraph array["ArrayList: capacity 10, size 3"]
-      used["인덱스 0~2: 원소 1, 2, 3"]
-      spare["인덱스 3~9: 빈 슬롯 7개"]
-    end
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class used,spare app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-```
+![ArrayList의 size와 capacity](assets/2607-java-collections-arraylist-capacity.svg)
 
 > 파란 칸 = 원소(size=3), 회색 칸 = 빈 공간(capacity=10).  
 > 7칸이 비어 있어도 메모리는 10칸분을 점유한다.
@@ -114,30 +97,7 @@ flowchart LR
 Java `HashMap`은 Chaining을 쓰되,  
 버킷당 원소가 많아지면 리스트를 **트리로 승격**시킨다.
 
-```mermaid
-flowchart TD
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction TD
-    insert["충돌 버킷에 새 원소 삽입"] --> check{"트리화 검사 조건 도달?"}
-    check -->|"아니요"| list["리스트 유지"]
-    check -->|"예"| capacity{"테이블 용량 64 이상?"}
-    capacity -->|"아니요"| resize["먼저 테이블 확장"]
-    capacity -->|"예"| tree["Red-Black Tree로 전환"]
-    tree --> split["resize로 버킷 분할"]
-    split --> small{"분할된 원소 수 6 이하?"}
-    small -->|"예"| untree["분할 버킷을 리스트로 전환"]
-    small -->|"아니요"| keep["트리 유지"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class insert,check,list,tree,split,small,untree,keep app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class capacity,resize db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-```
+![HashMap 버킷의 트리화와 리스트 전환](assets/2607-java-collections-hashmap-treeify.svg)
 
 | OpenJDK 21 구현 조건 | 의미 |
 |---|---|

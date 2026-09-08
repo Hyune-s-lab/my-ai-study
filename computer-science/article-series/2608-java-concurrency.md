@@ -37,20 +37,15 @@ JMM은 허용되는 관찰 결과를 규정하며, 매번 RAM에 쓰거나 캐�
 
 ```mermaid
 sequenceDiagram
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
-  box rgb(255, 255, 255)
-    participant A as Thread A
-    participant F as volatile ready
-    participant B as Thread B
-  end
-  rect rgb(255, 255, 255)
-    A->>A: 일반 필드 data = 900
-    A->>F: ready = true 쓰기
-    B->>F: ready 읽기
-    F-->>B: true 관찰
-    B->>B: 앞서 게시된 data = 900 읽기
-    Note over A,B: 추가 쓰기가 없다는 전제에서 happens-before로 가시성 보장
-  end
+  participant A as Thread A
+  participant F as volatile ready
+  participant B as Thread B
+  A->>A: 일반 필드 data = 900
+  A->>F: ready = true 쓰기
+  B->>F: ready 읽기
+  F-->>B: true 관찰
+  B->>B: 앞서 게시된 data = 900 읽기
+  Note over A,B: 추가 쓰기가 없다는 전제에서 happens-before로 가시성 보장
 ```
 
 동시성 버그는 세 갈래로 갈린다.  
@@ -323,28 +318,7 @@ fun snapshot(): Long = processed.sum()
 `Executors.newFixedThreadPool(10)`은 편하지만 운영에서 위험하다.  
 이유를 보려면 작업이 풀에 들어가는 순서를 알아야 한다.
 
-```mermaid
-flowchart TD
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction TD
-    task["execute(task)"] --> core{"스레드 수가 corePoolSize 미만?"}
-    core -->|"예: 생성 성공"| start["새 worker가 task 실행"]
-    core -->|"아니요 또는 생성 실패"| queue{"큐에 적재 가능?"}
-    queue -->|"예"| queued["대기 후 worker가 실행"]
-    queue -->|"아니요"| max{"maximumPoolSize 내 worker 생성 가능?"}
-    max -->|"예"| start
-    max -->|"아니요"| rejected["RejectedExecutionHandler"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class task,core,queue,rejected app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-  class start,queued,max worker
-```
+![ThreadPoolExecutor의 작업 수용 판단](assets/2608-java-concurrency-executor.svg)
 
 위 그림은 executor가 실행 중인 일반 흐름이다.  
 큐 적재 뒤 shutdown 여부와 worker 존재를 다시 검사하므로, 종료와 경합하면 적재 후에도 거부될 수 있다.

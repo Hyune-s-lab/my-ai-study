@@ -17,43 +17,7 @@
 
 ### 전체 구조 — Topic · Partition · Broker · Consumer
 
-```mermaid
-flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    producer["Producer: key로 파티션 선택"]
-    subgraph topic["Topic: order.events"]
-      p0["Partition 0"]
-      p1["Partition 1"]
-      p2["Partition 2"]
-    end
-    subgraph notification["Consumer Group: 알림"]
-      a["Consumer A: P0, P2"]
-      b["Consumer B: P1"]
-    end
-    subgraph accounting["Consumer Group: 회계"]
-      c["Consumer C: P0, P1, P2"]
-    end
-    producer --> p0
-    producer --> p1
-    producer --> p2
-    p0 --> a
-    p2 --> a
-    p1 --> b
-    p0 --> c
-    p1 --> c
-    p2 --> c
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class producer,a,b,c app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  class p0,p1,p2 db
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-```
+![Kafka 파티션과 독립 Consumer Group](assets/2606-kafka-구조-consumer-groups.svg)
 
 - **Topic** = 논리적 이름. `order.events` 토픽이 3개 파티션으로 구성.
 - **Partition** = 실제 로그. 각 파티션이 offset 0,1,2…를 가짐. 같은 key는 같은 파티션 → 순서 보장.
@@ -66,28 +30,18 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    producer["Producer"]
-    route["key=filing_id로 파티션 선택"]
-    subgraph topic["Topic: tax.filing"]
-      p0["P0: offset 0, 1, 2, 3, ..."]
-      p1["P1: offset 0, 1, ..."]
-      p2["P2: offset 0, 1, 2, ..."]
-    end
-    producer --> route
-    route --> p0
-    route --> p1
-    route --> p2
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_producer["Producer"]
+  n_route["key=filing_id로 파티션 선택"]
+  subgraph g_topic["Topic: tax.filing"]
+    n_p0["P0: offset 0, 1, 2, 3, ..."]
+    n_p1["P1: offset 0, 1, ..."]
+    n_p2["P2: offset 0, 1, 2, ..."]
   end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class producer,route,p0,p1,p2 app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  n_producer --> n_route
+  n_route --> n_p0
+  n_route --> n_p1
+  n_route --> n_p2
 ```
 
 - **Topic = 논리적 이름**(파티션들의 묶음). **Partition = 실제 데이터** = 순서 보장되는 **append-only 로그**(offset 0,1,2…).
@@ -133,39 +87,27 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  subgraph g_zkmode["① ZooKeeper 모드 (레거시 · ~Kafka 3.x)"]
     direction LR
-    subgraph zkmode["① ZooKeeper 모드 (레거시 · ~Kafka 3.x)"]
-      direction TB
-      z["ZooKeeper 앙상블<br/>(별도 클러스터 · 메타데이터·선출 보관)"]
-      zk_b1["Broker 1<br/>(+ Active Controller · 선출됨)"]
-      zk_b2["Broker 2"]
-      zk_b3["Broker 3"]
-      zk_b1 --> z
-      zk_b2 --> z
-      zk_b3 --> z
-    end
-  
-    subgraph kraftmode["② KRaft 모드 (Kafka 3.3+ · 4.0 전용)"]
-      direction TB
-      cq["Controller Quorum<br/>(__cluster_metadata · 내부 Raft 합의)"]
-      k_b1["Broker 1"]
-      k_b2["Broker 2"]
-      k_b3["Broker 3"]
-      k_b1 --> cq
-      k_b2 --> cq
-      k_b3 --> cq
-    end
+    n_z["ZooKeeper 앙상블<br/>(별도 클러스터 · 메타데이터·선출 보관)"]
+    n_zk_b1["Broker 1<br/>(+ Active Controller · 선출됨)"]
+    n_zk_b2["Broker 2"]
+    n_zk_b3["Broker 3"]
   end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class z,zk_b2,zk_b3,k_b1,k_b2,k_b3 app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  class zk_b1,cq policy
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+  subgraph g_kraftmode["② KRaft 모드 (Kafka 3.3+ · 4.0 전용)"]
+    direction LR
+    n_cq["Controller Quorum<br/>(__cluster_metadata · 내부 Raft 합의)"]
+    n_k_b1["Broker 1"]
+    n_k_b2["Broker 2"]
+    n_k_b3["Broker 3"]
+  end
+  n_zk_b1 --> n_z
+  n_zk_b2 --> n_z
+  n_zk_b3 --> n_z
+  n_k_b1 --> n_cq
+  n_k_b2 --> n_cq
+  n_k_b3 --> n_cq
 ```
 
 - **① ZooKeeper 모드(레거시)**: 메타데이터·컨트롤러 선출·구성 관리를 **별도 ZooKeeper 앙상블**이 담당. broker 중 1대가 **Active Controller**로 선출됨. → 클러스터 2개(Kafka+ZK) 운영.

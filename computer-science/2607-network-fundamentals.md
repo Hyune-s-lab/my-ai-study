@@ -14,23 +14,15 @@
 OSI는 **이론적 기준**, TCP/IP는 **실제 인터넷이 쓰는 모델**이다.
 
 ```mermaid
-flowchart TD
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction TD
-    app["응용 계층: OSI 7·6·5<br/>HTTP · DNS · 표현 · 세션"]
-    transport["전송 계층: OSI 4<br/>TCP · UDP · 포트"]
-    internet["인터넷 계층: OSI 3<br/>IP · 라우팅"]
-    access["네트워크 액세스: OSI 2·1<br/>Ethernet · MAC · 물리 매체"]
-    app --> transport --> internet --> access
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class app,transport,internet,access app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+flowchart TB
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_app["응용 계층: OSI 7·6·5<br/>HTTP · DNS · 표현 · 세션"]
+  n_transport["전송 계층: OSI 4<br/>TCP · UDP · 포트"]
+  n_internet["인터넷 계층: OSI 3<br/>IP · 라우팅"]
+  n_access["네트워크 액세스: OSI 2·1<br/>Ethernet · MAC · 물리 매체"]
+  n_app --> n_transport
+  n_transport --> n_internet
+  n_internet --> n_access
 ```
 
 > OSI 5·6·7층이 TCP/IP에서는 **응용층 하나**로 합쳐진다.  
@@ -62,19 +54,14 @@ flowchart TD
 
 ```mermaid
 sequenceDiagram
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
-  box rgb(255, 255, 255)
-    participant C as 클라이언트
-    participant S as 서버
-  end
-  rect rgb(255, 255, 255)
-    C->>S: SYN (seq=x)
-    Note right of S: SYN_RCVD
-    S->>C: SYN + ACK (seq=y, ack=x+1)
-    Note left of C: ESTABLISHED
-    C->>S: ACK (ack=y+1)
-    Note right of S: ESTABLISHED
-  end
+  participant C as 클라이언트
+  participant S as 서버
+  C->>S: SYN (seq=x)
+  Note right of S: SYN_RCVD
+  S->>C: SYN + ACK (seq=y, ack=x+1)
+  Note left of C: ESTABLISHED
+  C->>S: ACK (ack=y+1)
+  Note right of S: ESTABLISHED
 ```
 
 | 단계 | 방향 | 의미 |
@@ -93,25 +80,20 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
-  box rgb(255, 255, 255)
-    participant C as 클라이언트
-    participant S as 서버
-  end
-  rect rgb(255, 255, 255)
-    C->>S: FIN (seq=u)
-    Note left of C: FIN_WAIT_1
-    S->>C: ACK (ack=u+1)
-    Note right of S: CLOSE_WAIT
-    Note left of C: FIN_WAIT_2
-    Note right of S: (남은 데이터 전송)
-    S->>C: FIN (seq=v)
-    Note right of S: LAST_ACK
-    C->>S: ACK (ack=v+1)
-    Note left of C: TIME_WAIT (2×MSL)
-    Note left of C: CLOSED
-    Note right of S: CLOSED
-  end
+  participant C as 클라이언트
+  participant S as 서버
+  C->>S: FIN (seq=u)
+  Note left of C: FIN_WAIT_1
+  S->>C: ACK (ack=u+1)
+  Note right of S: CLOSE_WAIT
+  Note left of C: FIN_WAIT_2
+  Note right of S: (남은 데이터 전송)
+  S->>C: FIN (seq=v)
+  Note right of S: LAST_ACK
+  C->>S: ACK (ack=v+1)
+  Note left of C: TIME_WAIT (2×MSL)
+  Note left of C: CLOSED
+  Note right of S: CLOSED
 ```
 
 | 단계 | 방향 | 의미 |
@@ -158,20 +140,15 @@ TCP 3-way handshake (1 RTT)
 
 ```mermaid
 sequenceDiagram
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
-  box rgb(255, 255, 255)
-    participant C as Client
-    participant S as Server
-  end
-  rect rgb(255, 255, 255)
-    C->>S: ClientHello + key_share
-    S->>C: ServerHello + key_share
-    Note over C,S: 양쪽이 공유 비밀로 handshake key 도출
-    S->>C: 암호화된 EncryptedExtensions · Certificate · CertificateVerify · Finished
-    C->>C: 인증서 체인·서명·Finished 검증
-    C->>S: Finished
-    Note over C,S: application traffic key로 데이터 암호화
-  end
+  participant C as Client
+  participant S as Server
+  C->>S: ClientHello + key_share
+  S->>C: ServerHello + key_share
+  Note over C,S: 양쪽이 공유 비밀로 handshake key 도출
+  S->>C: 암호화된 EncryptedExtensions · Certificate · CertificateVerify · Finished
+  C->>C: 인증서 체인·서명·Finished 검증
+  C->>S: Finished
+  Note over C,S: application traffic key로 데이터 암호화
 ```
 
 ### 인증과 키 합의는 다른 역할이다
@@ -214,43 +191,7 @@ HTTP/2 해결: 한 연결에서 여러 요청을 동시에 보낸다 (multiplexi
 HTTP/3 해결: TCP를 버리고 UDP 기반 QUIC을 쓴다.  
 스트림마다 독립적이라, 한 스트림에서 패킷 손실이 있어도 다른 스트림은 멈추지 않는다.
 
-```mermaid
-flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-  
-    subgraph h1["HTTP/1.1: 한 연결의 응답 순서"]
-      direction TB
-      h1a["요청 A"]
-      h1b["요청 B (A 완료까지 대기)"]
-      h1c["요청 C (B 완료까지 대기)"]
-      h1a --> h1b --> h1c
-    end
-  
-    subgraph h2["HTTP/2"]
-      direction TB
-      h2a["요청 A"]
-      h2b["요청 B"]
-      h2c["요청 C"]
-      h2note["TCP 패킷 손실 시 전체 멈춤"]
-    end
-  
-    subgraph h3["HTTP/3"]
-      direction TB
-      h3a["요청 A (독립 스트림)"]
-      h3b["요청 B (독립 스트림)"]
-      h3c["요청 C (독립 스트림)"]
-    end
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class h1a,h1b,h1c,h2a,h2b,h2c,h2note,h3a,h3b,h3c app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
-```
+![HTTP 버전별 요청 처리와 스트림](assets/2607-network-fundamentals-http-streams.svg)
 
 > HTTP/2의 multiplexing은 **같은 TCP 연결**에서 여러 요청을 동시에 보내는 것이다.  
 > TCP 위에서 동작하므로, TCP 레벨 패킷 손실이 모든 요청에 영향을 미친다.  
@@ -260,23 +201,16 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    DNS["DNS 조회<br/>도메인 → IP<br/>(UDP)"]
-    TCP["TCP 3-way handshake<br/>연결 수립<br/>(1 RTT)"]
-    TLS["TLS handshake<br/>암호화 협상<br/>(1~2 RTT)"]
-    HTTP["HTTP 요청·응답<br/>암호화된 데이터<br/>(1 RTT)"]
-    RENDER["브라우저 렌더링"]
-    DNS --> TCP --> TLS --> HTTP --> RENDER
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class DNS,TCP,TLS,HTTP,RENDER app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_DNS["DNS 조회<br/>도메인 → IP<br/>(UDP)"]
+  n_TCP["TCP 3-way handshake<br/>연결 수립<br/>(1 RTT)"]
+  n_TLS["TLS handshake<br/>암호화 협상<br/>(1~2 RTT)"]
+  n_HTTP["HTTP 요청·응답<br/>암호화된 데이터<br/>(1 RTT)"]
+  n_RENDER["브라우저 렌더링"]
+  n_DNS --> n_TCP
+  n_TCP --> n_TLS
+  n_TLS --> n_HTTP
+  n_HTTP --> n_RENDER
 ```
 
 | 단계 | 내용 | 비용 |

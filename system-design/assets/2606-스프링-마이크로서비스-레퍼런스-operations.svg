@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="875.0" height="522.0" viewBox="0.00 0.00 875.00 522.00" role="img" aria-labelledby="title description">
+  <title id="title">서비스 등록·설정·관측 구성</title>
+  <desc id="description">서비스 등록·설정·관측 구성。Gateway · 도메인 서비스; Eureka; Spring Cloud Config; Zipkin; Logstash; Elasticsearch; Kibana; Prometheus; Grafana</desc>
+  <rect width="875.0" height="522.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 502)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-502 854.66,-502 854.66,20.16 -20.16,20.16" />
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M388.84,-241C305.67,-241 213.5,-241 213.5,-241 213.5,-241 213.5,-168.48 213.5,-168.48" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="216.13,-168.48 213.5,-160.98 210.88,-168.48 216.13,-168.48" />
+      <text xml:space="preserve" text-anchor="middle" x="250.73" y="-179.84" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">등록·조회</text>
+    </g>
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M465.75,-215.33C465.75,-215.33 465.75,-168.28 465.75,-168.28" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="468.37,-168.28 465.75,-160.78 463.12,-168.28 468.37,-168.28" />
+      <text xml:space="preserve" text-anchor="middle" x="428.82" y="-178.83" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">설정 조회</text>
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M607.49,-215.33C607.49,-215.33 607.49,-168.28 607.49,-168.28" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="610.12,-168.28 607.49,-160.78 604.87,-168.28 610.12,-168.28" />
+      <text xml:space="preserve" text-anchor="middle" x="637.25" y="-181.69" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">trace</text>
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M650.04,-241C709.78,-241 767.5,-241 767.5,-241 767.5,-241 767.5,-168.48 767.5,-168.48" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="770.13,-168.48 767.5,-160.98 764.88,-168.48 770.13,-168.48" />
+      <text xml:space="preserve" text-anchor="middle" x="748.99" y="-177.96" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">log</text>
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M767.5,-107.37C767.5,-75.45 767.5,-25 767.5,-25 767.5,-25 199.42,-25 199.42,-25" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="199.42,-22.38 191.92,-25 199.42,-27.63 199.42,-22.38" />
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M78.5,-107.37C78.5,-107.37 78.5,-60.31 78.5,-60.31" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="81.13,-60.31 78.5,-52.81 75.88,-60.31 81.13,-60.31" />
+    </g>
+    <g id="edge7" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M519.5,-323.3C519.5,-323.3 519.5,-276.24 519.5,-276.24" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="522.13,-276.24 519.5,-268.74 516.88,-276.24 522.13,-276.24" />
+      <text xml:space="preserve" text-anchor="middle" x="578.20" y="-286.80" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">Actuator scrape</text>
+    </g>
+    <g id="edge8" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M519.5,-431.27C519.5,-431.27 519.5,-384.21 519.5,-384.21" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="522.13,-384.21 519.5,-376.71 516.88,-384.21 522.13,-384.21" />
+    </g>
+    <g id="node1" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M637.5,-265.9C637.5,-265.9 401.5,-265.9 401.5,-265.9 395.5,-265.9 389.5,-259.9 389.5,-253.9 389.5,-253.9 389.5,-227.94 389.5,-227.94 389.5,-221.94 395.5,-215.94 401.5,-215.94 401.5,-215.94 637.5,-215.94 637.5,-215.94 643.5,-215.94 649.5,-221.94 649.5,-227.94 649.5,-227.94 649.5,-253.9 649.5,-253.9 649.5,-259.9 643.5,-265.9 637.5,-265.9" />
+      <text xml:space="preserve" text-anchor="middle" x="519.5" y="-236.07" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Gateway · 도메인 서비스</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M257.52,-157.94C257.52,-157.94 169.48,-157.94 169.48,-157.94 163.48,-157.94 157.48,-151.94 157.48,-145.94 157.48,-145.94 157.48,-119.97 157.48,-119.97 157.48,-113.97 163.48,-107.97 169.48,-107.97 169.48,-107.97 257.52,-107.97 257.52,-107.97 263.52,-107.97 269.52,-113.97 269.52,-119.97 269.52,-119.97 269.52,-145.94 269.52,-145.94 269.52,-151.94 263.52,-157.94 257.52,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="213.49999237060547" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Eureka</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M529.99,-157.94C529.99,-157.94 305.01,-157.94 305.01,-157.94 299.01,-157.94 293.01,-151.94 293.01,-145.94 293.01,-145.94 293.01,-119.97 293.01,-119.97 293.01,-113.97 299.01,-107.97 305.01,-107.97 305.01,-107.97 529.99,-107.97 529.99,-107.97 535.99,-107.97 541.99,-113.97 541.99,-119.97 541.99,-119.97 541.99,-145.94 541.99,-145.94 541.99,-151.94 535.99,-157.94 529.99,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="417.5" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Spring Cloud Config</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M665.52,-157.94C665.52,-157.94 577.48,-157.94 577.48,-157.94 571.48,-157.94 565.48,-151.94 565.48,-145.94 565.48,-145.94 565.48,-119.97 565.48,-119.97 565.48,-113.97 571.48,-107.97 577.48,-107.97 577.48,-107.97 665.52,-107.97 665.52,-107.97 671.52,-107.97 677.52,-113.97 677.52,-119.97 677.52,-119.97 677.52,-145.94 677.52,-145.94 677.52,-151.94 671.52,-157.94 665.52,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="621.5" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Zipkin</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M822.5,-157.94C822.5,-157.94 712.5,-157.94 712.5,-157.94 706.5,-157.94 700.5,-151.94 700.5,-145.94 700.5,-145.94 700.5,-119.97 700.5,-119.97 700.5,-113.97 706.5,-107.97 712.5,-107.97 712.5,-107.97 822.5,-107.97 822.5,-107.97 828.5,-107.97 834.5,-113.97 834.5,-119.97 834.5,-119.97 834.5,-145.94 834.5,-145.94 834.5,-151.94 828.5,-157.94 822.5,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="767.5" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Logstash</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M177,-49.97C177,-49.97 12,-49.97 12,-49.97 6,-49.97 0,-43.97 0,-37.97 0,-37.97 0,-12 0,-12 0,-6 6,0 12,0 12,0 177,0 177,0 183,0 189,-6 189,-12 189,-12 189,-37.97 189,-37.97 189,-43.97 183,-49.97 177,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="94.5" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Elasticsearch</text>
+    </g>
+    <g id="node7" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M122.52,-157.94C122.52,-157.94 34.48,-157.94 34.48,-157.94 28.48,-157.94 22.48,-151.94 22.48,-145.94 22.48,-145.94 22.48,-119.97 22.48,-119.97 22.48,-113.97 28.48,-107.97 34.48,-107.97 34.48,-107.97 122.52,-107.97 122.52,-107.97 128.52,-107.97 134.52,-113.97 134.52,-119.97 134.52,-119.97 134.52,-145.94 134.52,-145.94 134.52,-151.94 128.52,-157.94 122.52,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="78.50000381469727" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Kibana</text>
+    </g>
+    <g id="node8" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M585.51,-373.87C585.51,-373.87 453.49,-373.87 453.49,-373.87 447.49,-373.87 441.49,-367.87 441.49,-361.87 441.49,-361.87 441.49,-335.9 441.49,-335.9 441.49,-329.9 447.49,-323.9 453.49,-323.9 453.49,-323.9 585.51,-323.9 585.51,-323.9 591.51,-323.9 597.51,-329.9 597.51,-335.9 597.51,-335.9 597.51,-361.87 597.51,-361.87 597.51,-367.87 591.51,-373.87 585.51,-373.87" />
+      <text xml:space="preserve" text-anchor="middle" x="519.5" y="-344.04" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Prometheus</text>
+    </g>
+    <g id="node9" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M568.99,-481.84C568.99,-481.84 470.01,-481.84 470.01,-481.84 464.01,-481.84 458.01,-475.84 458.01,-469.84 458.01,-469.84 458.01,-443.87 458.01,-443.87 458.01,-437.87 464.01,-431.87 470.01,-431.87 470.01,-431.87 568.99,-431.87 568.99,-431.87 574.99,-431.87 580.99,-437.87 580.99,-443.87 580.99,-443.87 580.99,-469.84 580.99,-469.84 580.99,-475.84 574.99,-481.84 568.99,-481.84" />
+      <text xml:space="preserve" text-anchor="middle" x="519.5" y="-452.01" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Grafana</text>
+    </g>
+  </g>
+</svg>

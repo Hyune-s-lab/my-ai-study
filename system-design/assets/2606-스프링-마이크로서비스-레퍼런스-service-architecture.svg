@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="663.0" height="630.0" viewBox="0.00 0.00 663.00 630.00" role="img" aria-labelledby="title description">
+  <title id="title">인증·도메인 서비스·저장소·이벤트 흐름</title>
+  <desc id="description">인증·도메인 서비스·저장소·이벤트 흐름。Client; Spring Cloud Gateway; Keycloak; 조직 서비스: Resilience4j; 라이선싱 서비스: Resilience4j; 조직 PostgreSQL; 라이선싱 PostgreSQL; Redis 조회 캐시; Kafka</desc>
+  <rect width="663.0" height="630.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 609.97)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-609.97 642.9,-609.97 642.9,20.16 -20.16,20.16" />
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M472.98,-539.24C472.98,-539.24 472.98,-492.18 472.98,-492.18" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="475.6,-492.18 472.98,-484.68 470.35,-492.18 475.6,-492.18" />
+    </g>
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M528.99,-539.21C528.99,-539.21 528.99,-384.39 528.99,-384.39" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="531.62,-384.39 528.99,-376.89 526.37,-384.4 531.62,-384.39" />
+      <text xml:space="preserve" text-anchor="middle" x="565.92" y="-454.71" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">토큰 발급</text>
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M493.49,-431.27C493.49,-431.27 493.49,-384.21 493.49,-384.21" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="496.11,-384.21 493.49,-376.71 490.86,-384.21 496.11,-384.21" />
+      <text xml:space="preserve" text-anchor="middle" x="455.60" y="-403.77" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">JWK 조회</text>
+      <text xml:space="preserve" text-anchor="middle" x="455.60" y="-385.77" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">토큰 검증</text>
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M309.75,-431.27C309.75,-431.27 309.75,-384.21 309.75,-384.21" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="312.37,-384.21 309.75,-376.71 307.12,-384.21 312.37,-384.21" />
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M379.24,-431.44C379.24,-431.44 379.24,-168.17 379.24,-168.17" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="381.86,-168.17 379.24,-160.67 376.61,-168.17 381.86,-168.17" />
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M255.75,-323.3C255.75,-323.3 255.75,-276.24 255.75,-276.24" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="258.38,-276.24 255.75,-268.74 253.13,-276.24 258.38,-276.24" />
+    </g>
+    <g id="edge9" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M98.99,-323.3C98.99,-323.3 98.99,-276.24 98.99,-276.24" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="101.61,-276.24 98.99,-268.74 96.36,-276.24 101.61,-276.24" />
+      <text xml:space="preserve" text-anchor="middle" x="142.40" y="-286.80" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">변경 이벤트</text>
+    </g>
+    <g id="edge7" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M156.73,-107.37C156.73,-107.37 156.73,-60.31 156.73,-60.31" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="159.35,-60.31 156.73,-52.81 154.1,-60.31 159.35,-60.31" />
+    </g>
+    <g id="edge8" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M331.5,-107.37C331.5,-107.37 331.5,-60.31 331.5,-60.31" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="334.13,-60.31 331.5,-52.81 328.88,-60.31 334.13,-60.31" />
+    </g>
+    <g id="edge10" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M102.49,-215.33C102.49,-215.33 102.49,-168.28 102.49,-168.28" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="105.11,-168.28 102.49,-160.78 99.86,-168.28 105.11,-168.28" />
+    </g>
+    <g id="node1" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M524,-589.81C524,-589.81 435.97,-589.81 435.97,-589.81 429.97,-589.81 423.97,-583.81 423.97,-577.81 423.97,-577.81 423.97,-551.84 423.97,-551.84 423.97,-545.84 429.97,-539.84 435.97,-539.84 435.97,-539.84 524,-539.84 524,-539.84 530,-539.84 536,-545.84 536,-551.84 536,-551.84 536,-577.81 536,-577.81 536,-583.81 530,-589.81 524,-589.81" />
+      <text xml:space="preserve" text-anchor="middle" x="479.98500061035156" y="-559.97" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Client</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M509.98,-481.84C509.98,-481.84 273.99,-481.84 273.99,-481.84 267.99,-481.84 261.99,-475.84 261.99,-469.84 261.99,-469.84 261.99,-443.87 261.99,-443.87 261.99,-437.87 267.99,-431.87 273.99,-431.87 273.99,-431.87 509.98,-431.87 509.98,-431.87 515.98,-431.87 521.98,-437.87 521.98,-443.87 521.98,-443.87 521.98,-469.84 521.98,-469.84 521.98,-475.84 515.98,-481.84 509.98,-481.84" />
+      <text xml:space="preserve" text-anchor="middle" x="391.9849853515625" y="-452.01" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Spring Cloud Gateway</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M586.98,-373.87C586.98,-373.87 476.99,-373.87 476.99,-373.87 470.99,-373.87 464.99,-367.87 464.99,-361.87 464.99,-361.87 464.99,-335.9 464.99,-335.9 464.99,-329.9 470.99,-323.9 476.99,-323.9 476.99,-323.9 586.98,-323.9 586.98,-323.9 592.98,-323.9 598.98,-329.9 598.98,-335.9 598.98,-335.9 598.98,-361.87 598.98,-361.87 598.98,-367.87 592.98,-373.87 586.98,-373.87" />
+      <text xml:space="preserve" text-anchor="middle" x="531.9849853515625" y="-344.04" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Keycloak</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M345.5,-373.87C345.5,-373.87 78.48,-373.87 78.48,-373.87 72.48,-373.87 66.48,-367.87 66.48,-361.87 66.48,-361.87 66.48,-335.9 66.48,-335.9 66.48,-329.9 72.48,-323.9 78.48,-323.9 78.48,-323.9 345.5,-323.9 345.5,-323.9 351.5,-323.9 357.5,-329.9 357.5,-335.9 357.5,-335.9 357.5,-361.87 357.5,-361.87 357.5,-367.87 351.5,-373.87 345.5,-373.87" />
+      <text xml:space="preserve" text-anchor="middle" x="211.98999786376953" y="-344.04" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">조직 서비스: Resilience4j</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M388.5,-157.94C388.5,-157.94 85.48,-157.94 85.48,-157.94 79.48,-157.94 73.48,-151.94 73.48,-145.94 73.48,-145.94 73.48,-119.97 73.48,-119.97 73.48,-113.97 79.48,-107.97 85.48,-107.97 85.48,-107.97 388.5,-107.97 388.5,-107.97 394.5,-107.97 400.5,-113.97 400.5,-119.97 400.5,-119.97 400.5,-145.94 400.5,-145.94 400.5,-151.94 394.5,-157.94 388.5,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="236.98999786376953" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">라이선싱 서비스: Resilience4j</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M345.98,-265.9C345.98,-265.9 166,-265.9 166,-265.9 160,-265.9 154,-259.9 154,-253.9 154,-253.9 154,-227.94 154,-227.94 154,-221.94 160,-215.94 166,-215.94 166,-215.94 345.98,-215.94 345.98,-215.94 351.98,-215.94 357.98,-221.94 357.98,-227.94 357.98,-227.94 357.98,-253.9 357.98,-253.9 357.98,-259.9 351.98,-265.9 345.98,-265.9" />
+      <text xml:space="preserve" text-anchor="middle" x="255.99000549316406" y="-236.07" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">조직 PostgreSQL</text>
+    </g>
+    <g id="node7" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M227.98,-49.97C227.98,-49.97 12,-49.97 12,-49.97 6,-49.97 0,-43.97 0,-37.97 0,-37.97 0,-12 0,-12 0,-6 6,0 12,0 12,0 227.98,0 227.98,0 233.98,0 239.98,-6 239.98,-12 239.98,-12 239.98,-37.97 239.98,-37.97 239.98,-43.97 233.98,-49.97 227.98,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="119.98999786376953" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">라이선싱 PostgreSQL</text>
+    </g>
+    <g id="node8" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M435.47,-49.97C435.47,-49.97 274.5,-49.97 274.5,-49.97 268.5,-49.97 262.5,-43.97 262.5,-37.97 262.5,-37.97 262.5,-12 262.5,-12 262.5,-6 268.5,0 274.5,0 274.5,0 435.47,0 435.47,0 441.47,0 447.47,-6 447.47,-12 447.47,-12 447.47,-37.97 447.47,-37.97 447.47,-43.97 441.47,-49.97 435.47,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="354.98500061035156" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Redis 조회 캐시</text>
+    </g>
+    <g id="node9" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M119.5,-265.9C119.5,-265.9 42.48,-265.9 42.48,-265.9 36.48,-265.9 30.48,-259.9 30.48,-253.9 30.48,-253.9 30.48,-227.94 30.48,-227.94 30.48,-221.94 36.48,-215.94 42.48,-215.94 42.48,-215.94 119.5,-215.94 119.5,-215.94 125.5,-215.94 131.5,-221.94 131.5,-227.94 131.5,-227.94 131.5,-253.9 131.5,-253.9 131.5,-259.9 125.5,-265.9 119.5,-265.9" />
+      <text xml:space="preserve" text-anchor="middle" x="80.9900016784668" y="-236.07" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Kafka</text>
+    </g>
+  </g>
+</svg>

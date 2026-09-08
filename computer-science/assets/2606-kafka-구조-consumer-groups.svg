@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="930.0" height="387.0" viewBox="0.00 0.00 930.00 387.00" role="img" aria-labelledby="title description">
+  <title id="title">Kafka 파티션과 독립 Consumer Group</title>
+  <desc id="description">Kafka 파티션과 독립 Consumer Group。Producer: key로 파티션 선택; Partition 0; Partition 1; Partition 2; Consumer A: P0, P2; Consumer B: P1; Consumer C: P0, P1, P2</desc>
+  <rect width="930.0" height="387.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 367.16)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-367.16 909.62,-367.16 909.62,20.16 -20.16,20.16" />
+    <g id="clust1" class="cluster">
+      <path fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" d="M347.73,-35C347.73,-35 529.73,-35 529.73,-35 535.73,-35 541.73,-41 541.73,-47 541.73,-47 541.73,-294 541.73,-294 541.73,-300 535.73,-306 529.73,-306 529.73,-306 347.73,-306 347.73,-306 341.73,-306 335.73,-300 335.73,-294 335.73,-294 335.73,-47 335.73,-47 335.73,-41 341.73,-35 347.73,-35" />
+      <text xml:space="preserve" text-anchor="start" x="355.7300109863281" y="-283.95" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="19.00" fill="#16213e">Topic: order.events</text>
+    </g>
+    <g id="clust2" class="cluster">
+      <path fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" d="M593.97,-141C593.97,-141 848.98,-141 848.98,-141 854.98,-141 860.98,-147 860.98,-153 860.98,-153 860.98,-327 860.98,-327 860.98,-333 854.98,-339 848.98,-339 848.98,-339 593.97,-339 593.97,-339 587.97,-339 581.97,-333 581.97,-327 581.97,-327 581.97,-153 581.97,-153 581.97,-147 587.97,-141 593.97,-141" />
+      <text xml:space="preserve" text-anchor="start" x="601.969970703125" y="-316.95" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="19.00" fill="#16213e">Consumer Group: 알림</text>
+    </g>
+    <g id="clust3" class="cluster">
+      <path fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" d="M573.48,-8C573.48,-8 869.46,-8 869.46,-8 875.46,-8 881.46,-14 881.46,-20 881.46,-20 881.46,-121 881.46,-121 881.46,-127 875.46,-133 869.46,-133 869.46,-133 573.48,-133 573.48,-133 567.48,-133 561.48,-127 561.48,-121 561.48,-121 561.48,-20 561.48,-20 561.48,-14 567.48,-8 573.48,-8" />
+      <text xml:space="preserve" text-anchor="start" x="581.47998046875" y="-110.95" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="19.00" fill="#16213e">Consumer Group: 회계</text>
+    </g>
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M304.6,-155C304.6,-155 347.47,-155 347.47,-155" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="347.47,-157.63 354.97,-155 347.47,-152.38 347.47,-157.63" />
+    </g>
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M152.46,-180.53C152.46,-201.58 152.46,-228 152.46,-228 152.46,-228 347.16,-228 347.16,-228" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="347.16,-230.63 354.66,-228 347.16,-225.38 347.16,-230.63" />
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M152.46,-129.47C152.46,-108.42 152.46,-82 152.46,-82 152.46,-82 347.16,-82 347.16,-82" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="347.16,-84.63 354.66,-82 347.16,-79.38 347.16,-84.63" />
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M520.13,-171.5C520.13,-171.5 593.39,-171.5 593.39,-171.5" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="593.39,-174.13 600.89,-171.5 593.39,-168.88 593.39,-174.13" />
+    </g>
+    <g id="edge7" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M520.37,-146.52C556.28,-146.52 590.46,-146.52 590.46,-146.52 590.46,-146.52 590.46,-90.41 590.46,-90.41" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="593.09,-90.41 590.46,-82.91 587.84,-90.41 593.09,-90.41" />
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M520.13,-244.5C520.13,-244.5 613.96,-244.5 613.96,-244.5" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="613.96,-247.13 621.46,-244.5 613.96,-241.88 613.96,-247.13" />
+    </g>
+    <g id="edge8" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M520.42,-208C559.31,-208 597.46,-208 597.46,-208 597.46,-208 597.46,-90.53 597.46,-90.53" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="600.09,-90.53 597.46,-83.03 594.84,-90.53 600.09,-90.53" />
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M520.13,-93.48C603.65,-93.48 721.46,-93.48 721.46,-93.48 721.46,-93.48 721.46,-152.75 721.46,-152.75" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="718.84,-152.75 721.46,-160.25 724.09,-152.75 718.84,-152.75" />
+    </g>
+    <g id="edge9" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M520.13,-68.5C520.13,-68.5 572.9,-68.5 572.9,-68.5" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="572.9,-71.13 580.4,-68.5 572.9,-65.88 572.9,-71.13" />
+    </g>
+    <g id="node1" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M291.98,-179.98C291.98,-179.98 12,-179.98 12,-179.98 6,-179.98 0,-173.98 0,-167.98 0,-167.98 0,-142.02 0,-142.02 0,-136.02 6,-130.02 12,-130.02 12,-130.02 291.98,-130.02 291.98,-130.02 297.98,-130.02 303.98,-136.02 303.98,-142.02 303.98,-142.02 303.98,-167.98 303.98,-167.98 303.98,-173.98 297.98,-179.98 291.98,-179.98" />
+      <text xml:space="preserve" text-anchor="middle" x="151.99000549316406" y="-150.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Producer: key로 파티션 선택</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M507.73,-179.98C507.73,-179.98 369.73,-179.98 369.73,-179.98 363.73,-179.98 357.73,-173.98 357.73,-167.98 357.73,-167.98 357.73,-142.02 357.73,-142.02 357.73,-136.02 363.73,-130.02 369.73,-130.02 369.73,-130.02 507.73,-130.02 507.73,-130.02 513.73,-130.02 519.73,-136.02 519.73,-142.02 519.73,-142.02 519.73,-167.98 519.73,-167.98 519.73,-173.98 513.73,-179.98 507.73,-179.98" />
+      <text xml:space="preserve" text-anchor="middle" x="438.72999572753906" y="-150.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Partition 0</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M507.73,-252.98C507.73,-252.98 369.73,-252.98 369.73,-252.98 363.73,-252.98 357.73,-246.98 357.73,-240.98 357.73,-240.98 357.73,-215.02 357.73,-215.02 357.73,-209.02 363.73,-203.02 369.73,-203.02 369.73,-203.02 507.73,-203.02 507.73,-203.02 513.73,-203.02 519.73,-209.02 519.73,-215.02 519.73,-215.02 519.73,-240.98 519.73,-240.98 519.73,-246.98 513.73,-252.98 507.73,-252.98" />
+      <text xml:space="preserve" text-anchor="middle" x="438.72999572753906" y="-223.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Partition 1</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M507.73,-106.98C507.73,-106.98 369.73,-106.98 369.73,-106.98 363.73,-106.98 357.73,-100.98 357.73,-94.98 357.73,-94.98 357.73,-69.02 357.73,-69.02 357.73,-63.02 363.73,-57.02 369.73,-57.02 369.73,-57.02 507.73,-57.02 507.73,-57.02 513.73,-57.02 519.73,-63.02 519.73,-69.02 519.73,-69.02 519.73,-94.98 519.73,-94.98 519.73,-100.98 513.73,-106.98 507.73,-106.98" />
+      <text xml:space="preserve" text-anchor="middle" x="438.72999572753906" y="-77.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Partition 2</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M826.98,-212.98C826.98,-212.98 615.97,-212.98 615.97,-212.98 609.97,-212.98 603.97,-206.98 603.97,-200.98 603.97,-200.98 603.97,-175.02 603.97,-175.02 603.97,-169.02 609.97,-163.02 615.97,-163.02 615.97,-163.02 826.98,-163.02 826.98,-163.02 832.98,-163.02 838.98,-169.02 838.98,-175.02 838.98,-175.02 838.98,-200.98 838.98,-200.98 838.98,-206.98 832.98,-212.98 826.98,-212.98" />
+      <text xml:space="preserve" text-anchor="middle" x="721.4749755859375" y="-183.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Consumer A: P0, P2</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M806.46,-285.98C806.46,-285.98 636.49,-285.98 636.49,-285.98 630.49,-285.98 624.49,-279.98 624.49,-273.98 624.49,-273.98 624.49,-248.02 624.49,-248.02 624.49,-242.02 630.49,-236.02 636.49,-236.02 636.49,-236.02 806.46,-236.02 806.46,-236.02 812.46,-236.02 818.46,-242.02 818.46,-248.02 818.46,-248.02 818.46,-273.98 818.46,-273.98 818.46,-279.98 812.46,-285.98 806.46,-285.98" />
+      <text xml:space="preserve" text-anchor="middle" x="721.4750061035156" y="-256.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Consumer B: P1</text>
+    </g>
+    <g id="node7" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M847.46,-79.98C847.46,-79.98 595.48,-79.98 595.48,-79.98 589.48,-79.98 583.48,-73.98 583.48,-67.98 583.48,-67.98 583.48,-42.02 583.48,-42.02 583.48,-36.02 589.48,-30.02 595.48,-30.02 595.48,-30.02 847.46,-30.02 847.46,-30.02 853.46,-30.02 859.46,-36.02 859.46,-42.02 859.46,-42.02 859.46,-67.98 859.46,-67.98 859.46,-73.98 853.46,-79.98 847.46,-79.98" />
+      <text xml:space="preserve" text-anchor="middle" x="721.4700012207031" y="-50.15" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Consumer C: P0, P1, P2</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1105.0" height="868.0" viewBox="0.00 0.00 1105.00 868.00" role="img" aria-labelledby="title description">
+  <title id="title">헥사고날 모듈의 호출과 외부 연동</title>
+  <desc id="description">헥사고날 모듈의 호출과 외부 연동。:adapters:web / REST Controller; :adapters:scheduling / Scheduler; :adapters:kafka / Kafka Consumer; :application / Inbound Port; :application / Application Service; :domain / Aggregate · Value Object; :domain / Rule · Domain Event; :application / Outbound Port; :adapters:persistence / Exposed Adapter; :adapters:kafka / Kafka Producer; :adapters:supplier / Supplier API Client; Kafka inbound topic; PostgreSQL; Kafka outbound topic; Supplier API</desc>
+  <rect width="1105.0" height="868.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 848.26)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-848.26 1084.66,-848.26 1084.66,20.16 -20.16,20.16" />
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M150.73,-643.68C150.73,-604.05 150.73,-548 150.73,-548 150.73,-548 270.61,-548 270.61,-548" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="270.61,-550.63 278.11,-548 270.61,-545.38 270.61,-550.63" />
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M368.99,-643.7C368.99,-643.7 368.99,-596.42 368.99,-596.42" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="371.62,-596.42 368.99,-588.92 366.37,-596.42 371.62,-596.42" />
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M600.73,-643.68C600.73,-604.05 600.73,-548 600.73,-548 600.73,-548 467.52,-548 467.52,-548" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="467.52,-545.38 460.02,-548 467.52,-550.63 467.52,-545.38" />
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M368.99,-509.67C368.99,-509.67 368.99,-462.38 368.99,-462.38" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="371.62,-462.38 368.99,-454.88 366.37,-462.38 371.62,-462.38" />
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M314.75,-375.64C314.75,-375.64 314.75,-328.35 314.75,-328.35" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="317.37,-328.35 314.75,-320.85 312.12,-328.35 317.37,-328.35" />
+    </g>
+    <g id="edge8" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M495.42,-414C507.57,-414 515.48,-414 515.48,-414 515.48,-414 515.48,-328.33 515.48,-328.33" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="518.11,-328.33 515.48,-320.83 512.86,-328.33 518.11,-328.33" />
+    </g>
+    <g id="edge7" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M173.24,-241.61C173.24,-241.61 173.24,-194.32 173.24,-194.32" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="175.87,-194.32 173.24,-186.82 170.62,-194.32 175.87,-194.32" />
+    </g>
+    <g id="edge9" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M523.74,-241.61C523.74,-241.61 523.74,-194.32 523.74,-194.32" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="526.37,-194.32 523.74,-186.82 521.12,-194.32 526.37,-194.32" />
+    </g>
+    <g id="edge10" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M628.23,-241.61C628.23,-241.61 628.23,-194.32 628.23,-194.32" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="630.86,-194.32 628.23,-186.82 625.61,-194.32 630.86,-194.32" />
+    </g>
+    <g id="edge11" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M677.46,-280C782.34,-280 937.99,-280 937.99,-280 937.99,-280 937.99,-194.31 937.99,-194.31" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="940.62,-194.31 937.99,-186.81 935.37,-194.31 940.62,-194.31" />
+    </g>
+    <g id="edge12" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M418.99,-107.37C418.99,-107.37 418.99,-60.57 418.99,-60.57" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="421.62,-60.57 418.99,-53.07 416.37,-60.57 421.62,-60.57" />
+    </g>
+    <g id="edge13" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M683.99,-107.37C683.99,-107.37 683.99,-60.57 683.99,-60.57" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="686.62,-60.57 683.99,-53.07 681.37,-60.57 686.62,-60.57" />
+    </g>
+    <g id="edge14" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M937.99,-107.37C937.99,-107.37 937.99,-60.57 937.99,-60.57" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="940.62,-60.57 937.99,-53.07 935.37,-60.57 940.62,-60.57" />
+    </g>
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M628.99,-777.45C628.99,-777.45 628.99,-730.54 628.99,-730.54" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="631.62,-730.54 628.99,-723.04 626.37,-730.54 631.62,-730.54" />
+    </g>
+    <g id="node1" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M201.98,-720.13C201.98,-720.13 12,-720.13 12,-720.13 6,-720.13 0,-714.13 0,-708.13 0,-708.13 0,-656.1 0,-656.1 0,-650.1 6,-644.1 12,-644.1 12,-644.1 201.98,-644.1 201.98,-644.1 207.98,-644.1 213.98,-650.1 213.98,-656.1 213.98,-656.1 213.98,-708.13 213.98,-708.13 213.98,-714.13 207.98,-720.13 201.98,-720.13" />
+      <text xml:space="preserve" text-anchor="middle" x="106.98999786376953" y="-689.39" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">:adapters:web</text>
+      <text xml:space="preserve" text-anchor="middle" x="106.98999786376953" y="-663.99" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#31559F">REST Controller</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#FFF7ED" stroke="#C98A2B" stroke-width="1.4" d="M489,-720.13C489,-720.13 248.98,-720.13 248.98,-720.13 242.98,-720.13 236.98,-714.13 236.98,-708.13 236.98,-708.13 236.98,-656.1 236.98,-656.1 236.98,-650.1 242.98,-644.1 248.98,-644.1 248.98,-644.1 489,-644.1 489,-644.1 495,-644.1 501,-650.1 501,-656.1 501,-656.1 501,-708.13 501,-708.13 501,-714.13 495,-720.13 489,-720.13" />
+      <text xml:space="preserve" text-anchor="middle" x="368.99000549316406" y="-689.39" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">:adapters:scheduling</text>
+      <text xml:space="preserve" text-anchor="middle" x="368.99000549316406" y="-663.99" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#9A620A">Scheduler</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M721.5,-720.13C721.5,-720.13 536.48,-720.13 536.48,-720.13 530.48,-720.13 524.48,-714.13 524.48,-708.13 524.48,-708.13 524.48,-656.1 524.48,-656.1 524.48,-650.1 530.48,-644.1 536.48,-644.1 536.48,-644.1 721.5,-644.1 721.5,-644.1 727.5,-644.1 733.5,-650.1 733.5,-656.1 733.5,-656.1 733.5,-708.13 733.5,-708.13 733.5,-714.13 727.5,-720.13 721.5,-720.13" />
+      <text xml:space="preserve" text-anchor="middle" x="628.989990234375" y="-689.39" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">:adapters:kafka</text>
+      <text xml:space="preserve" text-anchor="middle" x="628.989990234375" y="-663.99" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#31559F">Kafka Consumer</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M444.98,-586.1C444.98,-586.1 293.01,-586.1 293.01,-586.1 287.01,-586.1 281.01,-580.1 281.01,-574.1 281.01,-574.1 281.01,-522.06 281.01,-522.06 281.01,-516.06 287.01,-510.06 293.01,-510.06 293.01,-510.06 444.98,-510.06 444.98,-510.06 450.98,-510.06 456.98,-516.06 456.98,-522.06 456.98,-522.06 456.98,-574.1 456.98,-574.1 456.98,-580.1 450.98,-586.1 444.98,-586.1" />
+      <text xml:space="preserve" text-anchor="middle" x="368.99501037597656" y="-555.36" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">:application</text>
+      <text xml:space="preserve" text-anchor="middle" x="368.99501037597656" y="-529.96" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#31559F">Inbound Port</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M482.99,-452.06C482.99,-452.06 254.99,-452.06 254.99,-452.06 248.99,-452.06 242.99,-446.06 242.99,-440.06 242.99,-440.06 242.99,-388.03 242.99,-388.03 242.99,-382.03 248.99,-376.03 254.99,-376.03 254.99,-376.03 482.99,-376.03 482.99,-376.03 488.99,-376.03 494.99,-382.03 494.99,-388.03 494.99,-388.03 494.99,-440.06 494.99,-440.06 494.99,-446.06 488.99,-452.06 482.99,-452.06" />
+      <text xml:space="preserve" text-anchor="middle" x="368.98999786376953" y="-421.32" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">:application</text>
+      <text xml:space="preserve" text-anchor="middle" x="368.98999786376953" y="-395.92" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#31559F">Application Service</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M374.5,-318.03C374.5,-318.03 99.48,-318.03 99.48,-318.03 93.48,-318.03 87.48,-312.03 87.48,-306.03 87.48,-306.03 87.48,-254 87.48,-254 87.48,-248 93.48,-242 99.48,-242 99.48,-242 374.5,-242 374.5,-242 380.5,-242 386.5,-248 386.5,-254 386.5,-254 386.5,-306.03 386.5,-306.03 386.5,-312.03 380.5,-318.03 374.5,-318.03" />
+      <text xml:space="preserve" text-anchor="middle" x="236.98999786376953" y="-287.29" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">:domain</text>
+      <text xml:space="preserve" text-anchor="middle" x="236.98999786376953" y="-261.89" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#31559F">Aggregate · Value Object</text>
+    </g>
+    <g id="node7" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M247,-184C247,-184 26.99,-184 26.99,-184 20.99,-184 14.99,-178 14.99,-172 14.99,-172 14.99,-119.97 14.99,-119.97 14.99,-113.97 20.99,-107.97 26.99,-107.97 26.99,-107.97 247,-107.97 247,-107.97 253,-107.97 259,-113.97 259,-119.97 259,-119.97 259,-172 259,-172 259,-178 253,-184 247,-184" />
+      <text xml:space="preserve" text-anchor="middle" x="136.99499702453613" y="-153.26" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">:domain</text>
+      <text xml:space="preserve" text-anchor="middle" x="136.99499702453613" y="-127.86" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#6B21A8">Rule · Domain Event</text>
+    </g>
+    <g id="node8" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M664.98,-318.03C664.98,-318.03 503,-318.03 503,-318.03 497,-318.03 491,-312.03 491,-306.03 491,-306.03 491,-254 491,-254 491,-248 497,-242 503,-242 503,-242 664.98,-242 664.98,-242 670.98,-242 676.98,-248 676.98,-254 676.98,-254 676.98,-306.03 676.98,-306.03 676.98,-312.03 670.98,-318.03 664.98,-318.03" />
+      <text xml:space="preserve" text-anchor="middle" x="583.989990234375" y="-287.29" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">:application</text>
+      <text xml:space="preserve" text-anchor="middle" x="583.989990234375" y="-261.89" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#31559F">Outbound Port</text>
+    </g>
+    <g id="node9" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M544.48,-184C544.48,-184 293.51,-184 293.51,-184 287.51,-184 281.51,-178 281.51,-172 281.51,-172 281.51,-119.97 281.51,-119.97 281.51,-113.97 287.51,-107.97 293.51,-107.97 293.51,-107.97 544.48,-107.97 544.48,-107.97 550.48,-107.97 556.48,-113.97 556.48,-119.97 556.48,-119.97 556.48,-172 556.48,-172 556.48,-178 550.48,-184 544.48,-184" />
+      <text xml:space="preserve" text-anchor="middle" x="418.9949951171875" y="-153.26" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">:adapters:persistence</text>
+      <text xml:space="preserve" text-anchor="middle" x="418.9949951171875" y="-127.86" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#31559F">Exposed Adapter</text>
+    </g>
+    <g id="node10" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M776.5,-184C776.5,-184 591.48,-184 591.48,-184 585.48,-184 579.48,-178 579.48,-172 579.48,-172 579.48,-119.97 579.48,-119.97 579.48,-113.97 585.48,-107.97 591.48,-107.97 591.48,-107.97 776.5,-107.97 776.5,-107.97 782.5,-107.97 788.5,-113.97 788.5,-119.97 788.5,-119.97 788.5,-172 788.5,-172 788.5,-178 782.5,-184 776.5,-184" />
+      <text xml:space="preserve" text-anchor="middle" x="683.989990234375" y="-153.26" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">:adapters:kafka</text>
+      <text xml:space="preserve" text-anchor="middle" x="683.989990234375" y="-127.86" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#31559F">Kafka Producer</text>
+    </g>
+    <g id="node11" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M1052.5,-184C1052.5,-184 823.49,-184 823.49,-184 817.49,-184 811.49,-178 811.49,-172 811.49,-172 811.49,-119.97 811.49,-119.97 811.49,-113.97 817.49,-107.97 823.49,-107.97 823.49,-107.97 1052.5,-107.97 1052.5,-107.97 1058.5,-107.97 1064.5,-113.97 1064.5,-119.97 1064.5,-119.97 1064.5,-172 1064.5,-172 1064.5,-178 1058.5,-184 1052.5,-184" />
+      <text xml:space="preserve" text-anchor="middle" x="937.9949951171875" y="-153.26" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">:adapters:supplier</text>
+      <text xml:space="preserve" text-anchor="middle" x="937.9949951171875" y="-127.86" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#31559F">Supplier API Client</text>
+    </g>
+    <g id="node12" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M739.5,-828.1C739.5,-828.1 518.48,-828.1 518.48,-828.1 512.48,-828.1 506.48,-822.1 506.48,-816.1 506.48,-816.1 506.48,-790.13 506.48,-790.13 506.48,-784.13 512.48,-778.13 518.48,-778.13 518.48,-778.13 739.5,-778.13 739.5,-778.13 745.5,-778.13 751.5,-784.13 751.5,-790.13 751.5,-790.13 751.5,-816.1 751.5,-816.1 751.5,-822.1 745.5,-828.1 739.5,-828.1" />
+      <text xml:space="preserve" text-anchor="middle" x="628.9900054931641" y="-798.26" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Kafka inbound topic</text>
+    </g>
+    <g id="node13" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M487.99,-49.97C487.99,-49.97 349.99,-49.97 349.99,-49.97 343.99,-49.97 337.99,-43.97 337.99,-37.97 337.99,-37.97 337.99,-12 337.99,-12 337.99,-6 343.99,0 349.99,0 349.99,0 487.99,0 487.99,0 493.99,0 499.99,-6 499.99,-12 499.99,-12 499.99,-37.97 499.99,-37.97 499.99,-43.97 493.99,-49.97 487.99,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="418.989990234375" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">PostgreSQL</text>
+    </g>
+    <g id="node14" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M800.01,-49.97C800.01,-49.97 567.98,-49.97 567.98,-49.97 561.98,-49.97 555.98,-43.97 555.98,-37.97 555.98,-37.97 555.98,-12 555.98,-12 555.98,-6 561.98,0 567.98,0 567.98,0 800.01,0 800.01,0 806.01,0 812.01,-6 812.01,-12 812.01,-12 812.01,-37.97 812.01,-37.97 812.01,-43.97 806.01,-49.97 800.01,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="683.9949951171875" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Kafka outbound topic</text>
+    </g>
+    <g id="node15" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M1015.49,-49.97C1015.49,-49.97 860.5,-49.97 860.5,-49.97 854.5,-49.97 848.5,-43.97 848.5,-37.97 848.5,-37.97 848.5,-12 848.5,-12 848.5,-6 854.5,0 860.5,0 860.5,0 1015.49,0 1015.49,0 1021.49,0 1027.49,-6 1027.49,-12 1027.49,-12 1027.49,-37.97 1027.49,-37.97 1027.49,-43.97 1021.49,-49.97 1015.49,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="937.9949951171875" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Supplier API</text>
+    </g>
+  </g>
+</svg>

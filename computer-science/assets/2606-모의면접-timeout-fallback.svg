@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="552.0" height="574.0" viewBox="0.00 0.00 552.00 574.00" role="img" aria-labelledby="title description">
+  <title id="title">남은 deadline 안에서의 Provider 폴백</title>
+  <desc id="description">남은 deadline 안에서의 Provider 폴백。호출자 deadline: 10초; 1차 Provider: 최대 6초; 응답 반환; 응답 미커밋·폴백 가능·예산 남음?; 남은 예산 내 폴백 Provider 호출; 오류 반환</desc>
+  <rect width="552.0" height="574.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 554.13)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-554.13 531.89,-554.13 531.89,20.16 -20.16,20.16" />
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M128.48,-483.4C128.48,-483.4 128.48,-436.34 128.48,-436.34" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="131.11,-436.34 128.48,-428.84 125.86,-436.34 131.11,-436.34" />
+    </g>
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M129.5,-375.47C129.5,-375.47 129.5,-60.49 129.5,-60.49" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="132.13,-60.49 129.5,-52.99 126.88,-60.49 132.13,-60.49" />
+      <text xml:space="preserve" text-anchor="middle" x="107.52" y="-210.97" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">성공</text>
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M202.23,-375.36C202.23,-375.36 202.23,-328.44 202.23,-328.44" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="204.86,-328.44 202.23,-320.94 199.61,-328.44 204.86,-328.44" />
+      <text xml:space="preserve" text-anchor="middle" x="256.98" y="-341.78" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">실패·타임아웃</text>
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M285.48,-241.61C285.48,-241.61 285.48,-194.32 285.48,-194.32" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="288.11,-194.32 285.48,-186.82 282.86,-194.32 288.11,-194.32" />
+      <text xml:space="preserve" text-anchor="middle" x="300.97" y="-205.11" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">예</text>
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M423.89,-280C436.97,-280 445.47,-280 445.47,-280 445.47,-280 445.47,-25 445.47,-25 445.47,-25 430.98,-25 430.98,-25" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="430.98,-22.38 423.48,-25 430.98,-27.63 430.98,-22.38" />
+      <text xml:space="preserve" text-anchor="middle" x="473.94" y="-137.08" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">아니요</text>
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M190.48,-107.37C190.48,-107.37 190.48,-60.57 190.48,-60.57" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="193.11,-60.57 190.48,-53.07 187.86,-60.57 193.11,-60.57" />
+      <text xml:space="preserve" text-anchor="middle" x="168.23" y="-73.72" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">성공</text>
+    </g>
+    <g id="edge7" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M359.48,-107.37C359.48,-107.37 359.48,-60.57 359.48,-60.57" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="362.11,-60.57 359.48,-53.07 356.86,-60.57 362.11,-60.57" />
+      <text xml:space="preserve" text-anchor="middle" x="308.59" y="-79.87" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">실패·deadline</text>
+      <text xml:space="preserve" text-anchor="middle" x="308.59" y="-61.87" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">도달</text>
+    </g>
+    <g id="node1" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M240.97,-533.97C240.97,-533.97 16,-533.97 16,-533.97 10,-533.97 4,-527.97 4,-521.97 4,-521.97 4,-496 4,-496 4,-490 10,-484 16,-484 16,-484 240.97,-484 240.97,-484 246.97,-484 252.97,-490 252.97,-496 252.97,-496 252.97,-521.97 252.97,-521.97 252.97,-527.97 246.97,-533.97 240.97,-533.97" />
+      <text xml:space="preserve" text-anchor="middle" x="128.48500061035156" y="-504.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">호출자 deadline: 10초</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M244.97,-426C244.97,-426 12,-426 12,-426 6,-426 0,-420 0,-414 0,-414 0,-388.03 0,-388.03 0,-382.03 6,-376.03 12,-376.03 12,-376.03 244.97,-376.03 244.97,-376.03 250.97,-376.03 256.97,-382.03 256.97,-388.03 256.97,-388.03 256.97,-414 256.97,-414 256.97,-420 250.97,-426 244.97,-426" />
+      <text xml:space="preserve" text-anchor="middle" x="128.48500061035156" y="-396.17" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">1차 Provider: 최대 6초</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M225.47,-49.97C225.47,-49.97 127.5,-49.97 127.5,-49.97 121.5,-49.97 115.5,-43.97 115.5,-37.97 115.5,-37.97 115.5,-12 115.5,-12 115.5,-6 121.5,0 127.5,0 127.5,0 225.47,0 225.47,0 231.47,0 237.47,-6 237.47,-12 237.47,-12 237.47,-37.97 237.47,-37.97 237.47,-43.97 231.47,-49.97 225.47,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="176.48500061035156" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">응답 반환</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#fbf5ff" stroke="#8b3dff" stroke-width="1.4" d="M411.47,-318.03C411.47,-318.03 159.5,-318.03 159.5,-318.03 153.5,-318.03 147.5,-312.03 147.5,-306.03 147.5,-306.03 147.5,-254 147.5,-254 147.5,-248 153.5,-242 159.5,-242 159.5,-242 411.47,-242 411.47,-242 417.47,-242 423.47,-248 423.47,-254 423.47,-254 423.47,-306.03 423.47,-306.03 423.47,-312.03 417.47,-318.03 411.47,-318.03" />
+      <text xml:space="preserve" text-anchor="middle" x="285.48500061035156" y="-287.29" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">응답 미커밋·폴백 가능·예산</text>
+      <text xml:space="preserve" text-anchor="middle" x="285.48500061035156" y="-261.89" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#6b21a8">남음?</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M415.47,-184C415.47,-184 155.5,-184 155.5,-184 149.5,-184 143.5,-178 143.5,-172 143.5,-172 143.5,-119.97 143.5,-119.97 143.5,-113.97 149.5,-107.97 155.5,-107.97 155.5,-107.97 415.47,-107.97 415.47,-107.97 421.47,-107.97 427.47,-113.97 427.47,-119.97 427.47,-119.97 427.47,-172 427.47,-172 427.47,-178 421.47,-184 415.47,-184" />
+      <text xml:space="preserve" text-anchor="middle" x="285.48500061035156" y="-153.26" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">남은 예산 내 폴백 Provider</text>
+      <text xml:space="preserve" text-anchor="middle" x="285.48500061035156" y="-127.86" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#31559f">호출</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#eff6ff" stroke="#3b5ba5" stroke-width="1.4" d="M408.47,-49.97C408.47,-49.97 310.5,-49.97 310.5,-49.97 304.5,-49.97 298.5,-43.97 298.5,-37.97 298.5,-37.97 298.5,-12 298.5,-12 298.5,-6 304.5,0 310.5,0 310.5,0 408.47,0 408.47,0 414.47,0 420.47,-6 420.47,-12 420.47,-12 420.47,-37.97 420.47,-37.97 420.47,-43.97 414.47,-49.97 408.47,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="359.48500061035156" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213e">오류 반환</text>
+    </g>
+  </g>
+</svg>

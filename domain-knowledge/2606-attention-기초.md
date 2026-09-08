@@ -20,21 +20,16 @@
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    query["현재 토큰: 그것"] --> weights["문맥에 따른 가중치 계산"]
-    context["참고 토큰: 개발자 · 버그 · 고쳤다"] --> weights
-    weights --> mix["각 토큰의 정보를 가중합"]
-    mix --> output["그것의 문맥 표현"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class query,weights,context,mix,output app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_query["현재 토큰: 그것"]
+  n_weights["문맥에 따른 가중치 계산"]
+  n_context["참고 토큰:<br/>개발자 · 버그 · 고쳤다"]
+  n_mix["각 토큰의 정보를 가중합"]
+  n_output["그것의 문맥 표현"]
+  n_query --> n_weights
+  n_context --> n_weights
+  n_weights --> n_mix
+  n_mix --> n_output
 ```
 
 **세 줄 요약:**
@@ -88,24 +83,22 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    q["현재 토큰 Q"] --> score["Q와 K의 내적 · 스케일 조정"]
-    k["참고 토큰 K"] --> score
-    score --> mask["causal mask"]
-    mask --> softmax["softmax: 가중치"]
-    softmax --> sum["V의 가중합"]
-    v["참고 토큰 V"] --> sum
-    sum --> output["attention 출력"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class q,score,k,mask,softmax,sum,v,output app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400, "rankSpacing": 30}}}%%
+  n_q["현재 토큰 Q"]
+  n_score["Q와 K의 내적<br/>· 스케일 조정"]
+  n_k["참고 토큰 K"]
+  n_mask["causal mask"]
+  n_softmax["softmax: 가중치"]
+  n_sum["V의 가중합"]
+  n_v["참고 토큰 V"]
+  n_output["attention 출력"]
+  n_q --> n_score
+  n_k --> n_score
+  n_score --> n_mask
+  n_mask --> n_softmax
+  n_softmax --> n_sum
+  n_v --> n_sum
+  n_sum --> n_output
 ```
 
 ### 3.2 작은 예시로 한 스텝 따라가기
@@ -173,21 +166,17 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "clusterBkg": "#F8FAFC", "clusterBorder": "#CBD5E1"}}}%%
-  subgraph canvas[" "]
-    direction LR
-    current["위치 t의 Q"] --> past["위치 1~t의 K와 비교"]
-    past --> weights["softmax 가중치"]
-    weights --> values["위치 1~t의 V 가중합"]
-    future["위치 t 이후의 score"] --> blocked["마스크 처리: 가중치 0"]
-  end
-  style canvas fill:#ffffff,stroke:#ffffff,color:#111827
-  linkStyle default stroke:#3B5BA5,stroke-width:1.5px
-  classDef app fill:#EFF6FF,stroke:#3B5BA5,stroke-width:1px,color:#16213E
-  class current,past,weights,values,future,blocked app
-  classDef db fill:#F0FDF4,stroke:#3F8E55,stroke-width:1px,color:#16213E
-  classDef policy fill:#FAF5FF,stroke:#A855F7,stroke-width:1px,color:#16213E
-  classDef worker fill:#FFF7ED,stroke:#C98A2B,stroke-width:1px,color:#16213E
+%%{init: {"flowchart": {"curve": "stepAfter", "wrappingWidth": 400}}}%%
+  n_current["위치 t의 Q"]
+  n_past["위치 1~t의 K와 비교"]
+  n_weights["softmax 가중치"]
+  n_values["위치 1~t의 V 가중합"]
+  n_future["위치 t 이후의 score"]
+  n_blocked["마스크 처리: 가중치 0"]
+  n_current --> n_past
+  n_past --> n_weights
+  n_weights --> n_values
+  n_future --> n_blocked
 ```
 
 > 이 "과거만 본다" 성질이 KV 캐시를 가능하게 한다. 과거 토큰의 K·V는 새 토큰이 추가돼도 **재계산할 필요가 없다** → 그래서 캐싱이 무손실로 성립한다.

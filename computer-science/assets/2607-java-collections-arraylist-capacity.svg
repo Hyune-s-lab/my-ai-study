@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="240" viewBox="0 0 980 240" role="img" aria-labelledby="title description">
+  <title id="title">ArrayList의 size와 capacity</title>
+  <desc id="description">ArrayList의 size와 capacity。색은 처리와 저장소의 역할을 구분하며, 선은 명시된 관계만 나타낸다.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 4 L0 8Z" fill="#3B5BA5" />
+    </marker>
+  </defs>
+  <rect width="980" height="240" fill="#FFFFFF" />
+  <rect x="24" y="24" width="932" height="190" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2" />
+  <text x="44" y="56" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="19" font-weight="700" fill="#16213E" text-anchor="start">ArrayList: capacity 10, size 3</text>
+  <text x="88" y="97" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="15" font-weight="400" fill="#31559F" text-anchor="middle">0</text>
+  <g class="node">
+    <rect x="48" y="112" width="80" height="56" rx="7" fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" />
+    <text x="88" y="146.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">1</text>
+  </g>
+  <text x="176" y="97" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="15" font-weight="400" fill="#31559F" text-anchor="middle">1</text>
+  <g class="node">
+    <rect x="136" y="112" width="80" height="56" rx="7" fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" />
+    <text x="176" y="146.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">2</text>
+  </g>
+  <text x="264" y="97" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="15" font-weight="400" fill="#31559F" text-anchor="middle">2</text>
+  <g class="node">
+    <rect x="224" y="112" width="80" height="56" rx="7" fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" />
+    <text x="264" y="146.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">3</text>
+  </g>
+  <text x="352" y="97" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="15" font-weight="400" fill="#31559F" text-anchor="middle">3</text>
+  <g class="node">
+    <rect x="312" y="112" width="80" height="56" rx="7" fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" />
+    <text x="352" y="146.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">—</text>
+  </g>
+  <text x="440" y="97" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="15" font-weight="400" fill="#31559F" text-anchor="middle">4</text>
+  <g class="node">
+    <rect x="400" y="112" width="80" height="56" rx="7" fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" />
+    <text x="440" y="146.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">—</text>
+  </g>
+  <text x="528" y="97" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="15" font-weight="400" fill="#31559F" text-anchor="middle">5</text>
+  <g class="node">
+    <rect x="488" y="112" width="80" height="56" rx="7" fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" />
+    <text x="528" y="146.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">—</text>
+  </g>
+  <text x="616" y="97" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="15" font-weight="400" fill="#31559F" text-anchor="middle">6</text>
+  <g class="node">
+    <rect x="576" y="112" width="80" height="56" rx="7" fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" />
+    <text x="616" y="146.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">—</text>
+  </g>
+  <text x="704" y="97" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="15" font-weight="400" fill="#31559F" text-anchor="middle">7</text>
+  <g class="node">
+    <rect x="664" y="112" width="80" height="56" rx="7" fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" />
+    <text x="704" y="146.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">—</text>
+  </g>
+  <text x="792" y="97" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="15" font-weight="400" fill="#31559F" text-anchor="middle">8</text>
+  <g class="node">
+    <rect x="752" y="112" width="80" height="56" rx="7" fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" />
+    <text x="792" y="146.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">—</text>
+  </g>
+  <text x="880" y="97" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="15" font-weight="400" fill="#31559F" text-anchor="middle">9</text>
+  <g class="node">
+    <rect x="840" y="112" width="80" height="56" rx="7" fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" />
+    <text x="880" y="146.0" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="18" font-weight="700" fill="#16213E" text-anchor="middle">—</text>
+  </g>
+  <text x="180" y="197" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#31559F" text-anchor="middle">원소 3개 · size</text>
+  <text x="664" y="197" font-family="Arial, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="16" font-weight="400" fill="#6B21A8" text-anchor="middle">빈 슬롯 7개</text>
+</svg>

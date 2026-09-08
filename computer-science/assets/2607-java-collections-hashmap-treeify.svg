@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="668.0" height="738.0" viewBox="0.00 0.00 668.00 738.00" role="img" aria-labelledby="title description">
+  <title id="title">HashMap 버킷의 트리화와 리스트 전환</title>
+  <desc id="description">HashMap 버킷의 트리화와 리스트 전환。충돌 버킷에 새 원소 삽입; 트리화 검사 조건 도달?; 리스트 유지; 테이블 용량 64 이상?; 먼저 테이블 확장; Red-Black Tree로 전환; resize로 버킷 분할; 분할된 원소 수 6 이하?; 분할 버킷을 리스트로 전환; 트리 유지</desc>
+  <rect width="668.0" height="738.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 717.94)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-717.94 648.13,-717.94 648.13,20.16 -20.16,20.16" />
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M123.98,-647.21C123.98,-647.21 123.98,-600.15 123.98,-600.15" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="126.61,-600.15 123.98,-592.65 121.36,-600.15 126.61,-600.15" />
+    </g>
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M90.98,-539.24C90.98,-539.24 90.98,-492.18 90.98,-492.18" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="93.61,-492.18 90.98,-484.68 88.36,-492.18 93.61,-492.18" />
+      <text xml:space="preserve" text-anchor="middle" x="119.45" y="-502.74" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">아니요</text>
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M212.49,-539.24C212.49,-539.24 212.49,-492.18 212.49,-492.18" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="215.12,-492.18 212.49,-484.68 209.87,-492.18 215.12,-492.18" />
+      <text xml:space="preserve" text-anchor="middle" x="231.36" y="-505.59" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">예</text>
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M245.25,-431.27C245.25,-431.27 245.25,-384.21 245.25,-384.21" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="247.87,-384.21 245.25,-376.71 242.62,-384.21 247.87,-384.21" />
+      <text xml:space="preserve" text-anchor="middle" x="216.78" y="-394.77" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">아니요</text>
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M367.48,-431.27C367.48,-431.27 367.48,-384.21 367.48,-384.21" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="370.11,-384.21 367.48,-376.71 364.86,-384.21 370.11,-384.21" />
+      <text xml:space="preserve" text-anchor="middle" x="377.36" y="-397.62" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">예</text>
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M459.98,-323.3C459.98,-323.3 459.98,-276.24 459.98,-276.24" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="462.61,-276.24 459.98,-268.74 457.36,-276.24 462.61,-276.24" />
+    </g>
+    <g id="edge7" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M459.98,-215.33C459.98,-215.33 459.98,-168.28 459.98,-168.28" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="462.61,-168.28 459.98,-160.78 457.36,-168.28 462.61,-168.28" />
+    </g>
+    <g id="edge8" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M412.98,-107.37C412.98,-107.37 412.98,-60.31 412.98,-60.31" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="415.61,-60.31 412.98,-52.81 410.36,-60.31 415.61,-60.31" />
+      <text xml:space="preserve" text-anchor="middle" x="397.49" y="-70.87" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">예</text>
+    </g>
+    <g id="edge9" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M541.49,-107.37C541.49,-107.37 541.49,-60.31 541.49,-60.31" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="544.12,-60.31 541.49,-52.81 538.87,-60.31 544.12,-60.31" />
+      <text xml:space="preserve" text-anchor="middle" x="569.96" y="-70.87" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">아니요</text>
+    </g>
+    <g id="node1" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M235.97,-697.78C235.97,-697.78 12,-697.78 12,-697.78 6,-697.78 0,-691.78 0,-685.78 0,-685.78 0,-659.81 0,-659.81 0,-653.81 6,-647.81 12,-647.81 12,-647.81 235.97,-647.81 235.97,-647.81 241.97,-647.81 247.97,-653.81 247.97,-659.81 247.97,-659.81 247.97,-685.78 247.97,-685.78 247.97,-691.78 241.97,-697.78 235.97,-697.78" />
+      <text xml:space="preserve" text-anchor="middle" x="123.98500061035156" y="-667.94" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">충돌 버킷에 새 원소 삽입</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M229.49,-589.81C229.49,-589.81 18.48,-589.81 18.48,-589.81 12.48,-589.81 6.48,-583.81 6.48,-577.81 6.48,-577.81 6.48,-551.84 6.48,-551.84 6.48,-545.84 12.48,-539.84 18.48,-539.84 18.48,-539.84 229.49,-539.84 229.49,-539.84 235.49,-539.84 241.49,-545.84 241.49,-551.84 241.49,-551.84 241.49,-577.81 241.49,-577.81 241.49,-583.81 235.49,-589.81 229.49,-589.81" />
+      <text xml:space="preserve" text-anchor="middle" x="123.98500490188599" y="-559.97" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">트리화 검사 조건 도달?</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M148.97,-481.84C148.97,-481.84 33,-481.84 33,-481.84 27,-481.84 21,-475.84 21,-469.84 21,-469.84 21,-443.87 21,-443.87 21,-437.87 27,-431.87 33,-431.87 33,-431.87 148.97,-431.87 148.97,-431.87 154.97,-431.87 160.97,-437.87 160.97,-443.87 160.97,-443.87 160.97,-469.84 160.97,-469.84 160.97,-475.84 154.97,-481.84 148.97,-481.84" />
+      <text xml:space="preserve" text-anchor="middle" x="90.98500061035156" y="-452.01" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">리스트 유지</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M392.47,-481.84C392.47,-481.84 195.5,-481.84 195.5,-481.84 189.5,-481.84 183.5,-475.84 183.5,-469.84 183.5,-469.84 183.5,-443.87 183.5,-443.87 183.5,-437.87 189.5,-431.87 195.5,-431.87 195.5,-431.87 392.47,-431.87 392.47,-431.87 398.47,-431.87 404.47,-437.87 404.47,-443.87 404.47,-443.87 404.47,-469.84 404.47,-469.84 404.47,-475.84 398.47,-481.84 392.47,-481.84" />
+      <text xml:space="preserve" text-anchor="middle" x="293.98500061035156" y="-452.01" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">테이블 용량 64 이상?</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M294.99,-373.87C294.99,-373.87 136.98,-373.87 136.98,-373.87 130.98,-373.87 124.98,-367.87 124.98,-361.87 124.98,-361.87 124.98,-335.9 124.98,-335.9 124.98,-329.9 130.98,-323.9 136.98,-323.9 136.98,-323.9 294.99,-323.9 294.99,-323.9 300.99,-323.9 306.99,-329.9 306.99,-335.9 306.99,-335.9 306.99,-361.87 306.99,-361.87 306.99,-367.87 300.99,-373.87 294.99,-373.87" />
+      <text xml:space="preserve" text-anchor="middle" x="215.98499298095703" y="-344.04" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">먼저 테이블 확장</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M577.48,-373.87C577.48,-373.87 342.49,-373.87 342.49,-373.87 336.49,-373.87 330.49,-367.87 330.49,-361.87 330.49,-361.87 330.49,-335.9 330.49,-335.9 330.49,-329.9 336.49,-323.9 342.49,-323.9 342.49,-323.9 577.48,-323.9 577.48,-323.9 583.48,-323.9 589.48,-329.9 589.48,-335.9 589.48,-335.9 589.48,-361.87 589.48,-361.87 589.48,-367.87 583.48,-373.87 577.48,-373.87" />
+      <text xml:space="preserve" text-anchor="middle" x="459.9849853515625" y="-344.04" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Red-Black Tree로 전환</text>
+    </g>
+    <g id="node7" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M553.97,-265.9C553.97,-265.9 366,-265.9 366,-265.9 360,-265.9 354,-259.9 354,-253.9 354,-253.9 354,-227.94 354,-227.94 354,-221.94 360,-215.94 366,-215.94 366,-215.94 553.97,-215.94 553.97,-215.94 559.97,-215.94 565.97,-221.94 565.97,-227.94 565.97,-227.94 565.97,-253.9 565.97,-253.9 565.97,-259.9 559.97,-265.9 553.97,-265.9" />
+      <text xml:space="preserve" text-anchor="middle" x="459.9849853515625" y="-236.07" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">resize로 버킷 분할</text>
+    </g>
+    <g id="node8" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M564.98,-157.94C564.98,-157.94 354.98,-157.94 354.98,-157.94 348.98,-157.94 342.98,-151.94 342.98,-145.94 342.98,-145.94 342.98,-119.97 342.98,-119.97 342.98,-113.97 348.98,-107.97 354.98,-107.97 354.98,-107.97 564.98,-107.97 564.98,-107.97 570.98,-107.97 576.98,-113.97 576.98,-119.97 576.98,-119.97 576.98,-145.94 576.98,-145.94 576.98,-151.94 570.98,-157.94 564.98,-157.94" />
+      <text xml:space="preserve" text-anchor="middle" x="459.97999572753906" y="-128.1" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">분할된 원소 수 6 이하?</text>
+    </g>
+    <g id="node9" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M470.98,-49.97C470.98,-49.97 234.99,-49.97 234.99,-49.97 228.99,-49.97 222.99,-43.97 222.99,-37.97 222.99,-37.97 222.99,-12 222.99,-12 222.99,-6 228.99,0 234.99,0 234.99,0 470.98,0 470.98,0 476.98,0 482.98,-6 482.98,-12 482.98,-12 482.98,-37.97 482.98,-37.97 482.98,-43.97 476.98,-49.97 470.98,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="352.9850158691406" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">분할 버킷을 리스트로 전환</text>
+    </g>
+    <g id="node10" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M615.97,-49.97C615.97,-49.97 518,-49.97 518,-49.97 512,-49.97 506,-43.97 506,-37.97 506,-37.97 506,-12 506,-12 506,-6 512,0 518,0 518,0 615.97,0 615.97,0 621.97,0 627.97,-6 627.97,-12 627.97,-12 627.97,-37.97 627.97,-37.97 627.97,-43.97 621.97,-49.97 615.97,-49.97" />
+      <text xml:space="preserve" text-anchor="middle" x="566.9849853515625" y="-20.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">트리 유지</text>
+    </g>
+  </g>
+</svg>

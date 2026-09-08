@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1278.0" height="899.0" viewBox="0.00 0.00 1278.00 899.00" role="img" aria-labelledby="title description">
+  <title id="title">Gateway를 겸하는 Control Plane과 Data Plane</title>
+  <desc id="description">Gateway를 겸하는 Control Plane과 Data Plane。Customer Team; Admin Console; API Key 인증 / Rate Limit · Balance Control; Admin API · Usage Query; Record ingest; Settlement worker; Provider inference 호출; 성공 후 rough debit · record 전달; Redis / Rate Limit · Account Balance Cache; Durable MQ: Inference Record; PostgreSQL / Account · Record · Charge · Ledger; Model Provider</desc>
+  <rect width="1278.0" height="899.0" fill="#FFFFFF" />
+  <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(20.16 879.15)">
+    <polygon fill="#ffffff" stroke="none" points="-20.16,20.16 -20.16,-879.15 1258.15,-879.15 1258.15,20.16 -20.16,20.16" />
+    <g id="clust1" class="cluster">
+      <path fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" d="M658,-148.02C658,-148.02 1018,-148.02 1018,-148.02 1024,-148.02 1030,-154.02 1030,-160.02 1030,-160.02 1030,-751.02 1030,-751.02 1030,-757.02 1024,-763.02 1018,-763.02 1018,-763.02 658,-763.02 658,-763.02 652,-763.02 646,-757.02 646,-751.02 646,-751.02 646,-160.02 646,-160.02 646,-154.02 652,-148.02 658,-148.02" />
+      <text xml:space="preserve" text-anchor="start" x="666" y="-740.97" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="19.00" fill="#16213e">Control Plane: Gateway 겸용</text>
+    </g>
+    <g id="clust2" class="cluster">
+      <path fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" d="M20,-373.96C20,-373.96 588,-373.96 588,-373.96 594,-373.96 600,-379.96 600,-385.96 600,-385.96 600,-544.49 600,-544.49 600,-550.49 594,-556.49 588,-556.49 588,-556.49 20,-556.49 20,-556.49 14,-556.49 8,-550.49 8,-544.49 8,-544.49 8,-385.96 8,-385.96 8,-379.96 14,-373.96 20,-373.96" />
+      <text xml:space="preserve" text-anchor="start" x="28" y="-534.44" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="19.00" fill="#16213e">Data Plane</text>
+    </g>
+    <g id="edge1" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M838 -809.02001953125 V-797.02001953125 H1044 V-640.5050048828125 H1015.989990234375" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="1007.989990234375,-640.5050048828125 1015.989990234375,-643.5050048828125 1015.989990234375,-637.5050048828125" />
+    </g>
+    <g id="edge2" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M1105.5,-615.19C1105.5,-560.04 1105.5,-434 1105.5,-434 1105.5,-434 993.02,-434 993.02,-434" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="993.02,-431.38 985.52,-434 993.02,-436.63 993.02,-431.38" />
+    </g>
+    <g id="edge9" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M564.17,-303C564.17,-303 735.57,-303 735.57,-303" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="735.57,-305.63 743.07,-303 735.57,-300.38 735.57,-305.63" />
+    </g>
+    <g id="edge6" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M224,-615.18C224,-615.18 224,-482.46 224,-482.46" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="226.63,-482.46 224,-474.96 221.38,-482.46 226.63,-482.46" />
+      <text xml:space="preserve" text-anchor="middle" x="259.38" y="-568.24" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">성공 결과</text>
+    </g>
+    <g id="edge3" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M685,-601.83C685,-601.83 685,-112.46 685,-112.46" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="687.63,-112.46 685,-104.96 682.38,-112.46 687.63,-112.46" />
+      <text xml:space="preserve" text-anchor="middle" x="752.13" y="-341.33" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">판정 상태 조회·갱신</text>
+    </g>
+    <g id="edge4" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M676.5,-602.15C676.5,-542.43 676.5,-434 676.5,-434 676.5,-434 587.97,-434 587.97,-434" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="587.97,-431.38 580.47,-434 587.97,-436.63 587.97,-431.38" />
+      <text xml:space="preserve" text-anchor="middle" x="596.65" y="-446.00" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">허용</text>
+    </g>
+    <g id="edge13" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M972.34,-408.55C972.34,-408.55 972.34,-112.57 972.34,-112.57" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="974.97,-112.57 972.34,-105.07 969.72,-112.57 974.97,-112.57" />
+    </g>
+    <g id="edge10" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M930.52,-303C948.65,-303 962.18,-303 962.18,-303 962.18,-303 962.18,-112.54 962.18,-112.54" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="964.8,-112.54 962.18,-105.04 959.55,-112.54 964.8,-112.54" />
+      <text xml:space="preserve" text-anchor="middle" x="908.40" y="-234.16" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">PENDING 저장</text>
+    </g>
+    <g id="edge12" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M730.25,-169.6C730.25,-169.6 730.25,-112.62 730.25,-112.62" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="732.88,-112.62 730.25,-105.12 727.63,-112.62 732.88,-112.62" />
+      <text xml:space="preserve" text-anchor="middle" x="771" y="-143" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="14" fill="#31559f">정산 후</text>
+      <text xml:space="preserve" text-anchor="middle" x="771" y="-124" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="14" fill="#31559f">cache 교체</text>
+    </g>
+    <g id="edge11" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M894.51,-169.6C894.51,-169.6 894.51,-112.62 894.51,-112.62" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="897.14,-112.62 894.51,-105.12 891.89,-112.62 897.14,-112.62" />
+      <text xml:space="preserve" text-anchor="middle" x="851" y="-143" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="14" fill="#31559f">정산</text>
+      <text xml:space="preserve" text-anchor="middle" x="851" y="-124" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="14" fill="#31559f">transaction</text>
+    </g>
+    <g id="edge5" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M333.99,-459.3C333.99,-459.3 333.99,-605.05 333.99,-605.05" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="331.37,-605.05 333.99,-612.55 336.62,-605.05 331.37,-605.05" />
+    </g>
+    <g id="edge7" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" d="M274.17,-402C397.7,-402 570.5,-402 570.5,-402 570.5,-402 570.5,-112.35 570.5,-112.35" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="573.12,-112.35 570.5,-104.85 567.87,-112.35 573.12,-112.35" />
+      <text xml:space="preserve" text-anchor="middle" x="322.17" y="-381.00" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">rough debit</text>
+    </g>
+    <g id="edge8" class="edge">
+      <path fill="none" stroke="#3b5ba5" stroke-width="1.6" stroke-dasharray="5,2" d="M245.01,-395.38C245.01,-395.38 245.01,-338.4 245.01,-338.4" />
+      <polygon fill="#3b5ba5" stroke="#3b5ba5" stroke-width="1.6" points="247.63,-338.4 245.01,-330.9 242.38,-338.4 247.63,-338.4" />
+      <text xml:space="preserve" text-anchor="middle" x="289.37" y="-350.88" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="15.00" fill="#31559f">record 발행</text>
+    </g>
+    <g id="node1" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M918.99,-858.99C918.99,-858.99 757.01,-858.99 757.01,-858.99 751.01,-858.99 745.01,-852.99 745.01,-846.99 745.01,-846.99 745.01,-821.02 745.01,-821.02 745.01,-815.02 751.01,-809.02 757.01,-809.02 757.01,-809.02 918.99,-809.02 918.99,-809.02 924.99,-809.02 930.99,-815.02 930.99,-821.02 930.99,-821.02 930.99,-846.99 930.99,-846.99 930.99,-852.99 924.99,-858.99 918.99,-858.99" />
+      <text xml:space="preserve" text-anchor="middle" x="838" y="-829.16" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Customer Team</text>
+    </g>
+    <g id="node2" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M1225.99,-665.49C1225.99,-665.49 1064.01,-665.49 1064.01,-665.49 1058.01,-665.49 1052.01,-659.49 1052.01,-653.49 1052.01,-653.49 1052.01,-627.52 1052.01,-627.52 1052.01,-621.52 1058.01,-615.52 1064.01,-615.52 1064.01,-615.52 1225.99,-615.52 1225.99,-615.52 1231.99,-615.52 1237.99,-621.52 1237.99,-627.52 1237.99,-627.52 1237.99,-653.49 1237.99,-653.49 1237.99,-659.49 1231.99,-665.49 1225.99,-665.49" />
+      <text xml:space="preserve" text-anchor="middle" x="1145" y="-635.66" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Admin Console</text>
+    </g>
+    <g id="node3" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M724.51,-102.02C724.51,-102.02 493.49,-102.02 493.49,-102.02 487.49,-102.02 481.49,-96.02 481.49,-90.02 481.49,-90.02 481.49,-12 481.49,-12 481.49,-6 487.49,0 493.49,0 493.49,0 724.51,0 724.51,0 730.51,0 736.51,-6 736.51,-12 736.51,-12 736.51,-90.02 736.51,-90.02 736.51,-96.02 730.51,-102.02 724.51,-102.02" />
+      <text xml:space="preserve" text-anchor="middle" x="609" y="-70.41" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Redis</text>
+      <text xml:space="preserve" text-anchor="middle" x="609" y="-45.01" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#166534">Rate Limit · Account</text>
+      <text xml:space="preserve" text-anchor="middle" x="609" y="-20.76" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#166534">Balance Cache</text>
+    </g>
+    <g id="node4" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M551.48,-327.96C551.48,-327.96 228.52,-327.96 228.52,-327.96 222.52,-327.96 216.52,-321.96 216.52,-315.96 216.52,-315.96 216.52,-289.99 216.52,-289.99 216.52,-283.99 222.52,-277.99 228.52,-277.99 228.52,-277.99 551.48,-277.99 551.48,-277.99 557.48,-277.99 563.48,-283.99 563.48,-289.99 563.48,-289.99 563.48,-315.96 563.48,-315.96 563.48,-321.96 557.48,-327.96 551.48,-327.96" />
+      <text xml:space="preserve" text-anchor="middle" x="389.99998474121094" y="-298.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Durable MQ: Inference Record</text>
+    </g>
+    <g id="node5" class="node">
+      <path fill="#F0FDF4" stroke="#3F8E55" stroke-width="1.4" d="M1146.99,-102.02C1146.99,-102.02 849.01,-102.02 849.01,-102.02 843.01,-102.02 837.01,-96.02 837.01,-90.02 837.01,-90.02 837.01,-12 837.01,-12 837.01,-6 843.01,0 849.01,0 849.01,0 1146.99,0 1146.99,0 1152.99,0 1158.99,-6 1158.99,-12 1158.99,-12 1158.99,-90.02 1158.99,-90.02 1158.99,-96.02 1152.99,-102.02 1146.99,-102.02" />
+      <text xml:space="preserve" text-anchor="middle" x="998" y="-70.41" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">PostgreSQL</text>
+      <text xml:space="preserve" text-anchor="middle" x="998" y="-45.01" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#166534">Account · Record · Charge ·</text>
+      <text xml:space="preserve" text-anchor="middle" x="998" y="-20.76" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#166534">Ledger</text>
+    </g>
+    <g id="node6" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M359.5,-665.49C359.5,-665.49 186.5,-665.49 186.5,-665.49 180.5,-665.49 174.5,-659.49 174.5,-653.49 174.5,-653.49 174.5,-627.52 174.5,-627.52 174.5,-621.52 180.5,-615.52 186.5,-615.52 186.5,-615.52 359.5,-615.52 359.5,-615.52 365.5,-615.52 371.5,-621.52 371.5,-627.52 371.5,-627.52 371.5,-653.49 371.5,-653.49 371.5,-659.49 365.5,-665.49 359.5,-665.49" />
+      <text xml:space="preserve" text-anchor="middle" x="273" y="-635.66" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Model Provider</text>
+    </g>
+    <g id="node7" class="node">
+      <path fill="#FBF5FF" stroke="#8B3DFF" stroke-width="1.4" d="M995.99,-678.52C995.99,-678.52 680.01,-678.52 680.01,-678.52 674.01,-678.52 668.01,-672.52 668.01,-666.52 668.01,-666.52 668.01,-614.49 668.01,-614.49 668.01,-608.49 674.01,-602.49 680.01,-602.49 680.01,-602.49 995.99,-602.49 995.99,-602.49 1001.99,-602.49 1007.99,-608.49 1007.99,-614.49 1007.99,-614.49 1007.99,-666.52 1007.99,-666.52 1007.99,-672.52 1001.99,-678.52 995.99,-678.52" />
+      <text xml:space="preserve" text-anchor="middle" x="838" y="-647.78" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">API Key 인증</text>
+      <text xml:space="preserve" text-anchor="middle" x="838" y="-622.38" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#6B21A8">Rate Limit · Balance Control</text>
+    </g>
+    <g id="node8" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M970.5,-458.96C970.5,-458.96 705.5,-458.96 705.5,-458.96 699.5,-458.96 693.5,-452.96 693.5,-446.96 693.5,-446.96 693.5,-420.99 693.5,-420.99 693.5,-414.99 699.5,-408.99 705.5,-408.99 705.5,-408.99 970.5,-408.99 970.5,-408.99 976.5,-408.99 982.5,-414.99 982.5,-420.99 982.5,-420.99 982.5,-446.96 982.5,-446.96 982.5,-452.96 976.5,-458.96 970.5,-458.96" />
+      <text xml:space="preserve" text-anchor="middle" x="838" y="-429.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Admin API · Usage Query</text>
+    </g>
+    <g id="node9" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M918.02,-327.96C918.02,-327.96 757.98,-327.96 757.98,-327.96 751.98,-327.96 745.98,-321.96 745.98,-315.96 745.98,-315.96 745.98,-289.99 745.98,-289.99 745.98,-283.99 751.98,-277.99 757.98,-277.99 757.98,-277.99 918.02,-277.99 918.02,-277.99 924.02,-277.99 930.02,-283.99 930.02,-289.99 930.02,-289.99 930.02,-315.96 930.02,-315.96 930.02,-321.96 924.02,-327.96 918.02,-327.96" />
+      <text xml:space="preserve" text-anchor="middle" x="838" y="-298.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Record ingest</text>
+    </g>
+    <g id="node10" class="node">
+      <path fill="#FFF7ED" stroke="#C98A2B" stroke-width="1.4" d="M940.01,-219.99C940.01,-219.99 735.99,-219.99 735.99,-219.99 729.99,-219.99 723.99,-213.99 723.99,-207.99 723.99,-207.99 723.99,-182.02 723.99,-182.02 723.99,-176.02 729.99,-170.02 735.99,-170.02 735.99,-170.02 940.01,-170.02 940.01,-170.02 946.01,-170.02 952.01,-176.02 952.01,-182.02 952.01,-182.02 952.01,-207.99 952.01,-207.99 952.01,-213.99 946.01,-219.99 940.01,-219.99" />
+      <text xml:space="preserve" text-anchor="middle" x="838" y="-190.16" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Settlement worker</text>
+    </g>
+    <g id="node11" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M565.51,-458.96C565.51,-458.96 308.49,-458.96 308.49,-458.96 302.49,-458.96 296.49,-452.96 296.49,-446.96 296.49,-446.96 296.49,-420.99 296.49,-420.99 296.49,-414.99 302.49,-408.99 308.49,-408.99 308.49,-408.99 565.51,-408.99 565.51,-408.99 571.51,-408.99 577.51,-414.99 577.51,-420.99 577.51,-420.99 577.51,-446.96 577.51,-446.96 577.51,-452.96 571.51,-458.96 565.51,-458.96" />
+      <text xml:space="preserve" text-anchor="middle" x="437" y="-429.13" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">Provider inference 호출</text>
+    </g>
+    <g id="node12" class="node">
+      <path fill="#EFF6FF" stroke="#3B5BA5" stroke-width="1.4" d="M261.5,-471.99C261.5,-471.99 42.5,-471.99 42.5,-471.99 36.5,-471.99 30.5,-465.99 30.5,-459.99 30.5,-459.99 30.5,-407.96 30.5,-407.96 30.5,-401.96 36.5,-395.96 42.5,-395.96 42.5,-395.96 261.5,-395.96 261.5,-395.96 267.5,-395.96 273.5,-401.96 273.5,-407.96 273.5,-407.96 273.5,-459.99 273.5,-459.99 273.5,-465.99 267.5,-471.99 261.5,-471.99" />
+      <text xml:space="preserve" text-anchor="middle" x="152" y="-441.25" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-weight="bold" font-size="18.00" fill="#16213E">성공 후 rough debit ·</text>
+      <text xml:space="preserve" text-anchor="middle" x="152" y="-415.85" font-family="'Apple SD Gothic Neo', Arial, 'Noto Sans KR', sans-serif" font-size="16.00" fill="#31559F">record 전달</text>
+    </g>
+  </g>
+</svg>

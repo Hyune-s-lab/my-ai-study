@@ -7,19 +7,14 @@
 
 ```mermaid
 sequenceDiagram
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
-  box rgb(255, 255, 255)
-    participant A as 스레드 A
-    participant B as 스레드 B
-    participant S as stock = 1
-  end
-  rect rgb(255, 255, 255)
-    A->>S: read → 1
-    B->>S: read → 1
-    A->>S: write 1-1 = 0
-    B->>S: write 1-1 = 0
-    Note over S: 2건 주문됐는데 재고는 1만 감소 (lost update)
-  end
+  participant A as 스레드 A
+  participant B as 스레드 B
+  participant S as stock = 1
+  A->>S: read → 1
+  B->>S: read → 1
+  A->>S: write 1-1 = 0
+  B->>S: write 1-1 = 0
+  Note over S: 2건 주문됐는데 재고는 1만 감소 (lost update)
 ```
 
 ## 0단계 — 단일 인스턴스: JVM 락
@@ -162,19 +157,14 @@ transaction {
 
 ```mermaid
 sequenceDiagram
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
-  box rgb(255, 255, 255)
-    participant A as 인스턴스 A
-    participant R as Redis
-    participant B as 인스턴스 B
-  end
-  rect rgb(255, 255, 255)
-    A->>R: lock 획득 (SETNX)
-    B->>R: 획득 실패 → 채널 subscribe 후 대기
-    A->>R: unlock + 채널 publish
-    R->>B: 락 풀림 알림
-    B->>R: 재시도 → 획득
-  end
+  participant A as 인스턴스 A
+  participant R as Redis
+  participant B as 인스턴스 B
+  A->>R: lock 획득 (SETNX)
+  B->>R: 획득 실패 → 채널 subscribe 후 대기
+  A->>R: unlock + 채널 publish
+  R->>B: 락 풀림 알림
+  B->>R: 재시도 → 획득
 ```
 
 ```java
@@ -224,20 +214,15 @@ try {
 
 ```mermaid
 sequenceDiagram
-%%{init: {"theme": "base", "darkMode": false, "themeVariables": {"background": "#ffffff", "primaryColor": "#EFF6FF", "primaryTextColor": "#16213E", "primaryBorderColor": "#3B5BA5", "secondaryColor": "#F0FDF4", "tertiaryColor": "#FAF5FF", "lineColor": "#3B5BA5", "textColor": "#16213E", "edgeLabelBackground": "#ffffff", "actorBkg": "#EFF6FF", "actorBorder": "#3B5BA5", "actorTextColor": "#16213E", "signalColor": "#3B5BA5", "signalTextColor": "#16213E", "noteBkgColor": "#FFF7ED", "noteBorderColor": "#C98A2B", "noteTextColor": "#16213E", "labelBoxBkgColor": "#EFF6FF", "labelTextColor": "#16213E", "loopTextColor": "#16213E", "actorLineColor": "#64748B", "labelBoxBorderColor": "#3B5BA5"}}}%%
-  box rgb(255, 255, 255)
-    participant T1
-    participant T2
-    participant R1 as 행1 (id=1)
-    participant R2 as 행2 (id=2)
-  end
-  rect rgb(255, 255, 255)
-    T1->>R1: FOR UPDATE — X락 획득
-    T2->>R2: FOR UPDATE — X락 획득
-    T1->>R2: FOR UPDATE — 대기 (T2가 잡음)
-    T2->>R1: FOR UPDATE — 대기 (T1이 잡음)
-    Note over T1,R2: 순환 대기 → 데드락
-  end
+  participant T1
+  participant T2
+  participant R1 as 행1 (id=1)
+  participant R2 as 행2 (id=2)
+  T1->>R1: FOR UPDATE — X락 획득
+  T2->>R2: FOR UPDATE — X락 획득
+  T1->>R2: FOR UPDATE — 대기 (T2가 잡음)
+  T2->>R1: FOR UPDATE — 대기 (T1이 잡음)
+  Note over T1,R2: 순환 대기 → 데드락
 ```
 
 Spring 코드로:
